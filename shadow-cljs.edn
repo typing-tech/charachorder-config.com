@@ -23,7 +23,7 @@
               ;; this makes it so big, it does not load properly from Lambda
               :pseudo-names false}}
    :devtools {:watch-dir "./public"
-              :watch-path "/ce5368ea-99a5-450d-8240-276a99fe8647/"
+              :watch-path "/ce5368ea-99a5-450d-8240-276a99fe8647"
               :use-document-protocol true
               :preloads [devtools.preload]
               :after-load app.core/render}}}}
