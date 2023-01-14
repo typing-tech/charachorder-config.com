@@ -1,0 +1,10 @@
+.cache
+.cpcache
+/.shadow-cljs/
+/node_modules/
+
+/cc.jks
+
+/public/compiled/
+/public/charachorder-config.css
+/public/charachorder-config.css.map

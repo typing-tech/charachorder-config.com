@@ -1,0 +1,29 @@
+;; shadow-cljs configuration
+{:deps {:aliases [:charachorder-config]}
+
+ :dev-http {9631 "public"}
+ :ssl {:keystore "cc.jks" :password "shadow"}
+
+ :builds
+ {:charachorder-config
+  {:target :browser
+   :js-options {:js-package-dirs ["node_modules" "src/gen"]}
+   :output-dir "./public/compiled/"
+   :asset-path "/ce5368ea-99a5-450d-8240-276a99fe8647/compiled"
+   :modules {:charachorder-config {:init-fn app.core/init}}
+   :compiler-options {:externs ["datascript/externs.js"]
+                      :output-feature-set :es8
+                      :optimizations :none
+                      :external-config
+                      {:devtools/config {:features-to-install    [:formatters :hints]
+                                         :dont-detect-custom-formatters true
+                                         :print-config-overrides false}}}
+   :release {:compiler-options
+             {:optimizations :advanced
+              ;; this makes it so big, it does not load properly from Lambda
+              :pseudo-names false}}
+   :devtools {:watch-dir "./public"
+              :watch-path "/ce5368ea-99a5-450d-8240-276a99fe8647/"
+              :use-document-protocol true
+              :preloads [devtools.preload]
+              :after-load app.core/render}}}}
