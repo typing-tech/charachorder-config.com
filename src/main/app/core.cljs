@@ -14,7 +14,9 @@
    [app.ratoms :refer [*num-device-connected *active-port-id]]
    [app.db :as db :refer [*db]]
    [app.serial :as serial :refer [has-web-serial-api?
-                                  *ports]]))
+                                  *ports]]
+   
+   [app.repl]))
 
 (defn add-classes [classes x]
   (str classes " " (if (string? x)

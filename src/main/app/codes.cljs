@@ -73,3 +73,7 @@
                                    "Unknown" "255"}}
    :enable-realtime-feedback {:code "92" :type :num-boolean}
    :enable-charachorder-ready-on-startup {:code "93" :type :num-boolean}})
+(def code->var-param
+  (into {} (map (fn [[k {:as v :keys [code]}]]
+                  [code (assoc v :param k)])
+                var-params)))
