@@ -1,0 +1,9 @@
+{:linters {:unused-referred-var {:level :off}
+           :unresolved-var {:exclude [com.rpl.specter
+                                      posh.reagent]}
+           :unused-namespace {:exclude [taoensso.timbre
+                                        app.macros]}
+           :clojure-lsp/unused-public-var {:exclude #{}}}
+ :lint-as {promesa.core/let clojure.core/let}
+ :hooks {:analyze-call {app.macros/cond-xlet hooks.cond-xlet/cond-xlet}
+         :macroexpand {app.macros/args macros/args}}}
