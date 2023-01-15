@@ -36,7 +36,7 @@
 
         ;; DB
         datascript/datascript {:mvn/version "1.4.0"}
-        ; denistakeda/posh {:mvn/version "0.5.8"}
+        denistakeda/posh {:mvn/version "0.5.8"}
 
         ;; communication to backend
         cljs-http/cljs-http {:mvn/version "0.1.46"}

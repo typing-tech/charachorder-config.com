@@ -10,9 +10,12 @@
                       oget+ oset!+ ocall+ oapply+ ocall!+ oapply!+]]
    [promesa.core :as p]
    [datascript.core :refer [squuid]]
+   [reagent.core :as r]
 
    [app.macros :refer-macros [cond-xlet ->hash]]
-   [app.ratoms :refer [*device-connected]]))
+   [app.ratoms :refer [*num-device-connected *active-port-id]]
+   
+   [app.serial.fns :refer [issue-connect-cmds!]]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -30,13 +33,13 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn connect! [e]
+(defn on-serial-connect! [e]
   (cond-xlet
    :do (js/console.log "connect!")
    :do (js/console.log e)
    :return nil))
 
-(defn disconnect! [e]
+(defn on-serial-disconnect! [e]
   (cond-xlet
    :do (js/console.log "disconnect!")
    :do (js/console.log e)
@@ -44,8 +47,8 @@
 
 (defn init! []
   (when (has-web-serial-api?)
-    (.addEventListener Serial "connect" #(connect! %))
-    (.addEventListener Serial "disconnect" #(disconnect! %))))
+    (.addEventListener Serial "connect" #(on-serial-connect! %))
+    (.addEventListener Serial "disconnect" #(on-serial-disconnect! %))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -67,20 +70,46 @@
             rem (.subarray buf (inc i))]
         [lines rem]))))
 
+(defn start-processing-loop! [{:as port :keys [fn-ch]}]
+  (assert port)
+  (assert fn-ch)
+  (go-loop []
+    (let [f (<! fn-ch)]
+      (when f
+        (<! (f port))
+        (recur)))))
+
 (defn setup-io-loops! [port-id
                        ^js port]
   (let [read-ch (chan)
         write-ch (chan)
+        fn-ch (chan)
+        *writer (atom nil)
+        *reader (atom nil)
+        *device-name (r/atom "???")
 
         close-port-and-cleanup!
         (fn []
-          (close! write-ch)
-          (close! read-ch)
-          (.close port)
-          (swap! *ports dissoc port-id)
-          (reset! *device-connected false))]
+          (when [(get @*ports port-id)]
+            (close! fn-ch)
+            (close! write-ch)
+            (close! read-ch)
+            (.close @*writer)
+
+            (-> (.cancel @*reader)
+                (p/then #(.close port))
+                (p/catch (fn [e]
+                           (js/console.log "following exception while closing port")
+                           (js/console.warn e))))
+            (swap! *ports dissoc port-id)
+            (swap! *num-device-connected dec)))
+
+        m (->hash port read-ch write-ch fn-ch *device-name
+                  close-port-and-cleanup!)]
+
     (let [writable (oget port "writable")
           w (.getWriter writable)]
+      (reset! *writer w)
       (go-loop []
         (try
           (if-some [x (<! write-ch)]
@@ -96,6 +125,7 @@
 
     (let [readable (oget port "readable")
           r (.getReader readable)]
+      (reset! *reader r)
       (go-loop [prev-buf (new js/Uint8Array)]
         (try
           (let [x (<p! (.read r))
@@ -112,11 +142,32 @@
             (close-port-and-cleanup!)
             (js/console.error e)))))
 
-    (->hash read-ch write-ch)))
+    (letfn [(yield-until-ready []
+              (if (or (nil? @*writer)
+                      (nil? @*reader))
+                (js/window.requestIdleCallback yield-until-ready)
+                (start-processing-loop! m)))]
+      (yield-until-ready))
+
+    m))
+
+(defn add-port-to-list [m {:as x :keys [port-id]}]
+  (let [index (count m)
+        x (assoc x :i index)
+        num-devices (inc index)]
+    (reset! *num-device-connected num-devices)
+    (reset! *active-port-id port-id)
+    (assoc m port-id x)))
 
 (defn register-port! [^js port]
   (cond-xlet
-   :let [port-id (squuid)]
+   ;; do not add if port is already added
+   (some (fn [x]
+           (= port (:port x)))
+         (vals @*ports))
+   false
+
+   :let [port-id (str (squuid))]
    :plet [info (.getInfo port)]
 
    :let [usbVendorId (oget info "usbVendorId")
@@ -137,7 +188,8 @@
                    :hardware-id hardware-id}
                   (setup-io-loops! port-id port))]
    ; :do (js/console.log m)
-   :do (swap! *ports assoc port-id m)
+   :do (swap! *ports add-port-to-list m)
+   :do (issue-connect-cmds! m)
    :return nil))
 
 (defn request! []
@@ -147,19 +199,11 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn get-any-port []
-  (-> @*ports first val))
+(defn get-port [port-id]
+  (-> @*ports
+      (get port-id)))
 
-(defn id []
-  (let [m (get-any-port)
-        {:keys [read-ch write-ch]} m]
-    (go
-      (>! write-ch "ID")
-      (-> (<! read-ch) (js/console.log)))))
-
-(defn ram []
-  (let [m (get-any-port)
-        {:keys [read-ch write-ch]} m]
-    (go
-      (>! write-ch "RAM")
-      (-> (<! read-ch) (js/console.log)))))
+(defn disconnect! [port-id]
+  (let [{:keys [close-port-and-cleanup!]} (get-port port-id)]
+    (reset! *active-port-id nil)
+    (close-port-and-cleanup!)))

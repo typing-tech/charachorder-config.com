@@ -1,9 +1,12 @@
 @use "./thirdparty/tachyons.css";
 @use "./thirdparty/pure.css";
 
+@use "./buttons";
+
 @import url('https://fonts.googleapis.com/css2?family=Readex+Pro:wght@400;700&display=swap');
 
 $root: #charachorder-config;
+$left-nav-width: 250px;
 
 html, body, #{$root} {
   width: 100%;
@@ -12,8 +15,31 @@ html, body, #{$root} {
 
 body {
   font-family: 'Readex Pro', sans-serif;
-  background: black;
+  background: #333;
   color: #ccc;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  padding-left: $left-nav-width;
+  position: relative;
+}
+
+#nav {
+  margin-left: -$left-nav-width;
+  width: $left-nav-width;
+  height: 100%;
+  background-color: #000;
+}
+
+#main {
 }
 
 .blink {
