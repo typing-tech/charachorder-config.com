@@ -1,9 +1,13 @@
 import * as FS from "node:fs/promises"
+import * as windows1252 from "windows-1252"
 
 const main = async () => {
   const codes = []
 
-  const doc = await FS.readFile("docs/CCOS Key Remapping Reference Guide.txt", {encoding: "latin1"})
+  const docBytes = await FS.readFile(
+    "docs/CCOS Key Remapping Reference Guide.txt",
+    {encoding: "binary"})
+  const doc = windows1252.decode(docBytes)
   const lines = doc.split("\r\n")
 
   const header = lines[0]

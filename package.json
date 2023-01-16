@@ -20,7 +20,8 @@
     "sass": "1.56.1",
     "shadow-cljs": "2.20.13",
     "stylelint": "14.16.0",
-    "stylelint-config-standard": "29.0.0"
+    "stylelint-config-standard": "29.0.0",
+    "windows-1252": "3.0.4"
   },
   "dependencies": {
     "create-react-class": "15.7.0",

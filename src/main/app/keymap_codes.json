@@ -898,7 +898,7 @@
     [
         "128",
         "CP-1252",
-        "",
+        "€",
         "Uppercase cedilla",
         ""
     ],
@@ -912,77 +912,77 @@
     [
         "130",
         "CP-1252",
-        "",
+        "‚",
         "Single Low-9 Quotation Mark",
         ""
     ],
     [
         "131",
         "CP-1252",
-        "",
+        "ƒ",
         "Latin Small Letter f with Hook; Florin",
         ""
     ],
     [
         "132",
         "CP-1252",
-        "",
+        "„",
         "Double Low-9 Quotation Mark",
         ""
     ],
     [
         "133",
         "CP-1252",
-        "",
+        "…",
         "Horizontal Ellipsis",
         ""
     ],
     [
         "134",
         "CP-1252",
-        "",
+        "†",
         "Dagger",
         ""
     ],
     [
         "135",
         "CP-1252",
-        "",
+        "‡",
         "Double Dagger",
         ""
     ],
     [
         "136",
         "CP-1252",
-        "",
+        "ˆ",
         "Circumflex",
         ""
     ],
     [
         "137",
         "CP-1252",
-        "",
+        "‰",
         "Per Mile",
         ""
     ],
     [
         "138",
         "CP-1252",
-        "",
+        "Š",
         "Captial S Caron",
         ""
     ],
     [
         "139",
         "CP-1252",
-        "",
+        "‹",
         "Left Guillemet",
         ""
     ],
     [
         "140",
         "CP-1252",
-        "",
+        "Œ",
         "Captial Ligature OE",
         ""
     ],
@@ -996,7 +996,7 @@
     [
         "142",
         "CP-1252",
-        "",
+        "Ž",
         "Captial Z Caron",
         ""
     ],
@@ -1017,84 +1017,84 @@
     [
         "145",
         "CP-1252",
-        "",
+        "‘",
         "Single Quote Left",
         ""
     ],
     [
         "146",
         "CP-1252",
-        "",
+        "’",
         "Single Quote Right",
         ""
     ],
     [
         "147",
         "CP-1252",
-        "",
+        "“",
         "Double Quote Left",
         ""
     ],
     [
         "148",
         "CP-1252",
-        "",
+        "”",
         "Double Quote Right",
         ""
     ],
     [
         "149",
         "CP-1252",
-        "",
+        "•",
         "Bullet",
         ""
     ],
     [
         "150",
         "CP-1252",
-        "",
+        "–",
         "En Dash",
         ""
     ],
     [
         "151",
         "CP-1252",
-        "",
+        "—",
         "Em Dash",
         ""
     ],
     [
         "152",
         "CP-1252",
-        "",
+        "˜",
         "Small Tilde",
         ""
     ],
     [
         "153",
         "CP-1252",
-        "",
+        "™",
         "Trademark",
         ""
     ],
     [
         "154",
         "CP-1252",
-        "",
+        "š",
         "Small s Carson",
         ""
     ],
     [
         "155",
         "CP-1252",
-        "",
+        "›",
         "Right Guillement",
         ""
     ],
     [
         "156",
         "CP-1252",
-        "",
+        "œ",
         "Small Ligature oe",
         ""
     ],
@@ -1108,14 +1108,14 @@
     [
         "158",
         "CP-1252",
-        "",
+        "ž",
         "Small Z Caron",
         ""
     ],
     [
         "159",
         "CP-1252",
-        "",
+        "Ÿ",
         "Capital Y Diaresis",
         ""
     ],
