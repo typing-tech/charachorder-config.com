@@ -18,6 +18,22 @@ const main = async () => {
     const tokens = line.split("\t")
     if (tokens[0].length == 0) continue
 
+    let action = tokens[2]
+    if (action.startsWith('"') && action.endsWith('"')) {
+      action = action.substring(1, action.length - 1)
+      const buf = []
+      for (let i = 0; i < action.length; ++i) {
+        const ch = action[i]
+        if (ch === '"') {
+          buf.push(action[i + 1])
+          ++i
+        } else {
+          buf.push(ch)
+        }
+      }
+      tokens[2] = buf.join()
+    }
+
     // const entry = {}
     // for (let i = 0; i < keys.length; ++i) {
     //   const k = keys[i]
