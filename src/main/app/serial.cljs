@@ -217,7 +217,7 @@
     (close-port-and-cleanup!)))
 
 (defn reset-params! [port-id]
-  (let [{:as port :keys [close-port-and-cleanup! read-ch write-ch]} (get-port port-id)]
+  (let [{:as port :keys [close-port-and-cleanup!]} (get-port port-id)]
     (go
       (<! (fns/reset-params! port))
       (reset! *active-port-id nil)
