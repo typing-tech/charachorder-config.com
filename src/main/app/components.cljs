@@ -58,7 +58,8 @@
     (when (nil? positions) (error "Popover: missing property 'positions'"))
     (when (nil? align) (error "Popover: missing property 'align'"))
     (when (nil? content) (error "Popover: missing property 'content'"))
-    (when (nil? type) (error "Popover: missing architect property 'type'")))
+    ; (when (nil? type) (error "Popover: missing architect property 'type'"))
+    nil)
 
   (let [parent (get-main-root-element)
         args (cond-> args
