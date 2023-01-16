@@ -2,6 +2,7 @@
   "name": "charachorder-config",
   "version": "0.0.1",
   "private": true,
+  "type": "module",
   "devDependencies": {
     "@babel/cli": "7.19.3",
     "@babel/core": "7.20.5",
@@ -13,6 +14,7 @@
     "eslint": "8.29.0",
     "eslint-plugin-babel": "5.3.1",
     "eslint-plugin-flowtype": "8.0.3",
+    "eslint-plugin-json": "3.1.0",
     "eslint-plugin-react": "7.31.11",
     "eslint-plugin-react-flow": "0.0.1",
     "sass": "1.56.1",
