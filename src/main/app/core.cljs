@@ -11,6 +11,7 @@
    [posh.reagent :as posh :refer [pull q]]
 
    [app.macros :as mac :refer-macros [cond-xlet ->hash]]
+   [app.utils :refer [get-main-root-element]]
    [app.ratoms :refer [*num-device-connected *active-port-id]]
    [app.db :as db :refer [*db]]
    [app.serial :as serial :refer [has-web-serial-api? *ports]]
@@ -19,9 +20,6 @@
    [app.repl]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defn get-main-root-element []
-  (js/document.getElementById "charachorder-config"))
 
 (defn ^:export render []
   (rdom/render [super-root-view] (get-main-root-element)))

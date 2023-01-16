@@ -1,7 +1,20 @@
 (ns app.components
   (:require
+   ["react-tiny-popover" :as react-tiny-popover]
+
    [app.macros :as mac :refer-macros [cond-xlet ->hash]]
-   [app.ratoms :refer [*num-device-connected *active-port-id]]))
+   [app.ratoms :refer [*num-device-connected *active-port-id]]
+
+   [app.utils :refer [get-main-root-element]]))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(def Popover react-tiny-popover/Popover)
+(assert Popover)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(def should-check-for-errors true)
 
 (defn add-classes [classes x]
   (str classes " " (if (string? x)
@@ -9,6 +22,9 @@
                      (->> (filter identity x)
                           (interpose " ")
                           (apply str)))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (defn button [f inner-dom & {:keys [primary error classes]
                              :or {primary false
                                   error false
@@ -19,3 +35,33 @@
                            classes (add-classes classes))
                   :on-click f}]
         inner-dom))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn error [& args]
+  (apply js/console.warn args))
+
+(defn popover
+  "Use this as a function"
+  [{:as args :keys [isOpen positions align content type
+                    position containerClassName transitionDuration]}
+   & els]
+  (when should-check-for-errors
+    (when position
+      (error "Popover: 'position' has no effect"))
+    (when containerClassName
+      (error "Popover: 'containerClassName' do not use this in architect."))
+    (when transitionDuration
+      (error "Popover: 'transitionDuration' has no effect"))
+
+    (when (nil? isOpen) (error "Popover: missing property 'isOpen'"))
+    (when (nil? positions) (error "Popover: missing property 'positions'"))
+    (when (nil? align) (error "Popover: missing property 'align'"))
+    (when (nil? content) (error "Popover: missing property 'content'"))
+    (when (nil? type) (error "Popover: missing architect property 'type'")))
+
+  (let [parent (get-main-root-element)
+        args (cond-> args
+               :always (assoc :parentElement parent))]
+    (into [:> Popover args]
+          els)))
