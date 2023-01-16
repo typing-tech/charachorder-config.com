@@ -1,5 +1,9 @@
 (ns app.codes
-  (:require [app.utils :refer [bimap]]))
+  (:require
+   [clojure.string :as str]
+   [shadow.resource :as rc]
+   [app.macros :as mac :refer-macros [cond-xlet ->hash]]
+   [app.utils :refer [bimap]]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -79,3 +83,18 @@
   (into {} (map (fn [[k {:as v :keys [code]}]]
                   [code (assoc v :param k)])
                 var-params)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(def keymap-code-json (-> (rc/inline "app/keymap_codes.json")
+                          (js/JSON.parse)))
+(def keymap-codes
+  (->> keymap-code-json
+       (map (fn [[code type action action-desc notes]]
+              (->hash code type action action-desc notes)))
+       (remove (fn [{:keys [action]}]
+                 (or (not action) (= "" (str/trim action)))))))
+(def code->keymap-code
+  (into {} (map (fn [{:as m :keys [code]}]
+                  [code m])
+                keymap-codes)))
