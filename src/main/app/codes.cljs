@@ -1,4 +1,5 @@
-(ns app.codes)
+(ns app.codes
+  (:require [app.utils :refer [bimap]]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -65,12 +66,13 @@
                               :type :num-boolean :disabled true}
 
    :operating-system {:code "91" :type :non-neg-int
-                      :values-map {"Windows" "0"
-                                   "Mac" "1"
-                                   "Linux" "2"
-                                   "iOS" "3"
-                                   "Android" "4"
-                                   "Unknown" "255"}}
+                      :values (bimap
+                               {"Windows" "0"
+                                "Mac" "1"
+                                "Linux" "2"
+                                "iOS" "3"
+                                "Android" "4"
+                                "Unknown" "255"})}
    :enable-realtime-feedback {:code "92" :type :num-boolean}
    :enable-charachorder-ready-on-startup {:code "93" :type :num-boolean}})
 (def code->var-param

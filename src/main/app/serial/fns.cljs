@@ -59,13 +59,16 @@
   (go
     nil))
 
-(defn gen-var-get-fn [param]
+(defn gen-var-get-fn [{:keys [port-id]} param]
   (fn [{:keys [read-ch write-ch]}]
     (go
       (>! write-ch (cmd-var-get-parameter param))
       (let [ret (<! read-ch)
-            m (parse-get-parameter-ret ret)]
-        (js/console.log m)))))
+            {:as m :keys [param data]} (parse-get-parameter-ret ret)
+            port [:port/id port-id]]
+        (js/console.log m)
+        (when data
+          (transact! *db [[:db/add port param data]]))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -74,7 +77,8 @@
     (>! fn-ch store-device-name)))
 
 (defn query-all-vars! [{:as port :keys [fn-ch]}]
+  (js/console.log port)
   (let [params (->> (map key var-params))
-        fns (map gen-var-get-fn params)]
+        fns (map (partial gen-var-get-fn port) params)]
     (go
-     (<! (onto-chan! fn-ch fns false)))))
+      (<! (onto-chan! fn-ch fns false)))))

@@ -10,11 +10,13 @@
                       oget+ oset!+ ocall+ oapply+ ocall!+ oapply!+]]
    [promesa.core :as p]
    [datascript.core :refer [squuid]]
+   [posh.reagent :as posh :refer [transact!]]
    [reagent.core :as r]
 
    [app.macros :refer-macros [cond-xlet ->hash]]
    [app.ratoms :refer [*num-device-connected *active-port-id]]
-   
+   [app.db :refer [*db]]
+
    [app.serial.fns :refer [issue-connect-cmds!]]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -189,6 +191,7 @@
                   (setup-io-loops! port-id port))]
    ; :do (js/console.log m)
    :do (swap! *ports add-port-to-list m)
+   :do (transact! *db [{:port/id port-id}])
    :do (issue-connect-cmds! m)
    :return nil))
 
