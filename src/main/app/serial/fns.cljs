@@ -55,10 +55,6 @@
                      ret)]
       (reset! *device-name dev-name))))
 
-(defn nop [{:keys [read-ch write-ch]}]
-  (go
-    nil))
-
 (defn gen-var-get-fn [{:keys [port-id]} param]
   (fn [{:keys [read-ch write-ch]}]
     (go
@@ -67,18 +63,28 @@
             {:as m :keys [param data]} (parse-get-parameter-ret ret)
             port [:port/id port-id]]
         (js/console.log m)
-        (when data
-          (transact! *db [[:db/add port param data]]))))))
+        (when-not (nil? data)
+          (let [tx-data [[:db/add port param data]]]
+            (js/console.log tx-data)
+            (transact! *db tx-data)))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn issue-connect-cmds! [{:keys [fn-ch]}]
-  (go
-    (>! fn-ch store-device-name)))
-
 (defn query-all-vars! [{:as port :keys [fn-ch]}]
-  (js/console.log port)
   (let [params (->> (map key var-params))
         fns (map (partial gen-var-get-fn port) params)]
     (go
       (<! (onto-chan! fn-ch fns false)))))
+
+(defn issue-connect-cmds! [{:as port :keys [fn-ch]}]
+  (go
+    (>! fn-ch store-device-name)
+    (query-all-vars! port)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn reset-params! [{:keys [read-ch write-ch]}]
+  (go
+   (>! write-ch "RST PARAMS")
+      (let [ret (<! read-ch)]
+        (js/console.log ret))))

@@ -17,7 +17,7 @@
    [app.ratoms :refer [*num-device-connected *active-port-id]]
    [app.db :refer [*db]]
 
-   [app.serial.fns :refer [issue-connect-cmds!]]))
+   [app.serial.fns :as fns :refer [issue-connect-cmds!]]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -191,8 +191,9 @@
                   (setup-io-loops! port-id port))]
    ; :do (js/console.log m)
    :do (swap! *ports add-port-to-list m)
+   :let [port (get @*ports port-id)]
    :do (transact! *db [{:port/id port-id}])
-   :do (issue-connect-cmds! m)
+   :do (issue-connect-cmds! port)
    :return nil))
 
 (defn request! []
@@ -206,7 +207,18 @@
   (-> @*ports
       (get port-id)))
 
+(defn refresh-params [port-id]
+  (let [port (get-port port-id)]
+    (fns/query-all-vars! port)))
+
 (defn disconnect! [port-id]
   (let [{:keys [close-port-and-cleanup!]} (get-port port-id)]
     (reset! *active-port-id nil)
     (close-port-and-cleanup!)))
+
+(defn reset-params! [port-id]
+  (let [{:as port :keys [close-port-and-cleanup! read-ch write-ch]} (get-port port-id)]
+    (go
+      (<! (fns/reset-params! port))
+      (reset! *active-port-id nil)
+      (close-port-and-cleanup!))))

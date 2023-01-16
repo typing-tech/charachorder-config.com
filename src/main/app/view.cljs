@@ -75,7 +75,7 @@
         param-values @(pull *db '[*] [:port/id port-id])]
     [:table {:class "pure-table"}
      [:thead
-      [:th "Param"] [:th "Value"] [:th "Type"] [:th "Code"]]
+      [:tr [:th "Param"] [:th "Value"] [:th "Type"] [:th "Code"]]]
      (into [:tbody]
            (map (fn [param-key]
                   [param-table-row args param-key (get param-values param-key)])
@@ -84,8 +84,9 @@
 (defn main-view [{:as args :keys [port-id]}]
   [:div {:id "main" :class "pure-u-1 pa3"}
    [:div {:class "mb2"}
-    (button #(serial/disconnect! port-id)
-            ["Disconnect"] :error true)]
+    (button #(serial/refresh-params port-id) ["Refresh Params"])
+    (button #(serial/disconnect! port-id) ["Disconnect"] :error true)
+    (button #(serial/reset-params! port-id) ["RESET Params and COMMIT"] :error true)]
    [param-table args]])
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
