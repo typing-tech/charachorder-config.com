@@ -12,6 +12,7 @@ const main = async () => {
 
   for (let line of lines.slice(1)) {
     const tokens = line.split("\t")
+    if (tokens[0].length == 0) continue
 
     // const entry = {}
     // for (let i = 0; i < keys.length; ++i) {
