@@ -1,6 +1,7 @@
 @use "./thirdparty/tachyons.css";
 @use "./thirdparty/pure.css";
 
+@use "./components";
 @use "./buttons";
 
 @import url('https://fonts.googleapis.com/css2?family=Readex+Pro:wght@400;700&display=swap');
@@ -45,12 +46,4 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 #main {
-}
-
-.blink {
-  animation: blink-animation 1s steps(5, start) infinite;
-  -webkit-animation: blink-animation 1s steps(5, start) infinite;
-}
-@keyframes blink-animation {
-  to { visibility: hidden; }
 }

@@ -1,0 +1,16 @@
+.blink {
+  animation: blink-animation 1s steps(5, start) infinite;
+  -webkit-animation: blink-animation 1s steps(5, start) infinite;
+}
+@keyframes blink-animation {
+  to { visibility: hidden; }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+.react-tiny-popover-container {
+  background-color: white;
+  color: #333;
+  border-radius: 4px;
+  padding: 4px;
+}
