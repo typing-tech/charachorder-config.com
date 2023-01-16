@@ -39,3 +39,6 @@ upgrade-node-deep-deps:
 	rm -rf node_modules
 	rm -f package-lock.json
 	npm install --force
+
+deploy:
+	rsync -rv public/ /var/www/html/
