@@ -4,12 +4,16 @@
    [posh.reagent :as posh :refer [pull q]]
 
    [app.macros :as mac :refer-macros [cond-xlet ->hash]]
-   [app.ratoms :refer [*num-device-connected *active-port-id]]
+   [app.ratoms :refer [*num-device-connected
+                       *active-port-id
+                       *current-tab-view]]
    [app.db :as db :refer [*db]]
    [app.components :refer [button]]
    [app.serial :as serial :refer [has-web-serial-api?
                                   *ports]]
-   [app.codes :refer [var-params]]))
+   [app.codes :refer [var-params]]
+   [app.views.params :refer [params-view]]
+   [app.views.keymap :refer [keymap-view]]))
 
 (defn no-web-serial-api-view []
   [:div {:class "pure-u-1 tc"}
@@ -41,53 +45,28 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn no-device-main-view [args]
+(defn no-device-main-view [_]
   [:div {:id "main" :class "pure-u-1 pa3"}
    [:h1 "No Device Connected Yet"]
    [:p "Connect a device using the button on the left."]])
 
-(defn param-table-row [{:keys [port-id]} param-key raw-value]
-  (let [{param-type :type
-         values :values
-         code :code} (get var-params param-key)
-
-        value (cond
-                (nil? raw-value)
-                [:span.black "NULL"]
-                (= param-type :num-boolean)
-                [:span {:class (if raw-value "light-green" "dark-red")}
-                 (str raw-value)]
-
-                (= param-key :operating-system)
-                (get values raw-value)
-
-                :else
-                (str raw-value))]
-    [:tr
-     [:td.tr (pr-str param-key)]
-     [:td value]
-     [:td (str param-type)]
-     [:td code]]))
-
-(defn param-table [{:as args :keys [port-id]}]
-  (let [param-keys (->> (sort-by #(get-in % [1 :code]) var-params)
-                        (map first))
-        param-values @(pull *db '[*] [:port/id port-id])]
-    [:table {:class "pure-table"}
-     [:thead
-      [:tr [:th "Param"] [:th "Value"] [:th "Type"] [:th "Code"]]]
-     (into [:tbody]
-           (map (fn [param-key]
-                  [param-table-row args param-key (get param-values param-key)])
-                param-keys))]))
+(defn tab-menu []
+  (let [current @*current-tab-view
+        gen-button (fn [tab label]
+                     (button #(reset! *current-tab-view tab) [label]
+                             :classes ["button-xsmall" "ma2 mh2"]
+                             :primary (= current tab)))]
+    [:div {:id "tab-menu"}
+     (gen-button :keymap "Key Map")
+     (gen-button :params "Parameters")]))
 
 (defn main-view [{:as args :keys [port-id]}]
-  [:div {:id "main" :class "pure-u-1 pa3"}
-   [:div {:class "mb2"}
-    (button #(serial/refresh-params port-id) ["Refresh Params"])
-    (button #(serial/disconnect! port-id) ["Disconnect"] :error true)
-    (button #(serial/reset-params! port-id) ["RESET Params and COMMIT"] :error true)]
-   [param-table args]])
+  [:div {:id "main" :class "pure-u-1"}
+   [tab-menu]
+   (let [tab-view (or @*current-tab-view :params)]
+     (case tab-view
+       :keymap [keymap-view args]
+       :params [params-view args]))])
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
