@@ -14,3 +14,33 @@
   border-radius: 4px;
   padding: 4px;
 }
+
+.keycode-codes {
+  &__info {
+    background-color: #ddd;
+    height: 48px;
+  border-radius: 4px;
+  }
+
+  &__codes {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 16px;
+    border-collapse: collapse;
+
+    td {
+      text-align: center;
+      border: 1px solid #aaa;
+      cursor: pointer;
+      padding: 4px;
+
+      &.small {
+        font-size: 14px;
+      }
+
+      &:hover {
+        background-color: #d5ffff;
+        font-weight: 700;
+      }
+    }
+  }
+}

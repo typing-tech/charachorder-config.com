@@ -91,10 +91,73 @@
 (def keymap-codes
   (->> keymap-code-json
        (map (fn [[code type action action-desc notes]]
-              (->hash code type action action-desc notes)))
+              (let [code-int (js/parseInt code)]
+                (->hash code code-int type action action-desc notes))))
        (remove (fn [{:keys [action]}]
                  (or (not action) (= "" (str/trim action)))))))
+
+(def keymap-code-types (into #{} (map :type keymap-codes)))
+
 (def code->keymap-code
   (into {} (map (fn [{:as m :keys [code]}]
                   [code m])
                 keymap-codes)))
+
+(defn partition-when [pred xs]
+  (reduce (fn [v x]
+            (if (pred x)
+              (conj v [x])
+              (let [i (-> v count dec)]
+                (update v i conj x))))
+          [[]]
+          xs))
+
+(defn partition-when-too-big-or-pred [n pred xs]
+  (reduce (fn [v x]
+            (let [i (-> v count dec)
+                  last-subv (get v i)]
+              (cond
+                (<= n (count last-subv)) (conj v [x])
+                (pred x) (conj v [x])
+                :else (update v i conj x))))
+          [[]]
+          xs))
+
+(def ascii-keymap-codes
+  (->> (filter #(= (:type %) "ASCII") keymap-codes)
+       (sort-by :code-int)
+       (partition-when #(contains? #{"!" "0" "A" "[" "a"} (:action %)))))
+
+(def cp1252-keymap-codes
+  (->> (filter #(= (:type %) "CP-1252") keymap-codes)
+       (sort-by :code-int)
+       (partition-when #(contains? #{"¦" "À" "à"} (:action %)))))
+
+(def keyboard-keymap-codes
+  (->> (filter #(= (:type %) "Keyboard") keymap-codes)
+       (sort-by :code-int)
+       (partition-when #(contains? #{"RIGHT_CTRL" "RELEASE_MOD"} (:action %)))))
+
+(def mouse-keymap-codes
+  (->> (filter #(= (:type %) "Mouse") keymap-codes)
+       (sort-by :code-int)
+       (partition-when #(contains? #{"MS_MOVE_RT" "MS_SCRL_RT"} (:action %)))))
+
+(def charachorder-keymap-codes
+  (->> (filter #(= (:type %) "CharaChorder") keymap-codes)
+       (sort-by :code-int)
+       (partition-when #(contains? #{"KM_1_L" "AMBILEFT"} (:action %)))))
+
+(def charachorder-one-keymap-codes
+  (->> (filter #(= (:type %) "CharaChorder One") keymap-codes)
+       (sort-by :code-int)
+       (partition-when #(contains? #{"LH_INDEX_3D" "RH_THUMB_3_3D" "RH_INDEX_3D"} (:action %)))))
+
+(def raw-keymap-codes
+  (->> (filter #(= (:type %) "Raw Scancode") keymap-codes)
+       (sort-by :code-int)
+       (partition-when-too-big-or-pred
+        19
+        #(contains? #{"KEY_A" "KEY_N" "KEY_1" "ENTER" "F1" "PRTSCN" "KP_1" "F13" "EXECUTE"
+                      "INTL1" "KSC_99"}
+                    (:action %)))))
