@@ -228,7 +228,7 @@
         "ASCII",
         "SPACE",
         "Space",
-        "\"While SPACE is used for keymaps and chord, just a \"\" \"\" is used in chord outputs. This action is unique in this way. Technically it is 'printable', but it is not visible.\""
+        "While SPACE is used for keymaps and chord, just a \" \" is used in chord outputs. This action is unique in this way. Technically it is 'printable', but it is not visible."
     ],
     [
         "33",
@@ -2159,7 +2159,7 @@
         "308",
         "Raw Scancode",
         "KSC_34",
-        "\"Keyboard ' and \"\" (US English)\"",
+        "Keyboard ' and \" (US English)",
         ""
     ],
     [
@@ -2173,7 +2173,7 @@
         "310",
         "Raw Scancode",
         "KSC_36",
-        "\"Keyboard , and < (US English)\"",
+        "Keyboard , and < (US English)",
         ""
     ],
     [
@@ -3657,7 +3657,7 @@
         "522",
         "Keyboard",
         "RELEASE_KEYS",
-        "\"Release all keys, but not keyboard modifiers\"",
+        "Release all keys, but not keyboard modifiers",
         ""
     ],
     [
