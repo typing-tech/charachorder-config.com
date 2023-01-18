@@ -34,7 +34,7 @@
     [:tr [:td.tr "Code"] [:td code]]
     [:tr [:td.tr "Type"] [:td type]]
     [:tr [:td.tr "Action"] [:td action]]
-    [:tr [:td.tr "Action Desc"] [:td action-desc]]
+    [:tr [:td.tr "Desc"] [:td action-desc]]
     (when-not (str/blank? notes)
       [:tr [:td.tr "Notes"] [:td notes]])]])
 
@@ -114,8 +114,9 @@
                 :on-mouse-enter #(reset! *hovered true)
                 :on-mouse-leave #(reset! *hovered false)
                 :on-click #(db-set! port-id open-key true)}
-          (or action
-              [:span.gray (gstring/unescapeEntities "&nbsp;")])])))))
+          (if-not (str/blank? action)
+            action
+            [:span.gray (gstring/unescapeEntities "&nbsp;")])])))))
 
 (defn cc1-stick-key [{:keys [port-id]} switch-key]
   [:<>
@@ -174,4 +175,7 @@
        [cc1-stick args "rt2"]]]]))
 
 (defn keymap-view [args]
-  [cc1-keymap-view args])
+  [:<>
+   [:div.mv2.tc.yellow
+    "Did you know you can drag and drop a CSV here? And share the URL once it changes?"]
+   [cc1-keymap-view args]])

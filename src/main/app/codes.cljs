@@ -93,8 +93,7 @@
        (map (fn [[code type action action-desc notes]]
               (let [code-int (js/parseInt code)]
                 (->hash code code-int type action action-desc notes))))
-       (remove (fn [{:keys [action]}]
-                 (or (not action) (= "" (str/trim action)))))))
+       ))
 
 (def keymap-code-types (into #{} (map :type keymap-codes)))
 (def longest-action-text
