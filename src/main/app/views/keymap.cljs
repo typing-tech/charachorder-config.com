@@ -21,7 +21,8 @@
                       charachorder-keymap-codes
                       charachorder-one-keymap-codes
                       raw-keymap-codes]]
-   [app.hw.cc1 :as cc1]))
+   [app.hw.cc1 :as cc1]
+   [app.csv :refer [download-csv!]]))
 
 (defonce *tab (r/atom :ascii))
 
@@ -172,7 +173,11 @@
        [:td]
        [:td]
        [cc1-stick args "lt2"]
-       [cc1-stick args "rt2"]]]]))
+       [cc1-stick args "rt2"]
+       [:td]
+       [:td.tc (button #(download-csv! port-id)
+                    ["Download" [:br] "Layout CSV"]
+                    :primary true :size "small" :classes ["mr0"])]]]]))
 
 (defn keymap-view [args]
   [:<>
