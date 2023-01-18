@@ -32,13 +32,14 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn button [f inner-dom & {:keys [primary error classes]
+(defn button [f inner-dom & {:keys [primary error classes size]
                              :or {primary false
                                   error false
                                   classes nil}}]
   (into [:button {:class (cond-> "pure-button"
                            primary (str " pure-button-primary")
                            error (str " button-error")
+                           size (str " button-" size)
                            classes (add-classes classes))
                   :on-click f}]
         inner-dom))
