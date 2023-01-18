@@ -4,6 +4,7 @@
    [goog.string.format]
    [goog.string :as gstring :refer [format]]
 
+   [clojure.string :as str]
    [reagent.core :as r]
    [posh.reagent :as posh :refer [transact!]]
 
@@ -11,25 +12,38 @@
    [app.db :as db :refer [*db]]
    [app.codes :refer [keymap-codes
                       code->keymap-code
+                      longest-action-text
+
                       ascii-keymap-codes
                       cp1252-keymap-codes
                       keyboard-keymap-codes
                       mouse-keymap-codes
                       charachorder-keymap-codes
                       charachorder-one-keymap-codes
-                      raw-keymap-codes]]))
+                      raw-keymap-codes]]
+   [app.hw.cc1 :as cc1]))
 
 (defonce *tab (r/atom :ascii))
 
 (defn db-set! [port-id a v]
   (transact! *db [[:db/add [:port/id port-id] a v]]))
 
+(defn code-tooltip [{:keys [code type action action-desc notes]}]
+  [:table {:class "pure-table pure-table-horizontal pure-table-striped measure-wide"}
+   [:tbody
+    [:tr [:td.tr "Code"] [:td code]]
+    [:tr [:td.tr "Type"] [:td type]]
+    [:tr [:td.tr "Action"] [:td action]]
+    [:tr [:td.tr "Action Desc"] [:td action-desc]]
+    (when-not (str/blank? notes)
+      [:tr [:td.tr "Notes"] [:td notes]])]])
+
 (defn code-table []
   (let [*keymap-code (r/atom nil)
         gen-button (fn [k label]
                      (button #(reset! *tab k) [label] :classes ["button-xsmall"]
                              :primary (= @*tab k)))]
-    (fn [port-id switch-key]
+    (fn [port-id key-ns]
       [:div {:class "keymap-codes"}
        [:div {:class "keycode-codes__tab"}
         (gen-button :ascii "ASCII")
@@ -39,7 +53,7 @@
         (gen-button :charachorder "CharaChorder")
         (gen-button :charachorder-one "CharaChorder One")
         (gen-button :raw "Raw Scancode")
-        (button #(db-set! port-id (keyword switch-key "editing") false)
+        (button #(db-set! port-id (keyword key-ns "editing") false)
                 ["X"] :classes ["button-xsmall" "fr" "close-button ma0 mr0"] :error true)]
 
        (let [{:as keymap :keys [code action-desc notes]} (get code->keymap-code @*keymap-code)]
@@ -71,28 +85,93 @@
                        :on-mouse-enter #(reset! *keymap-code code)
                        :on-mouse-leave #(reset! *keymap-code nil)
                        :on-click (fn []
-                                   (db-set! port-id (keyword switch-key "code") code)
-                                   (db-set! port-id (keyword switch-key "editing") false))}
+                                   (db-set! port-id (keyword key-ns "code") code)
+                                   (db-set! port-id (keyword key-ns "editing") false))}
                   action]))
              gen-row (fn [xs] (into [:tr] (map gen-code xs)))]
          [:table {:class "keycode-codes__codes mt3"}
           (into [:tbody] (map gen-row codes))])])))
 
-(defn code-chooser-com [port-id switch-key]
-  (let [open-key (keyword switch-key "editing")
-        code-key (keyword switch-key "code")
-        m @(posh/pull *db [open-key code-key] [:port/id port-id])
-        is-open (-> m open-key boolean)
-        code (-> m code-key)]
-    (popover
-     {:isOpen is-open
-      :positions ["top" "bottom" "right" "left"]
-      :align "start"
-      :reposition true
-      :content (r/as-element [code-table port-id switch-key])}
-     [:div {:class "pointer" :on-click #(db-set! port-id open-key true)}
-      (or code "NIL")])))
+(defn code-chooser-com []
+  (let [*hovered (r/atom false)]
+    (fn [port-id layer switch-key]
+      (let [key-ns (str layer "." switch-key)
+            open-key (keyword key-ns "editing")
+            code-key (keyword key-ns "code")
+            m @(posh/pull *db [open-key code-key] [:port/id port-id])
+            is-open (-> m open-key boolean)
+            code (-> m code-key)
+            {:as keymap-code :keys [action]} (get code->keymap-code code)]
+        (popover
+         {:isOpen (or @*hovered is-open)
+          :positions ["bottom" "top" "right" "left"]
+          :align "start"
+          :reposition true
+          :content (if (and (not is-open) @*hovered)
+                     (r/as-element [code-tooltip keymap-code])
+                     (r/as-element [code-table port-id key-ns]))}
+         [:div {:class "pointer"
+                :on-mouse-enter #(reset! *hovered true)
+                :on-mouse-leave #(reset! *hovered false)
+                :on-click #(db-set! port-id open-key true)}
+          (or action
+              [:span.gray (gstring/unescapeEntities "&nbsp;")])])))))
 
-(defn keymap-view [{:keys [port-id]}]
+(defn cc1-stick-key [{:keys [port-id]} switch-key]
+  [:<>
+   [:div.code-chooser
+    [:div.code-chooser__layer "1"]
+    [:div.code-chooser__action [code-chooser-com port-id "A1" switch-key]]]
+   [:div.code-chooser
+    [:div.code-chooser__layer "2"]
+    [:div.code-chooser__action [code-chooser-com port-id "A2" switch-key]]]
+   [:div.code-chooser
+    [:div.code-chooser__layer "3"]
+    [:div.code-chooser__action [code-chooser-com port-id "A3" switch-key]]]])
+
+(defn cc1-stick [args switch-key-prefix]
+  (let [td (fn [dir]
+             [:td (when dir [cc1-stick-key args (str switch-key-prefix dir)])])]
+    [:td
+     [:table {:class "cc1"}
+      [:tbody
+       [:tr (td nil) (td "n")]
+       [:tr (td "w") (td "d") (td "e")]
+       [:tr (td nil) (td "s")]]]]))
+
+(defn cc1-keymap-view [{:as args :keys [port-id]}]
   (let []
-    [code-chooser-com port-id "L-0-0"]))
+    [:table {:class "cc1"}
+     [:tbody
+      [:tr
+       [cc1-stick args "lp0"]
+       [cc1-stick args "lr0"]
+       [cc1-stick args "lm0"]
+       [cc1-stick args "li0"]
+       [cc1-stick args "lt0"]
+
+       [cc1-stick args "rt0"]
+       [cc1-stick args "ri0"]
+       [cc1-stick args "rm0"]
+       [cc1-stick args "rr0"]
+       [cc1-stick args "rp0"]]
+      [:tr
+       [:td]
+       [cc1-stick args "lr1"]
+       [cc1-stick args "lm1"]
+       [:td]
+       [cc1-stick args "lt1"]
+       [cc1-stick args "rt1"]
+       [:td]
+       [cc1-stick args "rm1"]
+       [cc1-stick args "rr1"]]
+      [:tr
+       [:td]
+       [:td]
+       [:td]
+       [:td]
+       [cc1-stick args "lt2"]
+       [cc1-stick args "rt2"]]]]))
+
+(defn keymap-view [args]
+  [cc1-keymap-view args])

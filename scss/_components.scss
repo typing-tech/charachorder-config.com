@@ -8,6 +8,38 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
+.menu-button {
+  left: 50%;
+  transform: translate(-50%, 0%);
+  position: absolute;
+  width: 32px;
+  cursor: pointer;
+}
+
+.menu-button:before,
+.menu-button:after,
+.menu-button div {
+  background: #fff;
+  content: "";
+  display: block;
+  height: 4px;
+  border-radius: 3px;
+  margin: 6px 0;
+  transition: 0.5s;
+}
+.menu-button:hover:before {
+  transform: translateY(12px) rotate(-135deg);
+}
+.menu-button:hover:after {
+  transform: translateY(12px) rotate(135deg);
+}
+.menu-button:hover div {
+  transform: scale(0);
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+
 .react-tiny-popover-container {
   background-color: white;
   color: #333;
@@ -43,6 +75,33 @@
       &:hover {
         background-color: #d5ffff;
         font-weight: 700;
+      }
+    }
+  }
+}
+
+table.cc1 {
+  .code-chooser {
+    white-space: nowrap; 
+    font-family: monospace;
+    font-size: 13px;
+    &__layer {
+      display: inline-block;
+      width: 12px;
+      color: gray;
+      background-color: black;
+      text-align: center;
+      overflow: hidden;
+    }
+    &__action {
+      display: inline-block;
+      width: 44px;
+      overflow: hidden;
+      background-color: #333;
+      text-align: center;
+      &:hover {
+        background-color: #ccc;
+        color: #333;
       }
     }
   }

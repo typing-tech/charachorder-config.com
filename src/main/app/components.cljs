@@ -2,6 +2,8 @@
   (:require
    ["react-tiny-popover" :as react-tiny-popover]
 
+   [clojure.string :as str]
+
    [app.macros :as mac :refer-macros [cond-xlet ->hash]]
    [app.ratoms :refer [*num-device-connected *active-port-id]]
 
@@ -22,6 +24,11 @@
                      (->> (filter identity x)
                           (interpose " ")
                           (apply str)))))
+
+(defn concat-classes [& xs]
+  (->> (remove str/blank? xs)
+       (interpose " ")
+       (apply str)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

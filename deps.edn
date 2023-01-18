@@ -24,6 +24,7 @@
         camel-snake-kebab/camel-snake-kebab {:mvn/version "0.4.3"}
         funcool/promesa {:mvn/version "10.0.571"}
         org.clojars.mmb90/cljs-cache {:mvn/version "0.1.4"}
+        testdouble/clojurescript.csv {:mvn/version "0.6.0"}
 
         ;; spec + testing
         metosin/spec-tools {:mvn/version "0.10.5"}
@@ -41,11 +42,6 @@
         ;; communication to backend
         cljs-http/cljs-http {:mvn/version "0.1.46"}
         cljs-ajax/cljs-ajax {:mvn/version "0.8.4"}
-
-        ;; syandus
-        sy-datascript/sy-datascript
-        {:git/url "https://github.com/syandus/sy-datascript.git"
-         :sha "f788e4436fec95c2d1d398bca022b223eee2c5e4"}
 
         ;; REPL and dev
         cljfmt/cljfmt {:mvn/version "0.9.0"}}

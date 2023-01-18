@@ -97,6 +97,11 @@
                  (or (not action) (= "" (str/trim action)))))))
 
 (def keymap-code-types (into #{} (map :type keymap-codes)))
+(def longest-action-text
+  (reduce (fn [prev x]
+            (if (< (count prev) (count x))
+              x prev))
+          (->> (map :action keymap-codes) (sort))))
 
 (def code->keymap-code
   (into {} (map (fn [{:as m :keys [code]}]

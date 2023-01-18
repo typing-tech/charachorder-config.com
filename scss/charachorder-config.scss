@@ -9,6 +9,7 @@
 
 $root: #charachorder-config;
 $left-nav-width: 250px;
+$left-nav-width-collapsed: 36px;
 
 html, body, #{$root} {
   width: 100%;
@@ -17,7 +18,7 @@ html, body, #{$root} {
 
 body {
   font-family: 'Readex Pro', sans-serif;
-  background: #333;
+  background: #222;
   color: #ccc;
 }
 
@@ -40,6 +41,14 @@ h1, h2, h3, h4, h5, h6 {
   height: 100%;
   background-color: #000;
   position: fixed;
+}
+
+#root.nav-collapsed {
+  padding-left: $left-nav-width-collapsed;
+  #nav {
+    margin-left: -$left-nav-width-collapsed;
+    width: $left-nav-width-collapsed;
+  }
 }
 
 #tab-menu {

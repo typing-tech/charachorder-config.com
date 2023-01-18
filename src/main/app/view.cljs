@@ -1,19 +1,25 @@
 (ns app.view
   (:require
+   [clojure.string :as str]
+   [oops.core :refer [oget oset! ocall oapply ocall! oapply!
+                      oget+ oset!+ ocall+ oapply+ ocall!+ oapply!+]]
    [reagent.dom :as rdom]
-   [posh.reagent :as posh :refer [pull q]]
+   [posh.reagent :as posh :refer [transact! pull q]]
+   [testdouble.cljs.csv :as csv]
 
    [app.macros :as mac :refer-macros [cond-xlet ->hash]]
-   [app.ratoms :refer [*num-device-connected
+   [app.ratoms :refer [*nav-expanded
+                       *num-device-connected
                        *active-port-id
                        *current-tab-view]]
    [app.db :as db :refer [*db]]
-   [app.components :refer [button]]
+   [app.components :refer [button concat-classes]]
    [app.serial :as serial :refer [has-web-serial-api?
                                   *ports]]
    [app.codes :refer [var-params]]
    [app.views.params :refer [params-view]]
-   [app.views.keymap :refer [keymap-view]]))
+   [app.views.keymap :refer [keymap-view]]
+   [app.hw.cc1 :as cc1]))
 
 (defn no-web-serial-api-view []
   [:div {:class "pure-u-1 tc"}
@@ -27,21 +33,33 @@
             :classes ["mb2"
                       (when (= port-id active-port-id) "pure-button-primary")])))
 
-(defn nav [args]
-  (let [num-devices @*num-device-connected
-        xs (->> @*ports
+(defn menu-button [f]
+  [:div.menu-button {:on-click f} [:div]])
+
+(defn nav [{:as args :keys [nav-expanded num-devices]}]
+  (let [xs (->> @*ports
                 vals
                 (sort-by :i))]
-    [:div {:id "nav" :class "pure-u tc"}
-     [:h1.f5.mv3 "CharaChorder Config"]
+    [:div {:id "nav"
+           :class (concat-classes "pure-u tc"
+                                  (when-not nav-expanded "nav-collapsed"))}
+     (if nav-expanded
+       [:<>
+        [:h1.f5.mb3.mt4 "CharaChorder Config"]
 
-     (into [:div] (map (partial gen-device-buttons args) xs))
+        (into [:div] (map (partial gen-device-buttons args) xs))
 
-     (button serial/request! ["Connect New Device"]
-             :primary (= 0 num-devices)
-             :classes ["mt2 mb1"
-                       (when (< 0 num-devices) "button-xsmall")])
-     [:div.f6 num-devices " device(s) connected."]]))
+        (button serial/request! ["Connect New Device"]
+                :primary (= 0 num-devices)
+                :classes ["mt2 mb1"
+                          (when (< 0 num-devices) "button-xsmall")])
+        [:div.f6 num-devices " device(s) connected."]
+
+        [:div {:class "absolute top-0 right-0 pointer"
+               :on-click #(reset! *nav-expanded false)}
+         [:div.dib.ma2 "X"]]]
+       [:<>
+        [menu-button #(reset! *nav-expanded true)]])]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -70,11 +88,46 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defn load-csv-text! [port-id csv]
+  (let [xs (csv/read-csv csv)
+        txs (mapv (fn [[layer location code]]
+                    (let [switch-key-id (get cc1/location->switch-key-id location)
+                          attr-ns (str layer "." switch-key-id)
+                          attr (keyword attr-ns "code")]
+                      [:db/add [:port/id port-id] attr code]))
+                  xs)]
+    (transact! *db txs)))
+
+(defn on-drag-over! [e]
+  (.preventDefault e)
+  (.stopPropagation e)
+  (oset! e "dataTransfer.dropEffect" "copy"))
+
+(defn read-keymap-csv! [port-id
+                        ^js e]
+  (.preventDefault e)
+  (.stopPropagation e)
+  (let [files (oget e "dataTransfer.files")
+        file (first files)]
+    (when (and file (str/ends-with? (str/lower-case (oget file "name"))
+                                    ".csv"))
+      (js/console.log file)
+      (let [fr (new js/FileReader)]
+        (.addEventListener fr "load" #(load-csv-text! port-id (oget fr "result")) false)
+        (.readAsText fr file)))))
+
 (defn root-view []
   (let [active-port-id @*active-port-id
+        num-devices @*num-device-connected
+        nav-expanded (or @*nav-expanded
+                         (= num-devices 0))
         port-id active-port-id
-        args (->hash active-port-id port-id)]
-    [:div {:id "root" :class "pure-g"}
+        args (->hash num-devices nav-expanded active-port-id port-id)]
+    [:div {:id "root"
+           :on-drop #(read-keymap-csv! port-id %)
+           :on-drag-over on-drag-over!
+           :class (concat-classes "pure-g"
+                                  (when-not nav-expanded "nav-collapsed"))}
      [nav args]
      (if-not active-port-id
        [no-device-main-view args]
