@@ -16,8 +16,10 @@
     (.pushState js/window.history #js {} "" url)))
 
 (defn load-csv-text! [port-id csv]
-  (let [xs (csv/read-csv csv)
+  (let [csv (str/replace csv #"\r\n" "\n")
+        xs (csv/read-csv csv)
         txs (mapv (fn [[layer location code]]
+                    (js/console.log [layer location code])
                     (let [switch-key-id (get cc1/location->switch-key-id location)
                           attr-ns (str layer "." switch-key-id)
                           attr (keyword attr-ns "code")]
