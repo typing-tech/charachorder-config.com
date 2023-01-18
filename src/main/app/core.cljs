@@ -20,7 +20,7 @@
    [app.serial :as serial :refer [has-web-serial-api? *ports]]
    [app.view :refer [super-root-view]]
    [app.csv :refer [load-csv-text!]]
-   
+
    [app.repl]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -31,20 +31,34 @@
 (defn on-dom-content-loaded! []
   (render))
 
-(defn ^:export init []
-  (s/check-asserts true)
-
+(defn update-url-search-params! []
   (let [params (oget js/window "location.search")
         obj (new js/URLSearchParams params)]
-    (reset! *url-search-params obj))
+    (reset! *url-search-params obj)))
 
-  (db/init!)
-  (serial/init!)
-(when (.has @*url-search-params "cc1-layout")
+(defn update-layout-from-url! []
+  (when (.has @*url-search-params "cc1-layout")
     (transact! *db [{:port/id 0}])
     (swap! *num-device-connected inc)
     (reset! *active-port-id 0)
     (let [csv (.get @*url-search-params "cc1-layout")]
       (when-not (str/blank? csv)
-        (load-csv-text! 0 csv))))
+        (load-csv-text! 0 csv)))))
+
+(defn on-url-change! [_e]
+  (js/console.log "updating layout due to URL change!")
+  (update-url-search-params!)
+  (update-layout-from-url!))
+
+(defn ^:export init []
+  (s/check-asserts true)
+
+  (update-url-search-params!)
+  (update-layout-from-url!)
+
+  (db/init!)
+  (serial/init!)
+
+  (.addEventListener js/window "popstate" #(on-url-change! %))
+
   (js/window.addEventListener "DOMContentLoaded" on-dom-content-loaded!))
