@@ -1,6 +1,7 @@
 (ns app.core
   (:require
    [clojure.spec.alpha :as s]
+   [clojure.string :as str]
    [orchestra-cljs.spec.test :as ost]
    [expound.alpha :as expound]
    [oops.core :refer [oget oset! ocall oapply ocall! oapply!
@@ -43,5 +44,7 @@
     (transact! *db [{:port/id 0}])
     (swap! *num-device-connected inc)
     (reset! *active-port-id 0)
-    (load-csv-text! 0 (.get @*url-search-params "cc1-layout")))
+    (let [csv (.get @*url-search-params "cc1-layout")]
+      (when-not (str/blank? csv)
+        (load-csv-text! 0 csv))))
   (js/window.addEventListener "DOMContentLoaded" on-dom-content-loaded!))
