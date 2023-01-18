@@ -45,4 +45,7 @@
 
 .pure-button {
   margin-right: 16px;
+  &.mr0 {
+    margin-right: 0;
+  }
 }
