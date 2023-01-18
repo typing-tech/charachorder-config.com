@@ -7,19 +7,22 @@
    [oops.core :refer [oget oset! ocall oapply ocall! oapply!
                       oget+ oset!+ ocall+ oapply+ ocall!+ oapply!+]]
    [testdouble.cljs.csv :as csv]
+   [app.ratoms :refer [*url-search-params]]
    [app.hw.cc1 :as cc1]
    [app.db :as db :refer [*db]]))
 
 (defn set-url! [csv]
-  (let [encoded-layout (js/encodeURIComponent csv)
-        url (str "?cc1-layout=" encoded-layout)]
-    (.pushState js/window.history #js {} "" url)))
+  (let [current-layout (when (.has @*url-search-params "cc1-layout")
+                         (.get @*url-search-params "cc1-layout"))]
+    (when (not= csv current-layout)
+      (let [encoded-layout (js/encodeURIComponent csv)
+            url (str "?cc1-layout=" encoded-layout)]
+        (.pushState js/window.history #js {} "" url)))))
 
 (defn load-csv-text! [port-id csv]
   (let [csv (str/replace csv #"\r\n" "\n")
         xs (csv/read-csv csv)
         txs (mapv (fn [[layer location code]]
-                    (js/console.log [layer location code])
                     (let [switch-key-id (get cc1/location->switch-key-id location)
                           attr-ns (str layer "." switch-key-id)
                           attr (keyword attr-ns "code")]
