@@ -8,14 +8,17 @@
    [promesa.core :as p]
 
    [reagent.dom :as rdom]
-   [posh.reagent :as posh :refer [pull q]]
+   [posh.reagent :as posh :refer [pull q transact!]]
 
    [app.macros :as mac :refer-macros [cond-xlet ->hash]]
    [app.utils :refer [get-main-root-element]]
-   [app.ratoms :refer [*num-device-connected *active-port-id]]
+   [app.ratoms :refer [*url-search-params
+                       *num-device-connected
+                       *active-port-id]]
    [app.db :as db :refer [*db]]
    [app.serial :as serial :refer [has-web-serial-api? *ports]]
    [app.view :refer [super-root-view]]
+   [app.csv :refer [load-csv-text!]]
    
    [app.repl]))
 
@@ -29,7 +32,16 @@
 
 (defn ^:export init []
   (s/check-asserts true)
+
+  (let [params (oget js/window "location.search")
+        obj (new js/URLSearchParams params)]
+    (reset! *url-search-params obj))
+
   (db/init!)
   (serial/init!)
+(when (.has @*url-search-params "cc1-layout")
+    (transact! *db [{:port/id 0}])
+    (swap! *num-device-connected inc)
+    (reset! *active-port-id 0)
+    (load-csv-text! 0 (.get @*url-search-params "cc1-layout")))
   (js/window.addEventListener "DOMContentLoaded" on-dom-content-loaded!))
-

@@ -5,7 +5,6 @@
                       oget+ oset!+ ocall+ oapply+ ocall!+ oapply!+]]
    [reagent.dom :as rdom]
    [posh.reagent :as posh :refer [transact! pull q]]
-   [testdouble.cljs.csv :as csv]
 
    [app.macros :as mac :refer-macros [cond-xlet ->hash]]
    [app.ratoms :refer [*nav-expanded
@@ -19,7 +18,7 @@
    [app.codes :refer [var-params]]
    [app.views.params :refer [params-view]]
    [app.views.keymap :refer [keymap-view]]
-   [app.hw.cc1 :as cc1]))
+   [app.csv :refer [on-drag-over! read-dropped-keymap-csv!]]))
 
 (defn no-web-serial-api-view []
   [:div {:class "pure-u-1 tc"}
@@ -88,34 +87,6 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn load-csv-text! [port-id csv]
-  (let [xs (csv/read-csv csv)
-        txs (mapv (fn [[layer location code]]
-                    (let [switch-key-id (get cc1/location->switch-key-id location)
-                          attr-ns (str layer "." switch-key-id)
-                          attr (keyword attr-ns "code")]
-                      [:db/add [:port/id port-id] attr code]))
-                  xs)]
-    (transact! *db txs)))
-
-(defn on-drag-over! [e]
-  (.preventDefault e)
-  (.stopPropagation e)
-  (oset! e "dataTransfer.dropEffect" "copy"))
-
-(defn read-keymap-csv! [port-id
-                        ^js e]
-  (.preventDefault e)
-  (.stopPropagation e)
-  (let [files (oget e "dataTransfer.files")
-        file (first files)]
-    (when (and file (str/ends-with? (str/lower-case (oget file "name"))
-                                    ".csv"))
-      (js/console.log file)
-      (let [fr (new js/FileReader)]
-        (.addEventListener fr "load" #(load-csv-text! port-id (oget fr "result")) false)
-        (.readAsText fr file)))))
-
 (defn root-view []
   (let [active-port-id @*active-port-id
         num-devices @*num-device-connected
@@ -124,7 +95,7 @@
         port-id active-port-id
         args (->hash num-devices nav-expanded active-port-id port-id)]
     [:div {:id "root"
-           :on-drop #(read-keymap-csv! port-id %)
+           :on-drop #(read-dropped-keymap-csv! port-id %)
            :on-drag-over on-drag-over!
            :class (concat-classes "pure-g"
                                   (when-not nav-expanded "nav-collapsed"))}
