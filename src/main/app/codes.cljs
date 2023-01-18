@@ -92,8 +92,7 @@
   (->> keymap-code-json
        (map (fn [[code type action action-desc notes]]
               (let [code-int (js/parseInt code)]
-                (->hash code code-int type action action-desc notes))))
-       ))
+                (->hash code code-int type action action-desc notes))))))
 
 (def keymap-code-types (into #{} (map :type keymap-codes)))
 (def longest-action-text
