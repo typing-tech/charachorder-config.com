@@ -144,3 +144,7 @@
 (def location->switch-key-id
   (into {} (map (fn [[k {:keys [location]}]] [location k])
                 switch-keys)))
+(def sorted-switch-keys-by-loc
+  (->> switch-keys
+       (sort-by #(-> % val :location js/parseInt))
+       (map key)))

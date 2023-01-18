@@ -22,7 +22,7 @@
                       charachorder-one-keymap-codes
                       raw-keymap-codes]]
    [app.hw.cc1 :as cc1]
-   [app.csv :refer [download-csv!]]))
+   [app.csv :refer [download-csv! update-url-from-db!]]))
 
 (defonce *tab (r/atom :ascii))
 
@@ -87,7 +87,8 @@
                        :on-mouse-leave #(reset! *keymap-code nil)
                        :on-click (fn []
                                    (db-set! port-id (keyword key-ns "code") code)
-                                   (db-set! port-id (keyword key-ns "editing") false))}
+                                   (db-set! port-id (keyword key-ns "editing") false)
+                                   (update-url-from-db! port-id))}
                   action]))
              gen-row (fn [xs] (into [:tr] (map gen-code xs)))]
          [:table {:class "keycode-codes__codes mt3"}
