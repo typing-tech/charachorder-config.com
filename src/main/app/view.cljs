@@ -14,8 +14,8 @@
    [app.db :as db :refer [*db]]
    [app.components :refer [button concat-classes]]
    [app.serial :as serial :refer [has-web-serial-api?
-                                  *ports]]
-   [app.codes :refer [var-params]]
+                                  *ports
+                                  dummy-port-id]]
    [app.views.params :refer [params-view]]
    [app.views.keymap :refer [keymap-view]]
    [app.views.resets :refer [resets-view]]
@@ -36,14 +36,34 @@
 (defn menu-button [f]
   [:div.menu-button {:on-click f} [:div]])
 
-(defn nav [{:as args :keys [nav-expanded num-devices]}]
+(defn switch-to-real-device-mode-button []
+  (button #(oset! js/window "location" "?")
+          ["Switch to Real Device Mode"]
+          :size "xsmall" :warning true :classes ["mr0"]))
+
+(defn nav [{:as args :keys [port-id nav-expanded num-devices]}]
   (let [xs (->> @*ports
                 vals
-                (sort-by :i))]
+                (sort-by :i))
+        close-button
+        [:div {:class "absolute top-0 right-0 pointer"
+               :on-click #(reset! *nav-expanded false)}
+         [:div.dib.ma2 "X"]]]
     [:div {:id "nav"
            :class (concat-classes "pure-u tc"
                                   (when-not nav-expanded "nav-collapsed"))}
-     (if nav-expanded
+     (cond
+       (not nav-expanded)
+       [:<>
+        [menu-button #(reset! *nav-expanded true)]]
+
+       (= port-id dummy-port-id)
+       [:<>
+        [:h1.f5.mb3.mt4 "CharaChorder Config"]
+        [switch-to-real-device-mode-button]
+        close-button]
+
+       :else
        [:<>
         [:h1.f5.mb3.mt4 "CharaChorder Config"]
 
@@ -55,11 +75,7 @@
                           (when (< 0 num-devices) "button-xsmall")])
         [:div.f6 num-devices " device(s) connected."]
 
-        [:div {:class "absolute top-0 right-0 pointer"
-               :on-click #(reset! *nav-expanded false)}
-         [:div.dib.ma2 "X"]]]
-       [:<>
-        [menu-button #(reset! *nav-expanded true)]])]))
+        close-button])]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -68,7 +84,7 @@
    [:h1 "No Device Connected Yet"]
    [:p "Connect a device using the button on the left."]])
 
-(defn tab-menu []
+(defn tab-menu [{:keys [port-id]}]
   (let [current @*current-tab-view
         gen-button (fn [tab label & {:keys [danger]}]
                      (button #(reset! *current-tab-view tab) [label]
@@ -76,13 +92,17 @@
                              :primary (= current tab)
                              :danger danger))]
     [:div {:id "tab-menu"}
-     (gen-button :keymap "Key Map")
-     (gen-button :params "Parameters")
-     (gen-button :resets "RESETS" :danger true)]))
+     (if (= port-id dummy-port-id)
+       [:<>
+        [switch-to-real-device-mode-button]]
+       [:<>
+        (gen-button :keymap "Key Map")
+        (gen-button :params "Parameters")
+        (gen-button :resets "RESETS" :danger true)])]))
 
 (defn main-view [{:as args :keys [port-id]}]
   [:div {:id "main" :class "pure-u-1"}
-   [tab-menu]
+   [tab-menu args]
    (let [tab-view (or @*current-tab-view :params)]
      (case tab-view
        :keymap [keymap-view args]

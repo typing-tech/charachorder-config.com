@@ -17,7 +17,9 @@
                        *num-device-connected
                        *active-port-id]]
    [app.db :as db :refer [*db]]
-   [app.serial :as serial :refer [has-web-serial-api? *ports]]
+   [app.serial :as serial :refer [has-web-serial-api?
+                                  *ports
+                                  dummy-port-id]]
    [app.view :refer [super-root-view]]
    [app.csv :refer [load-csv-text!]]
 
@@ -38,12 +40,12 @@
 
 (defn update-layout-from-url! []
   (when (.has @*url-search-params "cc1-layout")
-    (transact! *db [{:port/id 0}])
+    (transact! *db [{:port/id dummy-port-id}])
     (swap! *num-device-connected inc)
-    (reset! *active-port-id 0)
+    (reset! *active-port-id dummy-port-id)
     (let [csv (.get @*url-search-params "cc1-layout")]
       (when-not (str/blank? csv)
-        (load-csv-text! 0 csv)))))
+        (load-csv-text! dummy-port-id csv)))))
 
 (defn on-url-change! [_e]
   (js/console.log "updating layout due to URL change!")

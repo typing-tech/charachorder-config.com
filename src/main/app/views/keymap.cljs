@@ -26,7 +26,8 @@
                       raw-keymap-codes]]
    [app.hw.cc1 :as cc1]
    [app.csv :refer [download-csv! update-url-from-db!]]
-   [app.serial :refer [set-keymap!]]))
+   [app.serial :refer [dummy-port-id
+                       set-keymap!]]))
 (def Marquee (oget react-double-marquee "default"))
 
 (defonce *tab (r/atom :ascii))
@@ -44,14 +45,14 @@
     (when-not (str/blank? notes)
       [:tr [:td.tr "Notes"] [:td notes]])]])
 
-(defn code-table []
+(defn action-chooser-popover []
   (let [*keymap-code (r/atom nil)
         gen-button (fn [k label]
                      (button #(reset! *tab k) [label] :classes ["button-xsmall"]
                              :primary (= @*tab k)))]
     (fn [port-id layer switch-key-id key-ns]
-      [:div {:class "keymap-codes"}
-       [:div {:class "keycode-codes__tab"}
+      [:div {:class "action-chooser-popover"}
+       [:div {:class "action-chooser-popover__tab"}
         (gen-button :ascii "ASCII")
         (gen-button :cp-1252 "CP-1252")
         (gen-button :keyboard "Keyboard")
@@ -63,7 +64,7 @@
                 ["X"] :classes ["button-xsmall" "fr" "close-button ma0 mr0"] :error true)]
 
        (let [{:as keymap :keys [code action-desc notes]} (get code->keymap-code @*keymap-code)]
-         [:div {:class "keycode-codes__info mv2 pa2"}
+         [:div {:class "action-chooser-popover__info mv2 pa2 mw-100"}
           (when keymap [:div (format "%s - %s" code action-desc)])
           (when notes [:div notes])])
 
@@ -95,10 +96,11 @@
                          (db-set! port-id (keyword key-ns "code") code)
                          (db-set! port-id (keyword key-ns "editing") false)
                          (update-url-from-db! port-id)
-                         (set-keymap! port-id layer switch-key-id code))}
+                         (when (not= port-id dummy-port-id)
+                           (set-keymap! port-id layer switch-key-id code)))}
                   action]))
              gen-row (fn [xs] (into [:tr] (map gen-code xs)))]
-         [:table {:class "keycode-codes__codes mt3"}
+         [:table {:class "action-chooser-popover__codes mt3"}
           (into [:tbody] (map gen-row codes))])])))
 
 (defn action-chooser-com []
@@ -118,7 +120,7 @@
           :reposition true
           :content (if (and (not is-open) @*hovered)
                      (r/as-element [code-tooltip keymap-code])
-                     (r/as-element [code-table port-id layer switch-key key-ns]))}
+                     (r/as-element [action-chooser-popover port-id layer switch-key key-ns]))}
          [:div {:class "action-chooser__action"
                 :on-mouse-enter #(reset! *hovered true)
                 :on-mouse-leave #(reset! *hovered false)
