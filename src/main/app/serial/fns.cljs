@@ -18,7 +18,8 @@
    [app.db :refer [*db]]
 
    [app.codes :refer [var-subcmds var-params code->var-param]]
-   [app.hw.cc1 :as cc1]))
+   [app.hw.cc1 :as cc1]
+   [app.csv :as csv]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -117,8 +118,44 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn issue-connect-cmds! [{:as port :keys [fn-ch]}]
+(defn cmd-var-commit []
+  (let [arg0 (:commit var-subcmds)]
+    (assert arg0)
+    (->> ["VAR" arg0]
+         (interpose " ")
+         (apply str))))
+
+(defn parse-commit-ret [ret]
+  (let [[cmd-code subcmd-code success-str] (str/split ret #"\s+")
+        success (js/parseInt success-str)
+        success (if (< 0 success) false true) ]
+    (->hash cmd-code subcmd-code success)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn cmd-var-set-keymap [layer loc code]
+  (let [arg0 (:set-keymap var-subcmds)]
+    (assert arg0)
+    (assert layer)
+    (assert loc)
+    (assert code)
+    (->> ["VAR" arg0 layer loc code]
+         (interpose " ")
+         (apply str))))
+
+(defn parse-var-set-keymap-ret [ret]
+  (let [[cmd-code subcmd-code layer location code success-str] (str/split ret #"\s+")
+        success (js/parseInt success-str)
+        success (if (< 0 success) false true) ]
+    (->hash cmd-code subcmd-code layer location code success)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+(defn issue-connect-cmds! [{:as port :keys [port-id fn-ch]}]
   (go
     (>! fn-ch store-device-name)
-    (<! (query-all-var-params! port))))
+    (<! (query-all-var-params! port))
+    (<! (query-all-var-keymaps! port))
+    (csv/update-url-from-db! port-id)))
 

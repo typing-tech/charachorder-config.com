@@ -17,6 +17,7 @@
    [app.ratoms :refer [*num-device-connected *active-port-id]]
    [app.db :refer [*db]]
 
+   [app.hw.cc1 :as cc1]
    [app.serial.fns :as fns :refer [issue-connect-cmds!]]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -216,8 +217,21 @@
     (reset! *active-port-id nil)
     (close-port-and-cleanup!)))
 
+(defn factory-reset! [port-id]
+  (let [{:keys [close-port-and-cleanup! fn-ch]} (get-port port-id)
+        cmd "RST FACTORY"]
+    (letfn [(f [{:keys [write-ch read-ch]}]
+              (go
+               (js/console.log )
+                (>! write-ch "RST FACTORY")
+                (let [ret (<! read-ch)]
+                  (js/console.log ret))
+                (reset! *active-port-id nil)
+                (close-port-and-cleanup!)))]
+      (put! fn-ch f))))
+
 (defn reset-params! [port-id]
-  (let [{:as port :keys [close-port-and-cleanup! fn-ch]} (get-port port-id)]
+  (let [{:keys [close-port-and-cleanup! fn-ch]} (get-port port-id)]
     (letfn [(f [{:keys [write-ch read-ch]}]
               (go
                 (>! write-ch "RST PARAMS")
@@ -228,7 +242,7 @@
       (put! fn-ch f))))
 
 (defn reset-keymaps! [port-id]
-  (let [{:as port :keys [close-port-and-cleanup! fn-ch]} (get-port port-id)]
+  (let [{:keys [close-port-and-cleanup! fn-ch]} (get-port port-id)]
     (letfn [(f [{:keys [write-ch read-ch]}]
               (go
                 (>! write-ch "RST KEYMAPS")
@@ -236,4 +250,37 @@
                   (js/console.log ret))
                 (reset! *active-port-id nil)
                 (close-port-and-cleanup!)))]
+      (put! fn-ch f))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn commit! [port-id]
+  (let [{:as port :keys [close-port-and-cleanup! fn-ch]} (get-port port-id)
+        cmd (fns/cmd-var-commit)]
+    (letfn [(f [{:keys [write-ch read-ch]}]
+              (go
+                (>! write-ch cmd)
+                (let [ret (<! read-ch)
+                      {:keys [success]} (fns/parse-commit-ret ret)]
+                  (js/console.log ret)
+                  (if success
+                    (js/console.log "COMMIT success")
+                    (js/console.error "COMMIT ERROR")))))]
+      (put! fn-ch f))))
+
+(defn set-keymap! [port-id layer switch-key-id code]
+  (assert (string? switch-key-id))
+  (let [{:as port :keys [fn-ch]} (get-port port-id)
+        location (get-in cc1/switch-keys [switch-key-id :location])
+        cmd (fns/cmd-var-set-keymap layer location code)]
+    (letfn [(f [{:keys [write-ch read-ch]}]
+              (go
+                (js/console.log "SEND" cmd)
+                (>! write-ch cmd)
+                (let [ret (<! read-ch)
+                      {:keys [success]} (fns/parse-var-set-keymap-ret ret)]
+                  (js/console.log "RECV" ret)
+                  (if success
+                    (js/console.log "COMMIT success")
+                    (js/console.error "COMMIT ERROR")))))]
       (put! fn-ch f))))

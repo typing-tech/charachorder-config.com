@@ -25,7 +25,8 @@
                       charachorder-one-keymap-codes
                       raw-keymap-codes]]
    [app.hw.cc1 :as cc1]
-   [app.csv :refer [download-csv! update-url-from-db!]]))
+   [app.csv :refer [download-csv! update-url-from-db!]]
+   [app.serial :refer [set-keymap!]]))
 (def Marquee (oget react-double-marquee "default"))
 
 (defonce *tab (r/atom :ascii))
@@ -48,7 +49,7 @@
         gen-button (fn [k label]
                      (button #(reset! *tab k) [label] :classes ["button-xsmall"]
                              :primary (= @*tab k)))]
-    (fn [port-id key-ns]
+    (fn [port-id layer switch-key-id key-ns]
       [:div {:class "keymap-codes"}
        [:div {:class "keycode-codes__tab"}
         (gen-button :ascii "ASCII")
@@ -89,10 +90,12 @@
                        :class (when (= tab :raw) "small")
                        :on-mouse-enter #(reset! *keymap-code code)
                        :on-mouse-leave #(reset! *keymap-code nil)
-                       :on-click (fn []
-                                   (db-set! port-id (keyword key-ns "code") code)
-                                   (db-set! port-id (keyword key-ns "editing") false)
-                                   (update-url-from-db! port-id))}
+                       :on-click
+                       (fn []
+                         (db-set! port-id (keyword key-ns "code") code)
+                         (db-set! port-id (keyword key-ns "editing") false)
+                         (update-url-from-db! port-id)
+                         (set-keymap! port-id layer switch-key-id code))}
                   action]))
              gen-row (fn [xs] (into [:tr] (map gen-code xs)))]
          [:table {:class "keycode-codes__codes mt3"}
@@ -115,7 +118,7 @@
           :reposition true
           :content (if (and (not is-open) @*hovered)
                      (r/as-element [code-tooltip keymap-code])
-                     (r/as-element [code-table port-id key-ns]))}
+                     (r/as-element [code-table port-id layer switch-key key-ns]))}
          [:div {:class "action-chooser__action"
                 :on-mouse-enter #(reset! *hovered true)
                 :on-mouse-leave #(reset! *hovered false)
