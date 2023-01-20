@@ -18,6 +18,7 @@
    [app.codes :refer [var-params]]
    [app.views.params :refer [params-view]]
    [app.views.keymap :refer [keymap-view]]
+   [app.views.resets :refer [resets-view]]
    [app.csv :refer [on-drag-over! read-dropped-keymap-csv!]]))
 
 (defn no-web-serial-api-view []
@@ -69,13 +70,15 @@
 
 (defn tab-menu []
   (let [current @*current-tab-view
-        gen-button (fn [tab label]
+        gen-button (fn [tab label & {:keys [danger]}]
                      (button #(reset! *current-tab-view tab) [label]
                              :classes ["button-xsmall" "ma2 mh2"]
-                             :primary (= current tab)))]
+                             :primary (= current tab)
+                             :danger danger))]
     [:div {:id "tab-menu"}
      (gen-button :keymap "Key Map")
-     (gen-button :params "Parameters")]))
+     (gen-button :params "Parameters")
+     (gen-button :resets "RESETS" :danger true)]))
 
 (defn main-view [{:as args :keys [port-id]}]
   [:div {:id "main" :class "pure-u-1"}
@@ -83,7 +86,8 @@
    (let [tab-view (or @*current-tab-view :params)]
      (case tab-view
        :keymap [keymap-view args]
-       :params [params-view args]))])
+       :params [params-view args]
+       :resets [resets-view args]))])
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
