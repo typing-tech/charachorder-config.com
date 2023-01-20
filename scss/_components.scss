@@ -51,12 +51,11 @@
 }
 
 .action-chooser-popover {
-  width: 768px;
-  max-width: 768px;
   &__info {
     background-color: #ddd;
     height: 48px;
     border-radius: 4px;
+    max-width: 600px;
   }
 
   &__codes {

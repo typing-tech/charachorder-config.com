@@ -151,11 +151,9 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-
 (defn issue-connect-cmds! [{:as port :keys [port-id fn-ch]}]
   (go
     (>! fn-ch store-device-name)
     (<! (query-all-var-params! port))
     (<! (query-all-var-keymaps! port))
     (csv/update-url-from-db! port-id)))
-

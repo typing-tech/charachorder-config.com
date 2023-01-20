@@ -1,5 +1,7 @@
 (ns app.utils
-  (:require [clojure.set :as set]))
+  (:require
+   ["date-fns" :as date-fns]
+   [clojure.set :as set]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -8,3 +10,6 @@
 
 (defn bimap [m]
   (merge m (set/map-invert m)))
+
+(defn human-time-now-with-seconds []
+  (date-fns/formatISO9075 (.now js/Date)))

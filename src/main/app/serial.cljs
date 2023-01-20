@@ -16,7 +16,9 @@
    [app.macros :refer-macros [cond-xlet ->hash]]
    [app.ratoms :refer [*num-device-connected *active-port-id]]
    [app.db :refer [*db]]
+   [app.utils :refer [human-time-now-with-seconds]]
 
+   [app.emoji-strings :refer [keyboard-left-arrow keyboard-right-arrow]]
    [app.hw.cc1 :as cc1]
    [app.serial.fns :as fns :refer [issue-connect-cmds!]]))
 
@@ -91,6 +93,16 @@
         *writer (atom nil)
         *reader (atom nil)
         *device-name (r/atom "???")
+        *console (r/atom [])
+
+        write->console
+        (fn [v msg]
+          (conj v [(count v) (human-time-now-with-seconds)
+                   (str " " keyboard-left-arrow " " msg)]))
+        read->console
+        (fn [v msg]
+          (conj v [(count v) (human-time-now-with-seconds)
+                   (str " " keyboard-right-arrow " " msg)]))
 
         close-port-and-cleanup!
         (fn []
@@ -108,7 +120,7 @@
             (swap! *ports dissoc port-id)
             (swap! *num-device-connected dec)))
 
-        m (->hash port-id port read-ch write-ch fn-ch *device-name
+        m (->hash port-id port read-ch write-ch fn-ch *device-name *console
                   close-port-and-cleanup!)]
 
     (let [writable (oget port "writable")
@@ -117,7 +129,8 @@
       (go-loop []
         (try
           (if-some [x (<! write-ch)]
-            (do (->> (str x "\r\n")
+            (do (swap! *console write->console x)
+                (->> (str x "\r\n")
                      (.encode cmd-encoder)
                      (.write w)
                      <p!)
@@ -139,7 +152,9 @@
               (.releaseLock r)
               (let [buf (concat-uint8-array prev-buf value)
                     [lines rem] (parse-lines buf)]
-              ; (js/console.log [lines rem])
+                ; (js/console.log [lines rem])
+                (dorun (for [line lines]
+                         (swap! *console read->console line)))
                 (<! (onto-chan! read-ch lines false))
                 (recur rem))))
           (catch :default e
@@ -282,6 +297,6 @@
                       {:keys [success]} (fns/parse-var-set-keymap-ret ret)]
                   (js/console.log "RECV" ret)
                   (if success
-                    (js/console.log "COMMIT success")
-                    (js/console.error "COMMIT ERROR")))))]
+                    (js/console.log "set keymap success")
+                    (js/console.error "set keymap ERROR")))))]
       (put! fn-ch f))))

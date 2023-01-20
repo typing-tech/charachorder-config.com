@@ -1,5 +1,7 @@
 (ns app.view
   (:require
+   ["react-scroll-to-bottom" :as react-scroll-to-bottom]
+
    [clojure.string :as str]
    [oops.core :refer [oget oset! ocall oapply ocall! oapply!
                       oget+ oset!+ ocall+ oapply+ ocall!+ oapply!+]]
@@ -15,11 +17,13 @@
    [app.components :refer [button concat-classes]]
    [app.serial :as serial :refer [has-web-serial-api?
                                   *ports
-                                  dummy-port-id]]
+                                  dummy-port-id
+                                  get-port]]
    [app.views.params :refer [params-view]]
    [app.views.keymap :refer [keymap-view]]
    [app.views.resets :refer [resets-view]]
    [app.csv :refer [on-drag-over! read-dropped-keymap-csv!]]))
+(def ScrollToBottom react-scroll-to-bottom/default)
 
 (defn no-web-serial-api-view []
   [:div {:class "pure-u-1 tc"}
@@ -100,6 +104,25 @@
         (gen-button :params "Parameters")
         (gen-button :resets "RESETS" :danger true)])]))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn console-content [port-id]
+  (let [{:keys [*console]} (get-port port-id)
+        lines (if-not *console
+                []
+                (or @*console []))
+        lines (take-last 100 lines)
+        els (map (fn [[id t msg]]
+                   [:p {:key (str id)} [:span.time t] [:span.msg msg]])
+                 lines)]
+    (into [:<>] els)))
+
+(defn console-view [{:keys [port-id]}]
+
+  [:> ScrollToBottom {:class-name "console"
+                      :initial-scroll-behavior "smooth"}
+   [console-content port-id]])
+
 (defn main-view [{:as args :keys [port-id]}]
   [:div {:id "main" :class "pure-u-1"}
    [tab-menu args]
@@ -107,7 +130,8 @@
      (case tab-view
        :keymap [keymap-view args]
        :params [params-view args]
-       :resets [resets-view args]))])
+       :resets [resets-view args]))
+   [console-view args]])
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

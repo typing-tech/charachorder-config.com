@@ -64,7 +64,7 @@
                 ["X"] :classes ["button-xsmall" "fr" "close-button ma0 mr0"] :error true)]
 
        (let [{:as keymap :keys [code action-desc notes]} (get code->keymap-code @*keymap-code)]
-         [:div {:class "action-chooser-popover__info mv2 pa2 mw-100"}
+         [:div {:class "action-chooser-popover__info mv2 pa2"}
           (when keymap [:div (format "%s - %s" code action-desc)])
           (when notes [:div notes])])
 
