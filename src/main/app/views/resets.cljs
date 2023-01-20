@@ -10,4 +10,5 @@
 (defn resets-view [{:keys [port-id]}]
   (let []
     [:div {:class "pa3"}
-     (button #(serial/reset-keymaps! port-id) ["RESET keymaps and COMMIT"] :error true)]))
+     (button #(serial/reset-keymaps! port-id) ["RESET keymaps and COMMIT"] :error true)
+     (button #(serial/factory-reset! port-id) ["FACTORY RESET"] :error true)]))
