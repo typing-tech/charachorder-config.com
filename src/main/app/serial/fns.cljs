@@ -17,7 +17,8 @@
    [app.ratoms :refer [*active-port-id]]
    [app.db :refer [*db]]
 
-   [app.codes :refer [var-subcmds var-params code->var-param]]))
+   [app.codes :refer [var-subcmds var-params code->var-param]]
+   [app.hw.cc1 :as cc1]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -44,8 +45,6 @@
                  raw-data))]
     (->hash param cmd-code subcmd-code param-code raw-data data success)))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
 (defn store-device-name [{:keys [read-ch write-ch *device-name]}]
   (go
     (>! write-ch "ID")
@@ -55,36 +54,71 @@
                      ret)]
       (reset! *device-name dev-name))))
 
-(defn gen-var-get-fn [{:keys [port-id]} param]
-  (fn [{:keys [read-ch write-ch]}]
+(defn gen-var-get-param-fn [{:keys []} param]
+  (fn [{:keys [port-id read-ch write-ch]}]
+    (assert port-id)
     (go
       (>! write-ch (cmd-var-get-parameter param))
       (let [ret (<! read-ch)
             {:as m :keys [param data]} (parse-get-parameter-ret ret)
             port [:port/id port-id]]
-        (js/console.log m)
+        ; (js/console.log m)
         (when-not (nil? data)
           (let [tx-data [[:db/add port param data]]]
-            (js/console.log tx-data)
+            ; (js/console.log tx-data)
             (transact! *db tx-data)))))))
+
+(defn query-all-var-params! [{:as port :keys [fn-ch]}]
+  (let [params (->> (map key var-params))
+        fns (map (partial gen-var-get-param-fn port) params)]
+    (onto-chan! fn-ch fns false)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn query-all-vars! [{:as port :keys [fn-ch]}]
-  (let [params (->> (map key var-params))
-        fns (map (partial gen-var-get-fn port) params)]
+(defn cmd-var-get-keymap [layer loc]
+  (let [arg0 (:get-keymap var-subcmds)]
+    (assert arg0)
+    (->> ["VAR" arg0 layer loc]
+         (interpose " ")
+         (apply str))))
+
+(defn parse-get-keymap-ret [ret]
+  (let [[cmd-code subcmd-code layer location code success-str]
+        (str/split ret #"\s+")
+        success (js/parseInt success-str)
+        success (if (< 0 success) false true)
+        code (if success code nil)]
+    (->hash cmd-code subcmd-code layer location code)))
+
+(defn gen-var-get-keymap-fn [{:keys []} [layer loc hw-attr attr]]
+  (fn [{:keys [port-id read-ch write-ch]}]
+    (assert port-id)
     (go
-      (<! (onto-chan! fn-ch fns false)))))
+      (>! write-ch (cmd-var-get-keymap layer loc))
+      (let [ret (<! read-ch)
+            {:as m :keys [layer loc code]} (parse-get-keymap-ret ret)
+            port [:port/id port-id]]
+        ; (js/console.log m)
+        (when-not (nil? code)
+          (let [tx-data [[:db/add port attr code]]]
+            ; (js/console.log tx-data)
+            (transact! *db tx-data)))))))
+
+(defn query-all-var-keymaps! [{:as port :keys [fn-ch]}]
+  (let [xs (mapv (fn [[layer switch-key-id]]
+                   (let [loc (get-in cc1/switch-keys [switch-key-id :location])
+                         attr-ns (str layer "." switch-key-id)
+                         hw-attr (keyword attr-ns "hw.code")
+                         attr (keyword attr-ns "code")]
+                     [layer loc hw-attr attr]))
+                 cc1/layers+sorted-switch-key-ids)
+        fns (map (partial gen-var-get-keymap-fn port) xs)]
+    (onto-chan! fn-ch fns false)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn issue-connect-cmds! [{:as port :keys [fn-ch]}]
   (go
     (>! fn-ch store-device-name)
-    (query-all-vars! port)))
+    (<! (query-all-var-params! port))))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defn reset-params! [{:keys [read-ch write-ch]}]
-  (go
-   (>! write-ch "RST PARAMS")
-      (let [ret (<! read-ch)]
-        (js/console.log ret))))
