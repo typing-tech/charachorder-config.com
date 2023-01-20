@@ -52,13 +52,13 @@
 
 (defn compute-csv [port-id]
   (let [m (ds/pull @*db '[*] [:port/id port-id])
-        xs (for [layer ["A1" "A2" "A3"]
-                 switch-key-id cc1/sorted-switch-keys-by-loc]
-             (let [loc (get-in cc1/switch-keys [switch-key-id :location])
-                   attr-ns (str layer "." switch-key-id)
-                   attr (keyword attr-ns "code")
-                   code (get m attr)]
-               [layer loc code]))
+        xs (mapv (fn [[layer switch-key-id]]
+                   (let [loc (get-in cc1/switch-keys [switch-key-id :location])
+                         attr-ns (str layer "." switch-key-id)
+                         attr (keyword attr-ns "code")
+                         code (get m attr)]
+                     [layer loc code]))
+                 cc1/layers+sorted-switch-key-ids)
         csv (csv/write-csv xs)]
     csv))
 
