@@ -1,7 +1,7 @@
 (ns app.serial
   (:require
    [cljs.core.async :as async
-    :refer [chan <! >! onto-chan! close!]
+    :refer [chan <! >! onto-chan! close! put!]
     :refer-macros [go go-loop]]
    [cljs.core.async.interop :refer-macros [<p!]]
    [clojure.string :as str]
@@ -106,7 +106,7 @@
             (swap! *ports dissoc port-id)
             (swap! *num-device-connected dec)))
 
-        m (->hash port read-ch write-ch fn-ch *device-name
+        m (->hash port-id port read-ch write-ch fn-ch *device-name
                   close-port-and-cleanup!)]
 
     (let [writable (oget port "writable")
@@ -209,7 +209,7 @@
 
 (defn refresh-params [port-id]
   (let [port (get-port port-id)]
-    (fns/query-all-vars! port)))
+    (fns/query-all-var-params! port)))
 
 (defn disconnect! [port-id]
   (let [{:keys [close-port-and-cleanup!]} (get-port port-id)]
@@ -217,8 +217,23 @@
     (close-port-and-cleanup!)))
 
 (defn reset-params! [port-id]
-  (let [{:as port :keys [close-port-and-cleanup!]} (get-port port-id)]
-    (go
-      (<! (fns/reset-params! port))
-      (reset! *active-port-id nil)
-      (close-port-and-cleanup!))))
+  (let [{:as port :keys [close-port-and-cleanup! fn-ch]} (get-port port-id)]
+    (letfn [(f [{:keys [write-ch read-ch]}]
+              (go
+                (>! write-ch "RST PARAMS")
+                (let [ret (<! read-ch)]
+                  (js/console.log ret))
+                (reset! *active-port-id nil)
+                (close-port-and-cleanup!)))]
+      (put! fn-ch f))))
+
+(defn reset-keymaps! [port-id]
+  (let [{:as port :keys [close-port-and-cleanup! fn-ch]} (get-port port-id)]
+    (letfn [(f [{:keys [write-ch read-ch]}]
+              (go
+                (>! write-ch "RST KEYMAPS")
+                (let [ret (<! read-ch)]
+                  (js/console.log ret))
+                (reset! *active-port-id nil)
+                (close-port-and-cleanup!)))]
+      (put! fn-ch f))))
