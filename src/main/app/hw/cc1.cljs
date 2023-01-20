@@ -148,3 +148,8 @@
   (->> switch-keys
        (sort-by #(-> % val :location js/parseInt))
        (map key)))
+
+(def layers+sorted-switch-key-ids
+  (for [layer ["A1" "A2" "A3"]
+        switch-key-id sorted-switch-keys-by-loc]
+    [layer switch-key-id]))
