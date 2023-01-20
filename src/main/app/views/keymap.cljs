@@ -1,5 +1,6 @@
 (ns app.views.keymap
   (:require
+   ["react-double-marquee" :as react-double-marquee]
    [goog.object]
    [goog.string.format]
    [goog.string :as gstring :refer [format]]
@@ -7,6 +8,8 @@
    [clojure.string :as str]
    [reagent.core :as r]
    [posh.reagent :as posh :refer [transact!]]
+   [oops.core :refer [oget oset! ocall oapply ocall! oapply!
+                      oget+ oset!+ ocall+ oapply+ ocall!+ oapply!+]]
 
    [app.components :refer [button popover]]
    [app.db :as db :refer [*db]]
@@ -23,6 +26,7 @@
                       raw-keymap-codes]]
    [app.hw.cc1 :as cc1]
    [app.csv :refer [download-csv! update-url-from-db!]]))
+(def Marquee (oget react-double-marquee "default"))
 
 (defonce *tab (r/atom :ascii))
 
@@ -94,7 +98,7 @@
          [:table {:class "keycode-codes__codes mt3"}
           (into [:tbody] (map gen-row codes))])])))
 
-(defn code-chooser-com []
+(defn action-chooser-com []
   (let [*hovered (r/atom false)]
     (fn [port-id layer switch-key]
       (let [key-ns (str layer "." switch-key)
@@ -112,25 +116,25 @@
           :content (if (and (not is-open) @*hovered)
                      (r/as-element [code-tooltip keymap-code])
                      (r/as-element [code-table port-id key-ns]))}
-         [:div {:class "pointer"
+         [:div {:class "action-chooser__action"
                 :on-mouse-enter #(reset! *hovered true)
                 :on-mouse-leave #(reset! *hovered false)
                 :on-click #(db-set! port-id open-key true)}
           (if-not (str/blank? action)
-            action
-            [:span.gray (gstring/unescapeEntities "&nbsp;")])])))))
+            [:div action]
+            [:div.gray (gstring/unescapeEntities "&nbsp;")])])))))
 
 (defn cc1-stick-key [{:keys [port-id]} switch-key]
   [:<>
-   [:div.code-chooser
-    [:div.code-chooser__layer "1"]
-    [:div.code-chooser__action [code-chooser-com port-id "A1" switch-key]]]
-   [:div.code-chooser
-    [:div.code-chooser__layer "2"]
-    [:div.code-chooser__action [code-chooser-com port-id "A2" switch-key]]]
-   [:div.code-chooser
-    [:div.code-chooser__layer "3"]
-    [:div.code-chooser__action [code-chooser-com port-id "A3" switch-key]]]])
+   [:div.action-chooser
+    [:div.action-chooser__layer "1"]
+    [action-chooser-com port-id "A1" switch-key]]
+   [:div.action-chooser
+    [:div.action-chooser__layer "2"]
+    [action-chooser-com port-id "A2" switch-key]]
+   [:div.action-chooser
+    [:div.action-chooser__layer "3"]
+    [action-chooser-com port-id "A3" switch-key]]])
 
 (defn cc1-stick [args switch-key-prefix]
   (let [td (fn [dir]
@@ -177,8 +181,8 @@
        [cc1-stick args "rt2"]
        [:td]
        [:td.tc (button #(download-csv! port-id)
-                    ["Download" [:br] "Layout CSV"]
-                    :primary true :size "small" :classes ["mr0"])]]]]))
+                       ["Download" [:br] "Layout CSV"]
+                       :primary true :size "small" :classes ["mr0"])]]]]))
 
 (defn keymap-view [args]
   [:<>
