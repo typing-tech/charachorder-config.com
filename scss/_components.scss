@@ -81,10 +81,22 @@
 }
 
 table.cc1 {
-  .code-chooser {
+  line-height: 1.0;
+
+  .action-chooser {
+    $action-width: 44px;
+    $action-font-size: 15px;
+
+    vertical-align: top;
     white-space: nowrap; 
     font-family: monospace;
-    font-size: 13px;
+    font-size: $action-font-size;
+    margin-bottom: 4px;
+
+    & > * {
+      vertical-align: top;
+    }
+
     &__layer {
       display: inline-block;
       width: 12px;
@@ -95,10 +107,21 @@ table.cc1 {
     }
     &__action {
       display: inline-block;
-      width: 44px;
+      width: $action-width;
+      height: $action-font-size;
       overflow: hidden;
       background-color: #333;
-      text-align: center;
+      cursor: pointer;
+      position: relative;
+      & > * {
+        min-width: $action-width;
+        height: $action-font-size;
+        text-align: center;
+        position: absolute;
+        top: 0;
+        right: 0;
+      }
+
       &:hover {
         background-color: #ccc;
         color: #333;
