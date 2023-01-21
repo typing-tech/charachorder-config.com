@@ -24,7 +24,8 @@
 
 (defn load-csv-text! [port-id csv]
   (let [csv (str/replace csv #"\r\n" "\n")
-        xs (csv/read-csv csv)
+        xs (->> (csv/read-csv csv)
+                (remove (partial = [""])))
         txs (mapv (fn [[layer location code]]
                     (let [switch-key-id (get cc1/location->switch-key-id location)
                           attr-ns (str layer "." switch-key-id)
