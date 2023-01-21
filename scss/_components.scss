@@ -37,6 +37,36 @@
   transform: scale(0);
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
+.modal {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  &__content {
+    position: absolute;
+
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    margin: auto;
+
+    height: 480px;
+    width: 480px * (16/9);
+
+    border-radius: 8px;
+    background-color: #ccc;
+    color: #333;
+
+    padding: 16px;
+    font-family: monospace;
+    font-size: 20px;
+  }
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 
