@@ -29,7 +29,7 @@ styles-once:
 	./node_modules/.bin/sass scss/$(name).scss:./public/$(name).css
 
 release: node_modules styles-once
-	./node_modules/.bin/shadow-cljs release $(name) --pseudo-names
+	./node_modules/.bin/shadow-cljs release $(name)
 release-js:
 	./node_modules/.bin/babel src/js --out-dir src/gen
 
