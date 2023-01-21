@@ -1,6 +1,6 @@
 (ns app.views.keymap
   (:require
-   ["react-double-marquee" :as react-double-marquee]
+   ; ["react-double-marquee" :as react-double-marquee]
    [goog.object]
    [goog.string.format]
    [goog.string :as gstring :refer [format]]
@@ -29,7 +29,7 @@
    [app.serial.constants :refer [dummy-port-id]]
    [app.serial.ops :refer [set-keymap!
                            commit!]]))
-(def Marquee (oget react-double-marquee "default"))
+; (def Marquee (oget react-double-marquee "default"))
 
 (defonce *tab (r/atom :ascii))
 
