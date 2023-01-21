@@ -23,7 +23,7 @@ body {
   color: #ccc;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1, h2, h3, h4, h5, h6, p {
   margin: 0;
 }
 
@@ -69,10 +69,10 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .console {
-  position: absolute !important;
+  position: fixed !important;
   border-radius: 4px;
   bottom: 0;
-  left: 0;
+  left: $left-nav-width-collapsed;
   right: 0;
   background-color: #888;
   color: #000;
