@@ -88,7 +88,7 @@
 
 (defn debug-buttons []
   [:<>
-   (button #(transact! *db [[:db/add -1 :error/fatal "foo"]]) ["Add Dummy Error"]
+   (button #(transact! *db [[:db/add -1 :error/error "foo"]]) ["Add Dummy Error"]
            :classes ["button-xsmall" "ma2 ml6"]
            :primary false
            :danger true)])
@@ -158,7 +158,7 @@
         errors @(q '[:in $
                      :find ?e ?msg
                      :where
-                     [?e :error/fatal ?msg]]
+                     [?e :error/error ?msg]]
                    *db)
         args (->hash num-devices nav-expanded active-port-id port-id)]
     [:div {:id "root"
