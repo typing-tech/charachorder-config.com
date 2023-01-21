@@ -11,7 +11,7 @@
    [oops.core :refer [oget oset! ocall oapply ocall! oapply!
                       oget+ oset!+ ocall+ oapply+ ocall!+ oapply!+]]
 
-   [app.components :refer [button popover]]
+   [app.components :refer [button popover concat-classes]]
    [app.db :as db :refer [*db]]
    [app.codes :refer [keymap-codes
                       code->keymap-code
@@ -110,9 +110,11 @@
       (let [key-ns (str layer "." switch-key)
             open-key (keyword key-ns "editing")
             code-key (keyword key-ns "code")
-            m @(posh/pull *db [open-key code-key] [:port/id port-id])
+            hw-code-key (keyword key-ns "hw.code")
+            m @(posh/pull *db [open-key code-key hw-code-key] [:port/id port-id])
             is-open (-> m open-key boolean)
             code (-> m code-key)
+            hw-code (-> m hw-code-key)
             {:as keymap-code :keys [action]} (get code->keymap-code code)]
         (popover
          {:isOpen (or @*hovered is-open)
@@ -127,7 +129,9 @@
                 :on-mouse-leave #(reset! *hovered false)
                 :on-click #(db-set! port-id open-key true)}
           (if-not (str/blank? action)
-            [:div action]
+            [:div {:class (concat-classes (when (and (not= hw-code code)
+                                                     (not= port-id dummy-port-id)) "yellow"))}
+             action]
             [:div.gray (gstring/unescapeEntities "&nbsp;")])])))))
 
 (defn cc1-stick-key [{:keys [port-id]} switch-key]
@@ -181,9 +185,10 @@
       [:tr
        [:td]
        [:td]
-       [:td.tc (button #(commit! port-id)
-                       ["COMMIT"]
-                       :primary true :danger true :size "small" :classes ["mr0"])]
+       [:td.tc (when (not= port-id dummy-port-id)
+                 (button #(commit! port-id)
+                         ["COMMIT"]
+                         :primary true :danger true :size "small" :classes ["mr0"]))]
        [:td]
        [cc1-stick args "lt2"]
        [cc1-stick args "rt2"]
@@ -195,5 +200,6 @@
 (defn keymap-view [args]
   [:<>
    [:div.mv2.tc.yellow
-    "Did you know you can drag and drop a CSV here? And share the URL once it changes?"]
+    [:p.lh-solid "Did you know you can drag and drop a CSV here? And share the URL once it changes?"]
+    [:p.lh-solid "A yellow action means that the action has not been COMMITed."]]
    [cc1-keymap-view args]])
