@@ -52,7 +52,8 @@
   (.stopPropagation e)
   (cond-xlet
    :let [{:keys [*ready]} (get-port port-id)]
-   (or (not *ready) (not @*ready))
+   (and (not= port-id dummy-port-id)
+        (or (not *ready) (not @*ready)))
    (transact! *db [[:db/add -1 :error/error
                     "Not ready to process CSV just yet. Please wait a few seconds."]])
 

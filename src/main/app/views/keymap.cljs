@@ -185,16 +185,18 @@
       [:tr
        [:td]
        [:td
-        [:div.cc1-cell-mw.tr.fr
-         [:span.pink "WARNING: "]
-         [:span "Do not excessively use COMMIT."]]]
+        (when (not= port-id dummy-port-id)
+          [:div.cc1-cell-mw.tr.fr
+           [:span.pink "WARNING: "]
+           [:span "Do not excessively use COMMIT."]])]
        [:td.tc (when (not= port-id dummy-port-id)
                  (button #(commit! port-id)
                          ["COMMIT"]
                          :primary true :danger true :size "small" :classes ["mr0"]))]
        [:td
-        [:div.cc1-cell-mw
-         [:span "A CC device is only guaranteed at least 10,000 commits per lifetime of the device."]]]
+        (when (not= port-id dummy-port-id)
+          [:div.cc1-cell-mw
+           [:span "A CC device is only guaranteed at least 10,000 commits per lifetime of the device."]])]
 
        [cc1-stick args "lt2"]
        [cc1-stick args "rt2"]
