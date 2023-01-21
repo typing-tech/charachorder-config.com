@@ -91,7 +91,9 @@
         code (if success code nil)]
     (->hash cmd-code subcmd-code layer location code)))
 
-(defn gen-var-get-keymap-fn [{:keys []} [layer loc hw-attr attr]]
+(defn gen-var-get-keymap-fn [{:keys []}
+                             {:keys [boot] :or {boot false}}
+                             [layer loc hw-attr attr]]
   (fn [{:keys [port-id read-ch write-ch]}]
     (assert port-id)
     (go
@@ -101,11 +103,15 @@
             port [:port/id port-id]]
         ; (js/console.log m)
         (when-not (nil? code)
-          (let [tx-data [[:db/add port attr code]]]
-            ; (js/console.log tx-data)
+          (let [tx-data (cond-> [[:db/add port attr code]]
+                          boot (conj [:db/add port hw-attr code]))]
+            (js/console.log (pr-str tx-data))
             (transact! *db tx-data)))))))
 
-(defn query-all-var-keymaps! [{:as port :keys [fn-ch]}]
+(defn query-all-var-keymaps!
+  [{:as port :keys [fn-ch]} & {:as opts
+                               :keys [boot]
+                               :or {boot false}}]
   (let [xs (mapv (fn [[layer switch-key-id]]
                    (let [loc (get-in cc1/switch-keys [switch-key-id :location])
                          attr-ns (str layer "." switch-key-id)
@@ -113,7 +119,7 @@
                          attr (keyword attr-ns "code")]
                      [layer loc hw-attr attr]))
                  cc1/layers+sorted-switch-key-ids)
-        fns (map (partial gen-var-get-keymap-fn port) xs)]
+        fns (map (partial gen-var-get-keymap-fn port opts) xs)]
     (onto-chan! fn-ch fns false)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -128,7 +134,7 @@
 (defn parse-commit-ret [ret]
   (let [[cmd-code subcmd-code success-str] (str/split ret #"\s+")
         success (js/parseInt success-str)
-        success (if (< 0 success) false true) ]
+        success (if (< 0 success) false true)]
     (->hash cmd-code subcmd-code success)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -146,14 +152,15 @@
 (defn parse-var-set-keymap-ret [ret]
   (let [[cmd-code subcmd-code layer location code success-str] (str/split ret #"\s+")
         success (js/parseInt success-str)
-        success (if (< 0 success) false true) ]
+        success (if (< 0 success) false true)]
     (->hash cmd-code subcmd-code layer location code success)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn issue-connect-cmds! [{:as port :keys [port-id fn-ch]}]
+(defn issue-connect-cmds! [{:as port :keys [port-id fn-ch *ready]}]
   (go
     (>! fn-ch store-device-name)
     (<! (query-all-var-params! port))
-    (<! (query-all-var-keymaps! port))
-    (csv/update-url-from-db! port-id)))
+    (<! (query-all-var-keymaps! port :boot true))
+    (csv/update-url-from-db! port-id)
+    (reset! *ready true)))
