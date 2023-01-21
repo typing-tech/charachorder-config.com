@@ -20,6 +20,9 @@
 
    [app.emoji-strings :refer [keyboard-left-arrow keyboard-right-arrow]]
    [app.hw.cc1 :as cc1]
+   [app.serial.constants :refer [baud-rates
+                                 *ports
+                                 dummy-port-id]]
    [app.serial.fns :as fns :refer [issue-connect-cmds!]]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -32,10 +35,6 @@
 
 (def cmd-encoder (new js/TextEncoder))
 (def output-decoder (new js/TextDecoder))
-
-(def baud-rates {[9114 32783] 115200})
-(defonce *ports (atom {}))
-(def dummy-port-id "0")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -94,6 +93,7 @@
         *reader (atom nil)
         *device-name (r/atom "???")
         *console (r/atom [])
+        *ready (r/atom false)
 
         write->console
         (fn [v msg]
@@ -120,7 +120,7 @@
             (swap! *ports dissoc port-id)
             (swap! *num-device-connected dec)))
 
-        m (->hash port-id port read-ch write-ch fn-ch *device-name *console
+        m (->hash port-id port read-ch write-ch fn-ch *device-name *console *ready
                   close-port-and-cleanup!)]
 
     (let [writable (oget port "writable")

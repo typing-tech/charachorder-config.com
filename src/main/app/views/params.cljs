@@ -4,8 +4,10 @@
    [app.db :as db :refer [*db]]
    [app.codes :refer [var-params]]
    [app.components :refer [button]]
-   [app.serial :as serial :refer [has-web-serial-api?
-                                  *ports]]))
+   [app.serial :as serial :refer [has-web-serial-api?]]
+   [app.serial.constants :refer [baud-rates
+                                 *ports
+                                 dummy-port-id]]))
 
 (defn param-table-row [_ param-key raw-value]
   (let [{param-type :type

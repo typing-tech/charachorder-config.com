@@ -15,9 +15,8 @@
                        *current-tab-view]]
    [app.db :as db :refer [*db]]
    [app.components :refer [button concat-classes]]
+   [app.serial.constants :refer [*ports dummy-port-id]]
    [app.serial :as serial :refer [has-web-serial-api?
-                                  *ports
-                                  dummy-port-id
                                   get-port]]
    [app.views.params :refer [params-view]]
    [app.views.keymap :refer [keymap-view]]

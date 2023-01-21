@@ -1,6 +1,6 @@
 (ns app.repl
   (:require
-   [app.serial :refer [*ports]]
+   [app.serial.constants :refer [*ports]]
    [app.serial.fns :refer [query-all-var-params!
                            query-all-var-keymaps!]]))
 

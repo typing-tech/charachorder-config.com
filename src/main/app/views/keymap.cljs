@@ -26,8 +26,8 @@
                       raw-keymap-codes]]
    [app.hw.cc1 :as cc1]
    [app.csv :refer [download-csv! update-url-from-db!]]
-   [app.serial :refer [dummy-port-id
-                       set-keymap!
+   [app.serial.constants :refer [dummy-port-id]]
+   [app.serial :refer [set-keymap!
                        commit!]]))
 (def Marquee (oget react-double-marquee "default"))
 

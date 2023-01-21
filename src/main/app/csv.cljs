@@ -62,7 +62,9 @@
         csv (csv/write-csv xs)]
     csv))
 
-(defn update-url-from-db! [port-id]
+(defn update-url-from-db!
+  "synchronous, not a Promise, not a channel."
+  [port-id]
   (let [csv (compute-csv port-id)]
     (set-url! csv)))
 

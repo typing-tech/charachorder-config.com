@@ -4,8 +4,7 @@
    [app.db :as db :refer [*db]]
    [app.codes :refer [var-params]]
    [app.components :refer [button]]
-   [app.serial :as serial :refer [has-web-serial-api?
-                                  *ports]]))
+   [app.serial :as serial]))
 
 (defn resets-view [{:keys [port-id]}]
   (let []

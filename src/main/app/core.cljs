@@ -17,9 +17,9 @@
                        *num-device-connected
                        *active-port-id]]
    [app.db :as db :refer [*db]]
-   [app.serial :as serial :refer [has-web-serial-api?
-                                  *ports
-                                  dummy-port-id]]
+   [app.serial.constants :refer [*ports
+                                 dummy-port-id]]
+   [app.serial :as serial :refer [has-web-serial-api?]]
    [app.view :refer [super-root-view]]
    [app.csv :refer [load-csv-text!]]
 
