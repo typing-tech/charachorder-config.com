@@ -9,6 +9,7 @@
   {:target :browser
    :js-options {:js-package-dirs ["node_modules" "src/gen"]}
    :output-dir "./public/compiled/"
+   :build-hooks [(shadow.cljs.build-report/hook)]
    :asset-path "/ce5368ea-99a5-450d-8240-276a99fe8647/compiled"
    :modules {:charachorder-config {:init-fn app.core/init}}
    :compiler-options {:externs ["datascript/externs.js"]
