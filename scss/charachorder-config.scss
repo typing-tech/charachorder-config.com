@@ -58,9 +58,7 @@ h1, h2, h3, h4, h5, h6, p {
   height: 32px;
   padding-left: 16px;
   background-color: #555;
-  & > * {
-    vertical-align: middle;
-  }
+  position: relative;
 }
 
 #main {

@@ -184,22 +184,29 @@
        [cc1-stick args "rr1"]]
       [:tr
        [:td]
-       [:td]
+       [:td
+        [:div.cc1-cell-mw.tr.fr
+         [:span.pink "WARNING: "]
+         [:span "Do not excessively use COMMIT."]]]
        [:td.tc (when (not= port-id dummy-port-id)
                  (button #(commit! port-id)
                          ["COMMIT"]
                          :primary true :danger true :size "small" :classes ["mr0"]))]
-       [:td]
+       [:td
+        [:div.cc1-cell-mw
+         [:span "A CC device is only guaranteed at least 10,000 commits per lifetime of the device."]]]
+
        [cc1-stick args "lt2"]
        [cc1-stick args "rt2"]
        [:td]
        [:td.tc (button #(download-csv! port-id)
-                       ["Download" [:br] "Layout CSV"]
+                       ["Download" [:br] "Layout as CSV"]
                        :primary true :size "small" :classes ["mr0"])]]]]))
 
 (defn keymap-view [args]
   [:<>
-   [:div.mv2.tc.yellow
+   [:div.mv2.tc.light-yellow
     [:p.lh-solid "Did you know you can drag and drop a CSV here? And share the URL once it changes?"]
-    [:p.lh-solid "A yellow action means that the action has not been COMMITed."]]
+    [:p.lh-solid "A yellow action means that the action has not been COMMITed."]
+    [:p.lh-solid "Action changes immediately take effect, but are not COMMITed."]]
    [cc1-keymap-view args]])

@@ -43,6 +43,13 @@
           ["Switch to Real Device Mode"]
           :size "xsmall" :warning true :classes ["mr0"]))
 
+(defn reboot-tool-button []
+  (button #(oset! js/window "location" "?")
+          ["Reboot Tool"]
+          :size "xsmall" :warning true :classes ["mr0"]))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (defn nav [{:as args :keys [port-id nav-expanded num-devices]}]
   (let [xs (->> @*ports
                 vals
@@ -107,7 +114,9 @@
        [:<>
         (gen-button :keymap "Key Map")
         (gen-button :params "Parameters")
-        (gen-button :resets "RESETS" :danger true)])]))
+        (gen-button :resets "RESETS Toolbox" :danger true)
+        [:div {:class "absolute top-0 right-0 h-100 flex items-center mr3"}
+         [reboot-tool-button]]])]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
