@@ -27,7 +27,8 @@
    [app.hw.cc1 :as cc1]
    [app.csv :refer [download-csv! update-url-from-db!]]
    [app.serial :refer [dummy-port-id
-                       set-keymap!]]))
+                       set-keymap!
+                       commit!]]))
 (def Marquee (oget react-double-marquee "default"))
 
 (defonce *tab (r/atom :ascii))
@@ -180,7 +181,9 @@
       [:tr
        [:td]
        [:td]
-       [:td]
+       [:td.tc (button #(commit! port-id)
+                       ["COMMIT"]
+                       :primary true :danger true :size "small" :classes ["mr0"])]
        [:td]
        [cc1-stick args "lt2"]
        [cc1-stick args "rt2"]
