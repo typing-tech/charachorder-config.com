@@ -15,9 +15,8 @@
                        *current-tab-view]]
    [app.db :as db :refer [*db]]
    [app.components :refer [button concat-classes]]
-   [app.serial.constants :refer [*ports dummy-port-id]]
-   [app.serial :as serial :refer [has-web-serial-api?
-                                  get-port]]
+   [app.serial.constants :refer [*ports dummy-port-id get-port]]
+   [app.serial :as serial :refer [has-web-serial-api?]]
    [app.views.params :refer [params-view]]
    [app.views.keymap :refer [keymap-view]]
    [app.views.resets :refer [resets-view]]
@@ -87,6 +86,13 @@
    [:h1 "No Device Connected Yet"]
    [:p "Connect a device using the button on the left."]])
 
+(defn debug-buttons []
+  [:<>
+   (button #(transact! *db [[:db/add -1 :error/fatal "foo"]]) ["Add Dummy Error"]
+           :classes ["button-xsmall" "ma2 ml6"]
+           :primary false
+           :danger true)])
+
 (defn tab-menu [{:keys [port-id]}]
   (let [current @*current-tab-view
         gen-button (fn [tab label & {:keys [danger]}]
@@ -134,12 +140,26 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defn error-modal [e msg]
+  (let [f #(transact! *db [[:db.fn/retractEntity e]])]
+    [:div {:class "modal" :on-click f}
+     [:div {:class "modal__content"}
+      [:p msg]
+      [:div {:class "absolute top-0 right-0 pointer red f3"
+             :on-click f}
+       [:div.dib.ma2 "X"]]]]))
+
 (defn root-view []
   (let [active-port-id @*active-port-id
         num-devices @*num-device-connected
         nav-expanded (or @*nav-expanded
                          (= num-devices 0))
         port-id active-port-id
+        errors @(q '[:in $
+                     :find ?e ?msg
+                     :where
+                     [?e :error/fatal ?msg]]
+                   *db)
         args (->hash num-devices nav-expanded active-port-id port-id)]
     [:div {:id "root"
            :on-drop #(read-dropped-keymap-csv! port-id %)
@@ -149,7 +169,11 @@
      [nav args]
      (if-not active-port-id
        [no-device-main-view args]
-       [main-view args])]))
+       [main-view args])
+     (into [:<>]
+           (map (fn [[e msg]]
+                  [error-modal e msg])
+                errors))]))
 
 (defn super-root-view []
   (cond
