@@ -136,7 +136,8 @@
        :keymap [keymap-view args]
        :params [params-view args]
        :resets [resets-view args]))
-   [console-view args]])
+   (when (not= port-id dummy-port-id)
+     [console-view args])])
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
