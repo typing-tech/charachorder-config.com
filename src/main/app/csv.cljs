@@ -7,9 +7,11 @@
    [oops.core :refer [oget oset! ocall oapply ocall! oapply!
                       oget+ oset!+ ocall+ oapply+ ocall!+ oapply!+]]
    [testdouble.cljs.csv :as csv]
+   [app.macros :as mac :refer-macros [cond-xlet ->hash]]
    [app.ratoms :refer [*url-search-params]]
    [app.hw.cc1 :as cc1]
-   [app.db :as db :refer [*db]]))
+   [app.db :as db :refer [*db]]
+   [app.serial.constants :refer [get-port]]))
 
 (defn set-url! [csv]
   (let [current-layout (when (.has @*url-search-params "cc1-layout")
@@ -41,14 +43,22 @@
                                 ^js e]
   (.preventDefault e)
   (.stopPropagation e)
-  (let [files (oget e "dataTransfer.files")
-        file (first files)]
-    (when (and file (str/ends-with? (str/lower-case (oget file "name"))
-                                    ".csv"))
-      (js/console.log file)
-      (let [fr (new js/FileReader)]
-        (.addEventListener fr "load" #(load-csv-text! port-id (oget fr "result")) false)
-        (.readAsText fr file)))))
+  (cond-xlet
+   :let [{:keys [*ready]} (get-port port-id)]
+   (or (not *ready) (not @*ready))
+   (transact! *db [[:db/add -1 :error/fatal
+                    "Not ready to process CSV just yet. Please wait a few seconds."]])
+
+   :let [files (oget e "dataTransfer.files")
+         file (first files)]
+
+   (not file) nil
+   (not (str/ends-with? (str/lower-case (oget file "name")) ".csv")) nil
+
+   :do (js/console.log file)
+   :let [fr (new js/FileReader)]
+   :do (.addEventListener fr "load" #(load-csv-text! port-id (oget fr "result")) false)
+   :return (.readAsText fr file)))
 
 (defn compute-csv [port-id]
   (let [m (ds/pull @*db '[*] [:port/id port-id])
@@ -73,6 +83,5 @@
         blob (new js/Blob
                   #js [csv]
                   #js {:type "text/plain;charset=utf-8"})]
-    (js/console.log csv)
     (.saveAs file-saver blob "cc1-layout.csv")
     nil))
