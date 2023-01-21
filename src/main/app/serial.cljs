@@ -11,6 +11,7 @@
    [promesa.core :as p]
    [datascript.core :refer [squuid]]
    [posh.reagent :as posh :refer [transact!]]
+   [datascript.core :as ds]
    [reagent.core :as r]
 
    [app.macros :refer-macros [cond-xlet ->hash]]
@@ -22,6 +23,7 @@
    [app.hw.cc1 :as cc1]
    [app.serial.constants :refer [baud-rates
                                  *ports
+                                 get-port
                                  dummy-port-id]]
    [app.serial.fns :as fns :refer [issue-connect-cmds!]]))
 
@@ -104,6 +106,9 @@
           (conj v [(count v) (human-time-now-with-seconds)
                    (str " " keyboard-right-arrow " " msg)]))
 
+        ->console
+        (fn [v msg] (conj v [(count v) (human-time-now-with-seconds) (str " " msg)]))
+
         close-port-and-cleanup!
         (fn []
           (when [(get @*ports port-id)]
@@ -121,6 +126,7 @@
             (swap! *num-device-connected dec)))
 
         m (->hash port-id port read-ch write-ch fn-ch *device-name *console *ready
+                  write->console read->console ->console
                   close-port-and-cleanup!)]
 
     (let [writable (oget port "writable")
@@ -220,10 +226,6 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn get-port [port-id]
-  (-> @*ports
-      (get port-id)))
-
 (defn refresh-params [port-id]
   (let [port (get-port port-id)]
     (fns/query-all-var-params! port)))
@@ -272,16 +274,33 @@
 
 (defn commit! [port-id]
   (let [{:as port :keys [close-port-and-cleanup! fn-ch]} (get-port port-id)
-        cmd (fns/cmd-var-commit)]
-    (letfn [(f [{:keys [write-ch read-ch]}]
+        cmd (fns/cmd-var-commit)
+
+        m (ds/pull @*db '[*] [:port/id port-id])
+        attr-nses (map (fn [[layer switch-key-ids]]
+                         (str layer "." switch-key-ids))
+                       cc1/layers+sorted-switch-key-ids)
+        txs (reduce (fn [txs attr-ns]
+                      (let [a (get m (keyword attr-ns "code"))
+                            hw-code-key (keyword attr-ns "hw.code")
+                            b (get m hw-code-key)]
+                        (if (not= a b)
+                          (conj txs [:db/add [:port/id port-id] hw-code-key a])
+                          txs)))
+                    []
+                    attr-nses)]
+    ; (js/console.log txs)
+    (letfn [(f [{:keys [write-ch read-ch ->console]}]
               (go
                 (>! write-ch cmd)
                 (let [ret (<! read-ch)
                       {:keys [success]} (fns/parse-commit-ret ret)]
                   (js/console.log ret)
                   (if success
-                    (js/console.log "COMMIT success")
-                    (js/console.error "COMMIT ERROR")))))]
+                    (->console "COMMIT success")
+                    (->console "COMMIT ERROR"))
+                  (when success (transact! *db txs))
+                  success)))]
       (put! fn-ch f))))
 
 (defn set-keymap! [port-id layer switch-key-id code]
