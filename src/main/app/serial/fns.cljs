@@ -18,8 +18,7 @@
    [app.db :refer [*db]]
 
    [app.codes :refer [var-subcmds var-params code->var-param]]
-   [app.hw.cc1 :as cc1]
-   [app.csv :as csv]))
+   [app.hw.cc1 :as cc1]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -162,5 +161,4 @@
     (>! fn-ch store-device-name)
     (<! (query-all-var-params! port))
     (<! (query-all-var-keymaps! port :boot true))
-    (csv/update-url-from-db! port-id)
     (reset! *ready true)))

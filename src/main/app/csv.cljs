@@ -11,7 +11,8 @@
    [app.ratoms :refer [*url-search-params]]
    [app.hw.cc1 :as cc1]
    [app.db :as db :refer [*db]]
-   [app.serial.constants :refer [get-port]]))
+   [app.serial.constants :refer [get-port dummy-port-id]]
+   [app.serial.ops :as ops]))
 
 (defn set-url! [csv]
   (let [current-layout (when (.has @*url-search-params "cc1-layout")
@@ -31,6 +32,12 @@
                       [:db/add [:port/id port-id] attr code]))
                   xs)]
     (transact! *db txs)
+    (when (not= port-id dummy-port-id)
+      (dorun
+       (mapv (fn [[layer location code]]
+               (let [switch-key-id (get cc1/location->switch-key-id location)]
+                 (ops/set-keymap! port-id layer switch-key-id code)))
+             xs)))
     ;; assume success
     (set-url! csv)))
 

@@ -27,8 +27,8 @@
    [app.hw.cc1 :as cc1]
    [app.csv :refer [download-csv! update-url-from-db!]]
    [app.serial.constants :refer [dummy-port-id]]
-   [app.serial :refer [set-keymap!
-                       commit!]]))
+   [app.serial.ops :refer [set-keymap!
+                           commit!]]))
 (def Marquee (oget react-double-marquee "default"))
 
 (defonce *tab (r/atom :ascii))

@@ -4,10 +4,10 @@
    [app.db :as db :refer [*db]]
    [app.codes :refer [var-params]]
    [app.components :refer [button]]
-   [app.serial :as serial]))
+   [app.serial.ops :as ops]))
 
 (defn resets-view [{:keys [port-id]}]
   (let []
     [:div {:class "pa3"}
-     (button #(serial/reset-keymaps! port-id) ["RESET keymaps and COMMIT"] :error true)
-     (button #(serial/factory-reset! port-id) ["FACTORY RESET"] :error true)]))
+     (button #(ops/reset-keymaps! port-id) ["RESET keymaps and COMMIT"] :error true)
+     (button #(ops/factory-reset! port-id) ["FACTORY RESET"] :error true)]))

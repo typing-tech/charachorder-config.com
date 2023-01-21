@@ -5,6 +5,9 @@
    [app.codes :refer [var-params]]
    [app.components :refer [button]]
    [app.serial :as serial :refer [has-web-serial-api?]]
+   [app.serial.ops :as ops :refer [disconnect!
+                                   refresh-params
+                                   reset-params!]]
    [app.serial.constants :refer [baud-rates
                                  *ports
                                  dummy-port-id]]))
@@ -48,8 +51,8 @@
   (let []
     [:div {:class "pa3"}
      [:div {:class "mb2"}
-      (button #(serial/refresh-params port-id) ["Refresh Params"])
-      (button #(serial/disconnect! port-id) ["Disconnect"] :error true)
-      (button #(serial/reset-params! port-id) ["RESET Params and COMMIT"] :error true)]
+      (button #(refresh-params port-id) ["Refresh Params"])
+      (button #(disconnect! port-id) ["Disconnect"] :error true)
+      (button #(reset-params! port-id) ["RESET Params and COMMIT"] :error true)]
      [param-table args]]))
 
