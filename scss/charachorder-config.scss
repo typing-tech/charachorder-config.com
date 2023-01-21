@@ -23,8 +23,12 @@ body {
   color: #ccc;
 }
 
-h1, h2, h3, h4, h5, h6, p {
+h1, h2, h3, h4, h5, h6, p, ol, ul {
   margin: 0;
+}
+
+a, a:visited {
+  color: #88f;
 }
 
 #root {
@@ -34,6 +38,10 @@ h1, h2, h3, h4, h5, h6, p {
   padding: 0;
   padding-left: $left-nav-width;
   position: relative;
+}
+
+ol, ul {
+  list-style-position: outside;
 }
 
 #nav {

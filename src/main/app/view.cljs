@@ -91,7 +91,58 @@
 (defn no-device-main-view [_]
   [:div {:id "main" :class "pure-u-1 pa3"}
    [:h1 "No Device Connected Yet"]
-   [:p "Connect a device using the button on the left."]])
+   [:p "Connect a device using the button on the left."]
+
+   [:h1.mt6.mb2 "Samples Usages"]
+   [:div {:class "flex flex-wrap"}
+    [:div {:class "card card--li"}
+     [:ol
+      [:li "Connect the device."]
+      [:li "Manually modify the keymap."]
+      [:li "COMMIT"]
+      ]]
+    [:div {:class "card card--li"}
+     [:ol
+      [:li "Connect the device."]
+      [:li "Manually modify the keymap."]
+      [:li "The actions are changed when you use the device, but are " [:span.pink "LOST"] " upon disconnect of the device."]
+      ]]
+    [:div {:class "card card--li"}
+     [:ol
+      [:li "You are happy with the current keymap of the device."]
+      [:li "Connect the device."]
+      [:li "You download the layout as a CSV for backup."]
+      [:li "You share the layout via the URL."]
+      ]]
+    [:div {:class "card card--li"}
+     [:ol
+      [:li "Connect the device."]
+      [:li "Drag and drop another person's CSV file in the center of this window."]
+      [:li "COMMIT"]
+      ]]
+    [:div {:class "card card--li"}
+     [:ol
+      [:li "Connect the device."]
+      [:li "Drag and drop another person's CSV file in the center of this window."]
+      [:li "You don't like it, so you drag and drop your backup layout CSV to restore previous behavior."]
+      ]]
+
+    [:div {:class "card card--li"}
+     [:ol
+      [:li "You " [:a {:href "?cc1-layout="} "start the tool in read-only mode"] "."]
+      [:li "You drag and drop the default layout CSV to get started."]
+      [:li "You make changes to the layout."]
+      [:li "You share the layout via CSV or the URL."]
+      ]]
+
+    [:div {:class "card card--li"}
+     [:ol
+      [:li "You arrive via a read-only mode link."]
+      [:li "You make changes to the layout."]
+      [:li "You share the layout via CSV or the URL."]
+      ]]
+
+    ]])
 
 (defn debug-buttons []
   [:<>
