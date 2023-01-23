@@ -1,6 +1,7 @@
 (ns app.view
   (:require
    ["react-scroll-to-bottom" :as react-scroll-to-bottom]
+   [goog.string :as gstring :refer [format]]
 
    [clojure.string :as str]
    [oops.core :refer [oget oset! ocall oapply ocall! oapply!
@@ -153,9 +154,10 @@
 
 (defn tab-menu [{:keys [port-id]}]
   (let [current @*current-tab-view
+        {:keys [*device-name *device-version]} (get-port port-id)
         gen-button (fn [tab label & {:keys [danger]}]
                      (button #(reset! *current-tab-view tab) [label]
-                             :classes ["button-xsmall" "ma2 mh2"]
+                             :size "xsmall"
                              :primary (= current tab)
                              :danger danger))]
     [:div {:id "tab-menu"}
@@ -163,6 +165,8 @@
        [:<>
         [switch-to-real-device-mode-button]]
        [:<>
+        [:div {:class "device-string"}
+         (format "%s - %s" @*device-name @*device-version)]
         (gen-button :keymap "Key Map")
         (gen-button :params "Parameters")
         (gen-button :resets "RESETS Toolbox" :danger true)

@@ -54,6 +54,15 @@
                      ret)]
       (reset! *device-name dev-name))))
 
+(defn store-device-version [{:keys [read-ch write-ch *device-version]}]
+  (go
+    (>! write-ch "VERSION")
+    (let [ret (<! read-ch)
+          version (if (str/starts-with? ret "VERSION ")
+                    (subs ret (count "VERSION "))
+                    ret)]
+      (reset! *device-version version))))
+
 (defn gen-var-get-param-fn [{:keys []} param]
   (fn [{:keys [port-id read-ch write-ch]}]
     (assert port-id)
@@ -160,6 +169,7 @@
 (defn issue-connect-cmds! [{:as port :keys [port-id fn-ch *ready]}]
   (go
     (>! fn-ch store-device-name)
+    (>! fn-ch store-device-version)
     (<! (query-all-var-params! port))
     (<! (query-all-var-keymaps! port :boot true))
     (reset! *ready true)))
