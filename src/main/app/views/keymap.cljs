@@ -214,8 +214,8 @@
 
 (defn keymap-view [args]
   [:<>
-   [:div.mv2.tc.light-yellow
+   [:div.mv2.tc.light-purple
     [:p.lh-solid "Did you know you can drag and drop a CSV here? And share the URL once it changes?"]
-    [:p.lh-solid "A yellow action means that the action has not been COMMITed."]
-    [:p.lh-solid "Action changes immediately take effect, but are not COMMITed."]]
+    [:p.lh-solid "A yellow action means that the action has not been COMMITted."]
+    [:p.lh-solid "Action changes immediately take effect, but are not COMMITted."]]
    [cc1-keymap-view args]])
