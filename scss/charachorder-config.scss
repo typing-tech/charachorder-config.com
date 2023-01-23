@@ -67,6 +67,12 @@ ol, ul {
   padding-left: 16px;
   background-color: #555;
   position: relative;
+  .device-string {
+    font-size: 14px;
+  }
+  & > * {
+    margin-right: 16px;
+  }
 }
 
 #main {
