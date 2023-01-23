@@ -95,6 +95,7 @@
         *writer (atom nil)
         *reader (atom nil)
         *device-name (r/atom "???")
+        *device-version (r/atom "???")
         *console (r/atom [])
         *ready (r/atom false)
 
@@ -126,8 +127,8 @@
             (swap! *ports dissoc port-id)
             (swap! *num-device-connected dec)))
 
-        m (->hash port-id port read-ch write-ch fn-ch *device-name *console *ready
-                  write->console read->console ->console
+        m (->hash port-id port read-ch write-ch fn-ch *device-name *device-version *ready
+                  *console write->console read->console ->console
                   close-port-and-cleanup!)]
 
     (let [writable (oget port "writable")
