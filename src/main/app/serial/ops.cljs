@@ -15,7 +15,7 @@
                                  *ports
                                  get-port
                                  dummy-port-id]]
-   [app.serial.fns :as fns]))
+   [app.serial.fns :as fns :refer [query-all-var-keymaps!]]))
 
 (defn disconnect! [port-id]
   (let [{:keys [close-port-and-cleanup!]} (get-port port-id)]
@@ -63,7 +63,9 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn commit! [port-id]
+(defn commit!
+  "Returns nil."
+  [port-id]
   (let [{:as port :keys [close-port-and-cleanup! fn-ch]} (get-port port-id)
         cmd (fns/cmd-var-commit)
 
@@ -81,15 +83,15 @@
                     []
                     attr-nses)]
     ; (js/console.log txs)
-    (letfn [(f [{:keys [write-ch read-ch ->console]}]
+    (letfn [(f [{:keys [write-ch read-ch *console ->console]}]
               (go
                 (>! write-ch cmd)
                 (let [ret (<! read-ch)
                       {:keys [success]} (fns/parse-commit-ret ret)]
                   (js/console.log ret)
                   (if success
-                    (->console "COMMIT success")
-                    (->console "COMMIT ERROR"))
+                    (swap! *console ->console "COMMIT success")
+                    (swap! *console ->console "COMMIT ERROR"))
                   (when success (transact! *db txs))
                   success)))]
       (put! fn-ch f))))
@@ -113,3 +115,8 @@
                     (js/console.log "set keymap success")
                     (js/console.error "set keymap ERROR")))))]
       (put! fn-ch f))))
+
+(defn refresh-keymaps-after-commit! [port-id]
+  (assert port-id)
+  (let [{:as port} (get-port port-id)]
+    (query-all-var-keymaps! port :boot true)))

@@ -5,6 +5,9 @@
    [goog.string.format]
    [goog.string :as gstring :refer [format]]
 
+   [cljs.core.async :as async
+    :refer [chan <! >! onto-chan! close! put!]
+    :refer-macros [go go-loop]]
    [clojure.string :as str]
    [reagent.core :as r]
    [posh.reagent :as posh :refer [transact!]]
@@ -28,7 +31,8 @@
    [app.csv :refer [download-csv! update-url-from-db!]]
    [app.serial.constants :refer [dummy-port-id]]
    [app.serial.ops :refer [set-keymap!
-                           commit!]]))
+                           commit!
+                           refresh-keymaps-after-commit!]]))
 ; (def Marquee (oget react-double-marquee "default"))
 
 (defonce *tab (r/atom :ascii))
@@ -157,7 +161,10 @@
        [:tr (td nil) (td "s")]]]]))
 
 (defn cc1-keymap-view [{:as args :keys [port-id]}]
-  (let []
+  (let [commit-and-refresh!
+        (fn []
+          (commit! port-id)
+          (refresh-keymaps-after-commit! port-id))]
     [:table {:class "cc1"}
      [:tbody
       [:tr
@@ -190,7 +197,7 @@
            [:span.pink "WARNING: "]
            [:span "Do not excessively use COMMIT."]])]
        [:td.tc (when (not= port-id dummy-port-id)
-                 (button #(commit! port-id)
+                 (button #(commit-and-refresh!)
                          ["COMMIT"]
                          :primary true :danger true :size "small" :classes ["mr0"]))]
        [:td

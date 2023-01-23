@@ -108,6 +108,7 @@
             (transact! *db tx-data)))))))
 
 (defn query-all-var-keymaps!
+  "Returns a channel."
   [{:as port :keys [fn-ch]} & {:as opts
                                :keys [boot]
                                :or {boot false}}]
