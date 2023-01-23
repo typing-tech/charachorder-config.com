@@ -19,7 +19,7 @@
 
         value (cond
                 (nil? raw-value)
-                [:span.black "NULL"]
+                [:span.mid-gray "NULL"]
                 (= param-type :num-boolean)
                 [:span {:class (if raw-value "light-green" "dark-red")}
                  (str raw-value)]
