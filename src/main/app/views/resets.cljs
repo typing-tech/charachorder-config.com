@@ -9,5 +9,12 @@
 (defn resets-view [{:keys [port-id]}]
   (let []
     [:div {:class "pa3"}
-     (button #(ops/reset-keymaps! port-id) ["RESET keymaps and COMMIT"] :error true)
-     (button #(ops/factory-reset! port-id) ["FACTORY RESET"] :error true)]))
+     [:div.mb5
+      (button #(ops/reset-restart! port-id) ["Restart Device"])
+      (button #(ops/reset-bootloader! port-id) ["Enter Bootloader Mode"])]
+     [:div.mb5
+      (button #(ops/reset-starter! port-id) ["Add Starter Chords"] :warning true)]
+     [:div.mb5
+      (button #(ops/reset-keymaps! port-id) ["RESET keymaps and COMMIT"] :danger true)
+      (button #(ops/reset-clearcml! port-id) ["DELETE ALL Chords"] :danger true)
+      (button #(ops/factory-reset! port-id) ["FACTORY RESET"] :danger true)]]))

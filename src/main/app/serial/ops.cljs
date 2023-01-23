@@ -26,6 +26,28 @@
   (let [port (get-port port-id)]
     (fns/query-all-var-params! port)))
 
+(defn reset-restart! [port-id]
+  (let [{:keys [close-port-and-cleanup! fn-ch]} (get-port port-id)]
+    (letfn [(f [{:keys [write-ch read-ch]}]
+              (go
+                (>! write-ch "RST RESTART")
+                (let [ret (<! read-ch)]
+                  (js/console.log ret))
+                (reset! *active-port-id nil)
+                (close-port-and-cleanup!)))]
+      (put! fn-ch f))))
+
+(defn reset-bootloader! [port-id]
+  (let [{:keys [close-port-and-cleanup! fn-ch]} (get-port port-id)]
+    (letfn [(f [{:keys [write-ch read-ch]}]
+              (go
+                (>! write-ch "RST BOOTLOADER")
+                (let [ret (<! read-ch)]
+                  (js/console.log ret))
+                (reset! *active-port-id nil)
+                (close-port-and-cleanup!)))]
+      (put! fn-ch f))))
+
 (defn reset-params! [port-id]
   (let [{:keys [close-port-and-cleanup! fn-ch]} (get-port port-id)]
     (letfn [(f [{:keys [write-ch read-ch]}]
@@ -55,6 +77,28 @@
     (letfn [(f [{:keys [write-ch read-ch]}]
               (go
                 (>! write-ch "RST KEYMAPS")
+                (let [ret (<! read-ch)]
+                  (js/console.log ret))
+                (reset! *active-port-id nil)
+                (close-port-and-cleanup!)))]
+      (put! fn-ch f))))
+
+(defn reset-starter! [port-id]
+  (let [{:keys [close-port-and-cleanup! fn-ch]} (get-port port-id)]
+    (letfn [(f [{:keys [write-ch read-ch]}]
+              (go
+                (>! write-ch "RST STARTER")
+                (let [ret (<! read-ch)]
+                  (js/console.log ret))
+                (reset! *active-port-id nil)
+                (close-port-and-cleanup!)))]
+      (put! fn-ch f))))
+
+(defn reset-clearcml! [port-id]
+  (let [{:keys [close-port-and-cleanup! fn-ch]} (get-port port-id)]
+    (letfn [(f [{:keys [write-ch read-ch]}]
+              (go
+                (>! write-ch "RST CLEARCML")
                 (let [ret (<! read-ch)]
                   (js/console.log ret))
                 (reset! *active-port-id nil)
