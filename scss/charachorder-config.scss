@@ -10,6 +10,8 @@
 $root: #charachorder-config;
 $left-nav-width: 250px;
 $left-nav-width-collapsed: 36px;
+$tab-height: 32px;
+$console-height: 100px;
 
 html, body, #{$root} {
   width: 100%;
@@ -63,7 +65,7 @@ ol, ul {
 #tab-menu {
   display: flex;
   align-items: center;
-  height: 32px;
+  height: $tab-height;
   padding-left: 16px;
   background-color: #555;
   position: relative;
@@ -80,11 +82,9 @@ ol, ul {
   height: 100%;
 }
 
-$console-height: 100px;
-
 #viewport {
   width: 100%;
-  height: calc(100% - #{$console-height});
+  height: calc(100% - #{$tab-height} - #{$console-height});
   overflow: auto;
 
   & > * {
