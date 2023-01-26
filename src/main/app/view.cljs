@@ -100,50 +100,41 @@
      [:ol
       [:li "Connect the device."]
       [:li "Manually modify the keymap."]
-      [:li "COMMIT"]
-      ]]
+      [:li "COMMIT"]]]
     [:div {:class "card card--li"}
      [:ol
       [:li "Connect the device."]
       [:li "Manually modify the keymap."]
-      [:li "The actions are changed when you use the device, but are " [:span.pink "LOST"] " upon disconnect of the device."]
-      ]]
+      [:li "The actions are changed when you use the device, but are " [:span.pink "LOST"] " upon disconnect of the device."]]]
     [:div {:class "card card--li"}
      [:ol
       [:li "You are happy with the current keymap of the device."]
       [:li "Connect the device."]
       [:li "You download the layout as a CSV for backup."]
-      [:li "You share the layout via the URL."]
-      ]]
+      [:li "You share the layout via the URL."]]]
     [:div {:class "card card--li"}
      [:ol
       [:li "Connect the device."]
       [:li "Drag and drop another person's CSV file in the center of this window."]
-      [:li "COMMIT"]
-      ]]
+      [:li "COMMIT"]]]
     [:div {:class "card card--li"}
      [:ol
       [:li "Connect the device."]
       [:li "Drag and drop another person's CSV file in the center of this window."]
-      [:li "You don't like it, so you drag and drop your backup layout CSV to restore previous behavior."]
-      ]]
+      [:li "You don't like it, so you drag and drop your backup layout CSV to restore previous behavior."]]]
 
     [:div {:class "card card--li"}
      [:ol
       [:li "You " [:a {:href "?cc1-layout="} "start the tool in read-only mode"] "."]
       [:li "You drag and drop the default layout CSV to get started."]
       [:li "You make changes to the layout."]
-      [:li "You share the layout via CSV or the URL."]
-      ]]
+      [:li "You share the layout via CSV or the URL."]]]
 
     [:div {:class "card card--li"}
      [:ol
       [:li "You arrive via a read-only mode link."]
       [:li "You make changes to the layout."]
-      [:li "You share the layout via CSV or the URL."]
-      ]]
-
-    ]])
+      [:li "You share the layout via CSV or the URL."]]]]])
 
 (defn debug-buttons []
   [:<>
@@ -195,11 +186,13 @@
 (defn main-view [{:as args :keys [port-id]}]
   [:div {:id "main" :class "pure-u-1"}
    [tab-menu args]
-   (let [tab-view (or @*current-tab-view :params)]
-     (case tab-view
-       :keymap [keymap-view args]
-       :params [params-view args]
-       :resets [resets-view args]))
+   [:div {:id "viewport"}
+    (let [tab-view (or @*current-tab-view :params)]
+      (case tab-view
+        :keymap [keymap-view args]
+        :params [params-view args]
+        :resets [resets-view args]))]
+
    (when (not= port-id dummy-port-id)
      [console-view args])])
 

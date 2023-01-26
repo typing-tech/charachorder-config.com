@@ -80,6 +80,18 @@ ol, ul {
   height: 100%;
 }
 
+$console-height: 100px;
+
+#viewport {
+  width: 100%;
+  height: calc(100% - #{$console-height});
+  overflow: auto;
+
+  & > * {
+    vertical-align: top;
+  }
+}
+
 .console {
   position: fixed !important;
   border-radius: 4px;
@@ -88,10 +100,11 @@ ol, ul {
   right: 0;
   background-color: #888;
   color: #000;
-  height: 100px;
+  height: $console-height;
   overflow-anchor: none;
 
   padding: 5px;
+  padding-right: 0;
   font-family: monospace;
   font-size: 15px;
   line-height: 1.0;
