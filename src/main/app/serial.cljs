@@ -125,7 +125,7 @@
                            (js/console.log "following exception while closing port")
                            (js/console.warn e))))
             (swap! *ports dissoc port-id)
-            (swap! *num-device-connected dec)))
+            (reset! *num-device-connected (-> @*ports count))))
 
         m (->hash port-id port read-ch write-ch fn-ch *device-name *device-version *ready
                   *console write->console read->console ->console
