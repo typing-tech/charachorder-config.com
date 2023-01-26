@@ -8,7 +8,7 @@
    [posh.reagent :as posh :refer [transact!]]
    [datascript.core :as ds]
 
-   [app.ratoms :refer [*num-device-connected *active-port-id]]
+   [app.ratoms :refer [*num-devices-connected *active-port-id]]
    [app.db :refer [*db]]
    [app.hw.cc1 :as cc1]
    [app.serial.constants :refer [baud-rates

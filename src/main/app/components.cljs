@@ -5,7 +5,7 @@
    [clojure.string :as str]
 
    [app.macros :as mac :refer-macros [cond-xlet ->hash]]
-   [app.ratoms :refer [*num-device-connected *active-port-id]]
+   [app.ratoms :refer [*num-devices-connected *active-port-id]]
 
    [app.utils :refer [get-main-root-element]]))
 

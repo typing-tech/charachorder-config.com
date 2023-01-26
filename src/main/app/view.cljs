@@ -11,7 +11,7 @@
 
    [app.macros :as mac :refer-macros [cond-xlet ->hash]]
    [app.ratoms :refer [*nav-expanded
-                       *num-device-connected
+                       *num-devices-connected
                        *active-port-id
                        *current-tab-view]]
    [app.db :as db :refer [*db]]
@@ -209,7 +209,7 @@
 
 (defn root-view []
   (let [active-port-id @*active-port-id
-        num-devices @*num-device-connected
+        num-devices @*num-devices-connected
         nav-expanded (or @*nav-expanded
                          (= num-devices 0))
         port-id active-port-id

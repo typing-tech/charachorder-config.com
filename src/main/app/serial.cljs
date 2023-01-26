@@ -15,7 +15,7 @@
    [reagent.core :as r]
 
    [app.macros :refer-macros [cond-xlet ->hash]]
-   [app.ratoms :refer [*num-device-connected *active-port-id]]
+   [app.ratoms :refer [*num-devices-connected *active-port-id]]
    [app.db :refer [*db]]
    [app.utils :refer [human-time-now-with-seconds]]
 
@@ -125,7 +125,7 @@
                            (js/console.log "following exception while closing port")
                            (js/console.warn e))))
             (swap! *ports dissoc port-id)
-            (reset! *num-device-connected (-> @*ports count))))
+            (reset! *num-devices-connected (-> @*ports count))))
 
         m (->hash port-id port read-ch write-ch fn-ch *device-name *device-version *ready
                   *console write->console read->console ->console
@@ -182,7 +182,7 @@
   (let [index (count m)
         x (assoc x :i index)
         num-devices (inc index)]
-    (reset! *num-device-connected num-devices)
+    (reset! *num-devices-connected num-devices)
     (reset! *active-port-id port-id)
     (assoc m port-id x)))
 

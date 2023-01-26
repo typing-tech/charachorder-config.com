@@ -14,7 +14,7 @@
    [app.macros :as mac :refer-macros [cond-xlet ->hash]]
    [app.utils :refer [get-main-root-element]]
    [app.ratoms :refer [*url-search-params
-                       *num-device-connected
+                       *num-devices-connected
                        *active-port-id]]
    [app.db :as db :refer [*db]]
    [app.serial.constants :refer [*ports
@@ -41,7 +41,7 @@
 (defn update-layout-from-url! []
   (when (.has @*url-search-params "cc1-layout")
     (transact! *db [{:port/id dummy-port-id}])
-    (swap! *num-device-connected inc)
+    (swap! *num-devices-connected inc)
     (reset! *active-port-id dummy-port-id)
     (let [csv (.get @*url-search-params "cc1-layout")]
       (when-not (str/blank? csv)
