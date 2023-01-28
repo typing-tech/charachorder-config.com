@@ -50,6 +50,8 @@
     "react-modal": "3.16.1",
     "react-scroll-to-bottom": "4.2.0",
     "react-tiny-popover": "7.2.0",
-    "relect": "1.2.1"
+    "relect": "1.2.1",
+    "rfc4648": "1.5.2",
+    "snappyjs": "0.7.0"
   }
 }
