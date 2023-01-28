@@ -1,6 +1,9 @@
 (ns app.csv
   (:require
    ["file-saver" :as file-saver]
+   ["snappyjs" :as snappyjs]
+   ["rfc4648" :refer [base64url]]
+
    [clojure.string :as str]
    [datascript.core :as ds]
    [posh.reagent :as posh :refer [transact! pull q]]
@@ -14,12 +17,31 @@
    [app.serial.constants :refer [get-port dummy-port-id]]
    [app.serial.ops :as ops]))
 
+(defn compressed-text->csv [text]
+  (cond-xlet
+   ; :do (js/console.trace "compressed-text->csv")
+   (nil? text) nil
+   (str/blank? text) nil
+   :let [decoder (new js/TextDecoder "utf-8")]
+   :return (->> text
+                ((oget base64url "parse"))
+                ((oget snappyjs "uncompress"))
+                (.decode decoder))))
+
+(defn csv->compressed-text [csv]
+  (-> (new js/TextEncoder "utf-8")
+      (.encode csv)
+      ((oget snappyjs "compress"))
+      ((oget base64url "stringify"))))
+
 (defn set-url! [csv]
   (let [current-layout (when (.has @*url-search-params "cc1-layout")
-                         (.get @*url-search-params "cc1-layout"))]
+                         (-> (.get @*url-search-params "cc1-layout")
+                             (compressed-text->csv)))]
     (when (not= csv current-layout)
-      (let [encoded-layout (js/encodeURIComponent csv)
+      (let [encoded-layout (csv->compressed-text csv)
             url (str "?cc1-layout=" encoded-layout)]
+        ; (js/console.log (count encoded-layout))
         (.pushState js/window.history #js {} "" url)))))
 
 (defn load-csv-text! [port-id csv]
@@ -41,6 +63,10 @@
              xs)))
     ;; assume success
     (set-url! csv)))
+
+(defn load-compressed-csv-text! [port-id text]
+  (->> (compressed-text->csv text)
+       (load-csv-text! port-id)))
 
 (defn on-drag-over! [e]
   (.preventDefault e)

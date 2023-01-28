@@ -21,7 +21,7 @@
                                  dummy-port-id]]
    [app.serial :as serial :refer [has-web-serial-api?]]
    [app.view :refer [super-root-view]]
-   [app.csv :refer [load-csv-text!]]
+   [app.csv :refer [load-compressed-csv-text!]]
 
    [app.repl]))
 
@@ -45,7 +45,7 @@
     (reset! *active-port-id dummy-port-id)
     (let [csv (.get @*url-search-params "cc1-layout")]
       (when-not (str/blank? csv)
-        (load-csv-text! dummy-port-id csv)))))
+        (load-compressed-csv-text! dummy-port-id csv)))))
 
 (defn on-url-change! [_e]
   (js/console.log "updating layout due to URL change!")
@@ -63,4 +63,5 @@
 
   (.addEventListener js/window "popstate" #(on-url-change! %))
 
-  (js/window.addEventListener "DOMContentLoaded" on-dom-content-loaded!))
+  (js/window.addEventListener "DOMContentLoaded" on-dom-content-loaded!)
+  (js/console.log "init done"))
