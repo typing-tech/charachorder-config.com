@@ -54,11 +54,22 @@ ol, ul {
   position: fixed;
 }
 
+#main {
+  position: absolute;
+  height: 100%;
+  top: 0;
+  right: 0;
+  width: calc(100% - #{$left-nav-width});
+}
+
 #root.nav-collapsed {
   padding-left: $left-nav-width-collapsed;
   #nav {
     margin-left: -$left-nav-width-collapsed;
     width: $left-nav-width-collapsed;
+  }
+  #main {
+    width: calc(100% - #{$left-nav-width-collapsed});
   }
 }
 
@@ -77,14 +88,9 @@ ol, ul {
   }
 }
 
-#main {
-  position: relative;
-  height: 100%;
-}
-
 #viewport {
   width: 100%;
-  height: calc(100% - #{$tab-height} - #{$console-height});
+  height: calc(100% - #{$tab-height});
   overflow: auto;
 
   & > * {
@@ -93,10 +99,9 @@ ol, ul {
 }
 
 .console {
-  position: fixed !important;
+  width: 100%;
   border-radius: 4px;
   bottom: 0;
-  left: $left-nav-width-collapsed;
   right: 0;
   background-color: #888;
   color: #000;

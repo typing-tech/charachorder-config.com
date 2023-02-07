@@ -24,10 +24,17 @@
    [app.csv :refer [on-drag-over! read-dropped-keymap-csv!]]))
 (def ScrollToBottom react-scroll-to-bottom/default)
 
-(defn no-web-serial-api-view []
-  [:div {:class "pure-u-1 tc"}
-   [:h1.blink "Your browser does not support the Web Serial API."]
-   [:p "As of Janurary 2023, the only known browsers to support the Web Serial API is Chrome, Edge, and Opera from April 2021 onwards."]])
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn footer-com []
+  [:div {:class "footer tc mw-100 f6 pt5 pb5 light-purple"}
+   "Disclaimer: This site is not affiliated, associated, authorized, endorsed by,
+   or in any way officially connected with CharaChorder.
+   The official CharaChorder website can be found at "
+   [:a {:target "_blank" :href "https://www.charachorder.com/"}
+    "https://www.charachorder.com/"] "."])
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn gen-device-buttons [{:keys [active-port-id]}
                           {:keys [port-id *device-name]}]
@@ -89,11 +96,8 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn no-device-main-view [_]
-  [:div {:id "main" :class "pure-u-1 pa3"}
-   [:h1 "No Device Connected Yet"]
-   [:p "Connect a device using the button on the left."]
-
+(defn sample-usages-com []
+  [:<>
    [:h1.mt6.mb2 "Samples Usages"]
    [:div {:class "flex flex-wrap"}
     [:div {:class "card card--li"}
@@ -135,6 +139,14 @@
       [:li "You arrive via a read-only mode link."]
       [:li "You make changes to the layout."]
       [:li "You share the layout via CSV or the URL."]]]]])
+
+(defn no-device-main-view [_]
+  [:div {:id "main" :class "pa3"}
+   [:h1 "No Device Connected Yet"]
+   [:p "Connect a device using the button on the left."]
+   [sample-usages-com]
+
+   [footer-com]])
 
 (defn debug-buttons []
   [:<>
@@ -184,17 +196,17 @@
    [console-content port-id]])
 
 (defn main-view [{:as args :keys [port-id]}]
-  [:div {:id "main" :class "pure-u-1"}
+  [:div {:id "main" :class ""}
    [tab-menu args]
    [:div {:id "viewport"}
     (let [tab-view (or @*current-tab-view :params)]
       (case tab-view
         :keymap [keymap-view args]
         :params [params-view args]
-        :resets [resets-view args]))]
-
-   (when (not= port-id dummy-port-id)
-     [console-view args])])
+        :resets [resets-view args]))
+    [footer-com]
+    (when (not= port-id dummy-port-id)
+      [console-view args])]])
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -228,12 +240,17 @@
      (if-not active-port-id
        [no-device-main-view args]
        [main-view args])
-     (into [:<>]
-           (map (fn [[e msg]]
-                  [error-modal e msg])
-                errors))]))
+     (into [:<>] (map (fn [[e msg]] [error-modal e msg]) errors))]))
+
+(defn no-web-serial-api-view []
+  [:<>
+   [:div {:class "pure-u-1 tc"}
+    [:h1.blink "Your browser does not support the Web Serial API."]
+    [:p "As of Janurary 2023, the only known browsers to support the Web Serial API is Chrome, Edge, and Opera from April 2021 onwards."]]
+
+   [footer-com]])
 
 (defn super-root-view []
   (cond
-    (not (has-web-serial-api?)) [no-web-serial-api-view]
+    (or false (not (has-web-serial-api?))) [no-web-serial-api-view]
     :else [root-view]))
