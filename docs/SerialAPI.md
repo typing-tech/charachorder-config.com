@@ -212,29 +212,29 @@ The VAR command provides access to customizable parameters. This includes access
 | Enable USB HID Keyboard | 11 | boolean 0 or 1, default is 1 |
 | Enable Character Entry | 12 | boolean 0 or 1 |
 | GUI-CTRL Swap Mode | 13 | Boolean 0 or 1; 1 swaps keymap 0 and 1. (CCL only) |
-| Key Scan Duration | 14 | scan rate described in milliseconds; default is 5ms = 200Hz |
-| Key Debounce Press Duration | 15 | debounce time in milliseconds; default is 20ms |
-| Key Debounce Release Duration | 16 | debounce time in milliseconds; default is 20ms |
-| Keyboard Output Character Microsecond Delays | 17 | delay time in microseconds; default is 50us |
+| Key Scan Duration | 14 | scan rate described in milliseconds; default is 2ms = 500Hz |
+| Key Debounce Press Duration | 15 | debounce time in milliseconds; default is 7ms on the One and 20ms on the Lite |
+| Key Debounce Release Duration | 16 | debounce time in milliseconds; default is 7ms on the One and 20ms on the Lite |
+| Keyboard Output Character Microsecond Delays | 17 | delay time in microseconds (one delay for press and again for release); default is 480us; max is 10240us; increments of 40us |
 | Enable USB HID Mouse | 21 | boolean 0 or 1; default is 1 |
-| Slow Mouse Speed | 22 | pixels to move at the mouse poll rate; default is 2 = 100px/s |
-| Fast Mouse Speed | 23 | pixels to move at the mouse poll rate; default is 10 = 500px/s |
+| Slow Mouse Speed | 22 | pixels to move at the mouse poll rate; default is 5 = 250px/s |
+| Fast Mouse Speed | 23 | pixels to move at the mouse poll rate; default is 25 = 1250px/s |
 | Enable Active Mouse | 24 | boolean 0 or 1; moves mouse back and forth every 60s |
 | Mouse Scroll Speed | 25 | default is 1 |
 | Mouse Poll Duration | 26 | poll rate described in milliseconds; default is 20ms = 50Hz |
 | Enable Chording | 31 | boolean 0 or 1 |
-| Enable Chording Character Counter Killer | 32 | boolean 0 or 1; default is 1 |
-| Chording Character Counter Killer Timer | 33 | 0-255 deciseconds; default is 40 or 4.0 seconds |
+| Enable Chording Character Counter Timeout | 32 | boolean 0 or 1; default is 1 |
+| Chording Character Counter Timeout Timer | 33 | 0-255 deciseconds; default is 40 or 4.0 seconds |
 | Chord Detection Press Tolerance(ms) | 34 | 1-50 milliseconds |
 | Chord Detection Release Tolerance(ms) | 35 | 1-50 milliseconds |
 | Enable Spurring | 41 | boolean 0 or 1; default is 1 |
-| Enable Spurring Character Counter Killer | 42 | boolean 0 or 1; default is 1 |
-| Spurring Character Counter Killer Timer | 43 | 0-255 seconds; default is 240 |
+| Enable Spurring Character Counter Timeout | 42 | boolean 0 or 1; default is 1 |
+| Spurring Character Counter Timeout Timer | 43 | 0-255 seconds; default is 240 |
 | Enable Arpeggiates | 51 | boolean 0 or 1; default is 1 |
-| Arpeggiate Tolerance | 54 | in deciseconds; default 0.5s |
-| Enable Compound Chording (coming soon) | 61 | boolean 0 or 1; default is 1 |
-| Compound Tolerance | 64 | in deciseconds; default 1.5s |
-| LED Brightness | 81 | 0-50 (CCL only) |
+| Arpeggiate Tolerance | 54 | in milliseconds; default 800ms |
+| Enable Compound Chording (coming soon) | 61 | boolean 0 or 1; default is 0 |
+| Compound Tolerance | 64 | in milliseconds; default 1500ms |
+| LED Brightness | 81 | 0-50 (CCL only); default is 5, which draws around 100 mA of current |
 | LED Color Code | 82 | Color Codes to be listed (CCL only) |
 | Enable LED Key Highlight (coming soon) | 83 | boolean 0 or 1 |
 | Operating System | 91 | OS Codes to be listed |
