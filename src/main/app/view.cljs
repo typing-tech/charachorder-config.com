@@ -15,6 +15,7 @@
                        *active-port-id
                        *current-tab-view]]
    [app.db :as db :refer [*db]]
+   [app.utils :refer [human-time-with-seconds]]
    [app.components :refer [button concat-classes]]
    [app.serial.constants :refer [*ports dummy-port-id get-port]]
    [app.serial :as serial :refer [has-web-serial-api?]]
@@ -178,22 +179,51 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn console-content [port-id]
-  (let [{:keys [*console]} (get-port port-id)
-        lines (if-not *console
-                []
-                (or @*console []))
-        lines (take-last 100 lines)
-        els (map (fn [[id t msg]]
-                   [:p {:key (str id)} [:span.time t] [:span.msg msg]])
-                 lines)]
+(defn api-log-content [port-id]
+  (let [{:keys [*api-log]} (get-port port-id)
+        log (if-not *api-log {} (or @*api-log {}))
+        ks (->> (keys log)
+                (sort)
+                (take-last 500))
+        f
+        (fn [index]
+          (let [{:keys [stdin stdin-t stdout stdout-t]} (get log index)
+                wait-time (- stdout-t stdin-t)]
+            [:p {:key (str index)}
+             [:span.time.mr3 (human-time-with-seconds stdin-t)]
+             [:span.stdin.msg.mr4 stdin]
+             [:span.stdout.msg stdout]]))
+        els (map f ks)]
     (into [:<>] els)))
 
-(defn console-view [{:keys [port-id]}]
+(defn api-log-view [{:keys [port-id]}]
 
-  [:> ScrollToBottom {:class-name "console"
+  [:> ScrollToBottom {:class-name "log api-log"
                       :initial-scroll-behavior "smooth"}
-   [console-content port-id]])
+   [api-log-content port-id]])
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn serial-log-content [port-id]
+  (let [{:keys [*serial-log]} (get-port port-id)
+        log (if-not *serial-log {} (or @*serial-log {}))
+        ks (->> (keys log)
+                (sort)
+                (take-last 500))
+        f
+        (fn [index]
+          (let [{:keys [stdout stdout-t]} (get log index)]
+            [:p {:key (str index)}
+             [:span.time.mr3 (human-time-with-seconds stdout-t)]
+             [:span.stdout.msg stdout]]))
+        els (map f ks)]
+    (into [:<>] els)))
+
+(defn serial-log-view [{:keys [port-id]}]
+
+  [:> ScrollToBottom {:class-name "log serial-log"
+                      :initial-scroll-behavior "smooth"}
+   [serial-log-content port-id]])
 
 (defn main-view [{:as args :keys [port-id]}]
   [:div {:id "main" :class ""}
@@ -206,7 +236,9 @@
         :resets [resets-view args]))
     [footer-com]
     (when (not= port-id dummy-port-id)
-      [console-view args])]])
+      [:<>
+       [api-log-view args]
+       [serial-log-view args]])]])
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

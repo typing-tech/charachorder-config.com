@@ -17,7 +17,8 @@
    [app.macros :refer-macros [cond-xlet ->hash]]
    [app.ratoms :refer [*num-devices-connected *active-port-id]]
    [app.db :refer [*db]]
-   [app.utils :refer [human-time-now-with-seconds]]
+   [app.utils :refer [timestamp-ms
+                      human-time-with-seconds]]
 
    [app.emoji-strings :refer [keyboard-left-arrow keyboard-right-arrow]]
    [app.hw.cc1 :as cc1]
@@ -33,8 +34,9 @@
 (def ^js Serial (oget js/navigator "?serial"))
 (when-not Serial (js/console.error "This browser does not have WebSerial API."))
 
-(defn has-web-serial-api? []
-  (boolean Serial))
+(defn has-web-serial-api? [] (boolean Serial))
+(def is-valid-response-output?
+  (partial re-matches #"(CMD|ID|VERSION|CML|VAR|RST|RAM|SIM)\s.+"))
 
 (def cmd-encoder (new js/TextEncoder))
 (def output-decoder (new js/TextDecoder))
@@ -96,20 +98,33 @@
         *reader (atom nil)
         *device-name (r/atom "???")
         *device-version (r/atom "???")
+        *api-log (r/atom {})
+        *api-log-size (r/atom 0)
+        *serial-log (r/atom {})
+        *serial-log-size (r/atom 0)
         *console (r/atom [])
         *ready (r/atom false)
 
-        write->console
-        (fn [v msg]
-          (conj v [(count v) (human-time-now-with-seconds)
-                   (str " " keyboard-left-arrow " " msg)]))
-        read->console
-        (fn [v msg]
-          (conj v [(count v) (human-time-now-with-seconds)
-                   (str " " keyboard-right-arrow " " msg)]))
-
-        ->console
-        (fn [v msg] (conj v [(count v) (human-time-now-with-seconds) (str " " msg)]))
+        write-to-api-log!
+        (fn [stdin]
+          (let [i @*api-log-size
+                stdin-t (timestamp-ms)
+                x (->hash stdin stdin-t)]
+            (swap! *api-log update i merge x)))
+        read-to-api-log!
+        (fn [stdout]
+          (let [i @*api-log-size
+                stdout-t (timestamp-ms)
+                x (->hash stdout stdout-t)]
+            (swap! *api-log update i merge x)
+            (swap! *api-log-size inc)))
+        read-to-serial-log!
+        (fn [stdout]
+          (let [i @*serial-log-size
+                stdout-t (timestamp-ms)
+                x (->hash stdout stdout-t)]
+            (swap! *serial-log update i merge x)
+            (swap! *serial-log-size inc)))
 
         close-port-and-cleanup!
         (fn []
@@ -128,7 +143,7 @@
             (reset! *num-devices-connected (-> @*ports count))))
 
         m (->hash port-id port read-ch write-ch fn-ch *device-name *device-version *ready
-                  *console write->console read->console ->console
+                  *api-log *serial-log read-to-serial-log!
                   close-port-and-cleanup!)]
 
     (let [writable (oget port "writable")
@@ -137,7 +152,7 @@
       (go-loop []
         (try
           (if-some [x (<! write-ch)]
-            (do (swap! *console write->console x)
+            (do (write-to-api-log! x)
                 (->> (str x "\r\n")
                      (.encode cmd-encoder)
                      (.write w)
@@ -149,7 +164,17 @@
             (js/console.error e)))))
 
     (let [readable (oget port "readable")
-          r (.getReader readable)]
+          r (.getReader readable)
+          flush-lines!
+          (fn [lines*]
+            (go-loop [lines lines*]
+              (when-let [x (first lines)]
+                (if (is-valid-response-output? x)
+                  (do (read-to-api-log! x)
+                      (>! read-ch x))
+                  (do (read-to-serial-log! x)
+                      nil))
+                (recur (rest lines)))))]
       (reset! *reader r)
       (go-loop [prev-buf (new js/Uint8Array)]
         (try
@@ -161,9 +186,7 @@
               (let [buf (concat-uint8-array prev-buf value)
                     [lines rem] (parse-lines buf)]
                 ; (js/console.log [lines rem])
-                (dorun (for [line lines]
-                         (swap! *console read->console line)))
-                (<! (onto-chan! read-ch lines false))
+                (<! (flush-lines! lines))
                 (recur rem))))
           (catch :default e
             (close-port-and-cleanup!)
