@@ -11,7 +11,7 @@ $root: #charachorder-config;
 $left-nav-width: 250px;
 $left-nav-width-collapsed: 36px;
 $tab-height: 32px;
-$console-height: 100px;
+$log-height: 100px;
 
 html, body, #{$root} {
   width: 100%;
@@ -98,28 +98,45 @@ ol, ul {
   }
 }
 
-.console {
-  width: 100%;
-  border-radius: 4px;
-  bottom: 0;
-  right: 0;
+.log {
+  display: inline-block;
   background-color: #888;
   color: #000;
-  height: $console-height;
+  font-family: monospace;
+  font-size: 15px;
+  line-height: 1.0;
+
+  height: $log-height;
   overflow-anchor: none;
 
   padding: 5px;
   padding-right: 0;
-  font-family: monospace;
-  font-size: 15px;
-  line-height: 1.0;
+
   & > * {
     overflow-anchor: none;
   }
   p {
     margin: 0;
+    white-space: nowrap;
     .time {
       font-size: 12px;
     }
   }
+  .stdin {
+    color: #800;
+  }
+  .stdout {
+    color: #040;
+  }
+}
+
+.api-log {
+  width: 30%;
+  border-radius: 4px;
+}
+
+.serial-log {
+  font-size: 14px;
+  width: 70%;
+  border-radius: 4px;
 }
