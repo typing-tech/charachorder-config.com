@@ -127,15 +127,15 @@
                     []
                     attr-nses)]
     ; (js/console.log txs)
-    (letfn [(f [{:keys [write-ch read-ch *console ->console]}]
+    (letfn [(f [{:keys [write-ch read-ch read-to-serial-log!]}]
               (go
                 (>! write-ch cmd)
                 (let [ret (<! read-ch)
                       {:keys [success]} (fns/parse-commit-ret ret)]
                   (js/console.log ret)
                   (if success
-                    (swap! *console ->console "COMMIT success")
-                    (swap! *console ->console "COMMIT ERROR"))
+                    (read-to-serial-log! "COMMIT success")
+                    (read-to-serial-log! "COMMIT ERROR"))
                   (when success (transact! *db txs))
                   success)))]
       (put! fn-ch f))))
