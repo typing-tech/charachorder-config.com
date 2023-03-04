@@ -29,7 +29,7 @@
    :enable-serial-keyboard {:code "06" :type :num-boolean}
    :enable-serial-mouse {:code "07" :type :num-boolean}
    :enable-usb-hid-keyboard {:code "11" :type :num-boolean}
-   :enable-character-entry {:code "12" :type :num-boolean}
+   :enable-character-entry {:code "12" :type :num-boolean :ccl-only true}
 
    :gui-ctrl-swap-mode {:code "13" :type :num-boolean :ccl-only true}
 
@@ -47,20 +47,20 @@
    :mouse-poll-duration {:code "26" :type :ms}
 
    :enable-chording {:code "31" :type :num-boolean}
-   :enable-chording-character-counter-killer {:code "32" :type :num-boolean}
-   :chording-character-counter-killer-timer {:code "33" :type :ds}
+   :enable-chording-character-counter-timeout {:code "32" :type :num-boolean}
+   :chording-character-counter-timeout-timer {:code "33" :type :ds}
    :chord-detection-press-tolerance {:code "34" :type :ms}
    :chord-detection-release-tolerance {:code "35" :type :ms}
 
    :enable-spurring {:code "41" :type :num-boolean}
-   :enable-spurring-character-counter-killer {:code "42" :type :num-boolean}
-   :spurring-character-counter-killer-timer {:code "43" :type :s}
+   :enable-spurring-character-counter-timeout {:code "42" :type :num-boolean}
+   :spurring-character-counter-timeout-timer {:code "43" :type :s}
 
    :enable-arpeggiates {:code "51" :type :num-boolean}
-   :arpeggiate-tolerance {:code "54" :type :ds}
+   :arpeggiate-tolerance {:code "54" :type :ms}
 
    :enable-compound-chording {:code "61" :type :num-boolean}
-   :compound-tolerance {:code "64" :type :ds}
+   :compound-tolerance {:code "64" :type :ms}
 
    :led-brightness {:code "81" :ccl-only true
                     :type :non-neg-int :max 50}
