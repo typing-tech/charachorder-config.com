@@ -27,9 +27,9 @@
                       charachorder-keymap-codes
                       charachorder-one-keymap-codes
                       raw-keymap-codes]]
-   [app.hw.cc1 :as cc1]
+   [app.preds :refer [is-device-cc1?]]
    [app.csv :refer [download-csv! update-url-from-db!]]
-   [app.serial.constants :refer [dummy-port-id]]
+   [app.serial.constants :refer [get-port dummy-port-id]]
    [app.serial.ops :refer [set-keymap!
                            commit!
                            refresh-keymaps-after-commit!]]))
@@ -212,10 +212,17 @@
                        ["Download" [:br] "Layout as CSV"]
                        :primary true :size "small" :classes ["mr0"])]]]]))
 
-(defn keymap-view [args]
-  [:<>
-   [:div.mv2.tc.light-purple
-    [:p.lh-solid "Did you know you can drag and drop a CSV here? And share the URL once it changes?"]
-    [:p.lh-solid "A yellow action means that the action has not been COMMITted."]
-    [:p.lh-solid "Action changes immediately take effect, but are not COMMITted."]]
-   [cc1-keymap-view args]])
+(defn unsupported-keymap-view [args]
+  [:h1.mv5.tc.red "There is no keymap support for this device yet."])
+
+(defn keymap-view [{:as args :keys [port-id]}]
+  (let [port (get-port port-id)]
+    [:<>
+     [:div.mv2.tc.light-purple
+      [:p.lh-solid "Did you know you can drag and drop a CSV here? And share the URL once it changes?"]
+      [:p.lh-solid "A yellow action means that the action has not been COMMITted."]
+      [:p.lh-solid "Action changes immediately take effect, but are not COMMITted."]]
+     (cond
+       ; true [unsupported-keymap-view args]
+       (is-device-cc1? port) [cc1-keymap-view args]
+       :else [unsupported-keymap-view args])]))

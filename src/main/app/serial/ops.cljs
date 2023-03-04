@@ -10,7 +10,8 @@
 
    [app.ratoms :refer [*num-devices-connected *active-port-id]]
    [app.db :refer [*db]]
-   [app.hw.cc1 :as cc1]
+   [app.hw :refer [get-hw-switch-keys
+                   get-hw-layers+sorted-switch-key-ids]]
    [app.serial.constants :refer [baud-rates
                                  *ports
                                  get-port
@@ -122,12 +123,14 @@
   "Returns nil."
   [port-id]
   (let [{:as port :keys [close-port-and-cleanup! fn-ch]} (get-port port-id)
+        layers+sorted-switch-key-ids (get-hw-layers+sorted-switch-key-ids port)
+
         cmd (fns/cmd-var-commit)
 
         m (ds/pull @*db '[*] [:port/id port-id])
         attr-nses (map (fn [[layer switch-key-ids]]
                          (str layer "." switch-key-ids))
-                       cc1/layers+sorted-switch-key-ids)
+                       layers+sorted-switch-key-ids)
         txs (reduce (fn [txs attr-ns]
                       (let [a (get m (keyword attr-ns "code"))
                             hw-code-key (keyword attr-ns "hw.code")
@@ -157,7 +160,8 @@
   (assert code)
   (assert (string? switch-key-id))
   (let [{:as port :keys [fn-ch]} (get-port port-id)
-        location (get-in cc1/switch-keys [switch-key-id :location])
+        switch-keys (get-hw-switch-keys port)
+        location (get-in switch-keys [switch-key-id :location])
         cmd (fns/cmd-var-set-keymap layer location code)]
     (letfn [(f [{:keys [write-ch read-ch]}]
               (go

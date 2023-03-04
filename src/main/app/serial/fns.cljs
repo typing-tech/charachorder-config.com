@@ -17,8 +17,9 @@
    [app.ratoms :refer [*active-port-id]]
    [app.db :refer [*db]]
 
-   [app.codes :refer [var-subcmds var-params code->var-param]]
-   [app.hw.cc1 :as cc1]))
+   [app.hw :refer [get-hw-switch-keys
+                   get-hw-layers+sorted-switch-key-ids]]
+   [app.codes :refer [var-subcmds var-params code->var-param]]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -125,13 +126,16 @@
   [{:as port :keys [fn-ch]} & {:as opts
                                :keys [boot]
                                :or {boot false}}]
-  (let [xs (mapv (fn [[layer switch-key-id]]
-                   (let [loc (get-in cc1/switch-keys [switch-key-id :location])
+  (let [switch-keys (get-hw-switch-keys port)
+        layers+sorted-switch-key-ids (get-hw-layers+sorted-switch-key-ids port)
+
+        xs (mapv (fn [[layer switch-key-id]]
+                   (let [loc (get-in switch-keys [switch-key-id :location])
                          attr-ns (str layer "." switch-key-id)
                          hw-attr (keyword attr-ns "hw.code")
                          attr (keyword attr-ns "code")]
                      [layer loc hw-attr attr]))
-                 cc1/layers+sorted-switch-key-ids)
+                 layers+sorted-switch-key-ids)
         fns (map (partial gen-var-get-keymap-fn port opts) xs)]
     (onto-chan! fn-ch fns false)))
 
@@ -170,7 +174,7 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn issue-connect-cmds! [{:as port :keys [port-id fn-ch *ready]}]
+(defn issue-connect-cmds! [{:as port :keys [fn-ch *ready *device-name]}]
   (go
     (>! fn-ch store-device-name)
     (>! fn-ch store-device-version)
