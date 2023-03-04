@@ -36,7 +36,7 @@
 
 (defn has-web-serial-api? [] (boolean Serial))
 (def is-valid-response-output?
-  (partial re-matches #"(CMD|ID|VERSION|CML|VAR|RST|RAM|SIM)\s.+"))
+  (partial re-matches #"(CMD|ID|-betaID|VERSION|CML|VAR|RST|RAM|SIM)\s.+"))
 
 (def cmd-encoder (new js/TextEncoder))
 (def output-decoder (new js/TextDecoder))

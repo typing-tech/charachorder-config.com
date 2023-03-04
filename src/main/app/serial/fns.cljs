@@ -61,6 +61,10 @@
           version (if (str/starts-with? ret "VERSION ")
                     (subs ret (count "VERSION "))
                     ret)]
+      ;; fix to read stray "-beta line after VERSION return line"
+      (when (= ret "VERSION 0.9.17")
+        (>! write-ch "ID")
+        (<! read-ch))
       (reset! *device-version version))))
 
 (defn gen-var-get-param-fn [{:keys []} param]
