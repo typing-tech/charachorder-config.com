@@ -27,7 +27,8 @@
                       charachorder-keymap-codes
                       charachorder-one-keymap-codes
                       raw-keymap-codes]]
-   [app.preds :refer [is-device-cc1?]]
+   [app.preds :refer [is-device-not-yet-determined?
+                      is-device-cc1?]]
    [app.csv :refer [download-csv! update-url-from-db!]]
    [app.serial.constants :refer [get-port dummy-port-id]]
    [app.serial.ops :refer [set-keymap!
@@ -224,5 +225,6 @@
       [:p.lh-solid "Action changes immediately take effect, but are not COMMITted."]]
      (cond
        ; true [unsupported-keymap-view args]
+       (is-device-not-yet-determined? port) [:div]
        (is-device-cc1? port) [cc1-keymap-view args]
        :else [unsupported-keymap-view args])]))
