@@ -217,10 +217,10 @@ The VAR command provides access to customizable parameters. This includes access
 | Key Debounce Release Duration | 16 | debounce time in milliseconds; default is 7ms on the One and 20ms on the Lite |
 | Keyboard Output Character Microsecond Delays | 17 | delay time in microseconds (one delay for press and again for release); default is 480us; max is 10240us; increments of 40us |
 | Enable USB HID Mouse | 21 | boolean 0 or 1; default is 1 |
-| Slow Mouse Speed | 22 | pixels to move at the mouse poll rate; default is 5 = 250px/s |
-| Fast Mouse Speed | 23 | pixels to move at the mouse poll rate; default is 25 = 1250px/s |
+| Slow Mouse Speed | 22 | pixels to move at the mouse poll rate; default for CC1 is 5 = 250px/s |
+| Fast Mouse Speed | 23 | pixels to move at the mouse poll rate; default for CC1 is 25 = 1250px/s |
 | Enable Active Mouse | 24 | boolean 0 or 1; moves mouse back and forth every 60s |
-| Mouse Scroll Speed | 25 | default is 1 |
+| Mouse Scroll Speed | 25 | default is 1; polls at 1/4th the rate of the mouse move updates |
 | Mouse Poll Duration | 26 | poll rate described in milliseconds; default is 20ms = 50Hz |
 | Enable Chording | 31 | boolean 0 or 1 |
 | Enable Chording Character Counter Timeout | 32 | boolean 0 or 1; default is 1 |
@@ -351,6 +351,7 @@ The RST command restart the CharaChorder device. This will most likely also brea
 - The PARAMS subcommand resets the parameters to factory defaults and commits.
 - The KEYMAPS subcommand resets the keymaps to the factory defaults and commits.
 - The STARTER subcommand adds starter chordmaps. This does not clear the chordmap library, but adds to it, replacing those that have the same chord.
+- The FUNC subcommand adds only the functional chordmaps. These include backspace, delete, and arrow key chordmaps.
 - The CLEARCML subcommand permanently deletes all the chordmaps stored in the device memory.
 - (in progress) The UPGRADECML subcommand attemps to upgrade chordmaps that the system detects are older.
 
