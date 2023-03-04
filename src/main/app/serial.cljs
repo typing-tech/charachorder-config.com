@@ -9,9 +9,8 @@
    [oops.core :refer [oget oset! ocall oapply ocall! oapply!
                       oget+ oset!+ ocall+ oapply+ ocall!+ oapply!+]]
    [promesa.core :as p]
-   [datascript.core :refer [squuid]]
+   [datascript.core :as ds :refer [squuid]]
    [posh.reagent :as posh :refer [transact!]]
-   [datascript.core :as ds]
    [reagent.core :as r]
 
    [app.macros :refer-macros [cond-xlet ->hash]]
@@ -20,8 +19,6 @@
    [app.utils :refer [timestamp-ms
                       human-time-with-seconds]]
 
-   [app.emoji-strings :refer [keyboard-left-arrow keyboard-right-arrow]]
-   [app.hw.cc1 :as cc1]
    [app.csv :as csv]
    [app.serial.constants :refer [baud-rates
                                  *ports
