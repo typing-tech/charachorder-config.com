@@ -162,7 +162,7 @@
         gen-button (fn [tab label & {:keys [danger]}]
                      (button #(reset! *current-tab-view tab) [label]
                              :size "xsmall"
-                             :primary (= current tab)
+                             :active (= current tab)
                              :danger danger))]
     [:div {:id "tab-menu"}
      (if (= port-id dummy-port-id)
@@ -173,7 +173,7 @@
          (format "%s - %s" @*device-name @*device-version)]
         (gen-button :keymap "Key Map")
         (gen-button :params "Parameters")
-        (gen-button :resets "RESETS Toolbox" :danger true)
+        (gen-button :resets "RESETS Toolbox")
         [:div {:class "absolute top-0 right-0 h-100 flex items-center mr3"}
          [reboot-tool-button]]])]))
 

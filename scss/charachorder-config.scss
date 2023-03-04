@@ -83,6 +83,9 @@ ol, ul {
   .device-string {
     font-size: 14px;
   }
+  .pure-button {
+    min-width: 100px;
+  }
   & > * {
     margin-right: 16px;
   }
