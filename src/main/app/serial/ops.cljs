@@ -94,6 +94,17 @@
                 (close-port-and-cleanup!)))]
       (put! fn-ch f))))
 
+(defn reset-func! [port-id]
+  (let [{:keys [close-port-and-cleanup! fn-ch]} (get-port port-id)]
+    (letfn [(f [{:keys [write-ch read-ch]}]
+              (go
+                (>! write-ch "RST FUNC")
+                (let [ret (<! read-ch)]
+                  (js/console.log ret))
+                (reset! *active-port-id nil)
+                (close-port-and-cleanup!)))]
+      (put! fn-ch f))))
+
 (defn reset-clearcml! [port-id]
   (let [{:keys [close-port-and-cleanup! fn-ch]} (get-port port-id)]
     (letfn [(f [{:keys [write-ch read-ch]}]
