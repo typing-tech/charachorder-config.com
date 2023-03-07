@@ -51,8 +51,7 @@
   (let []
     [:div {:class "pa3"}
      [:div {:class "mb2"}
-      (button #(refresh-params port-id) ["Refresh Params"])
-      (button #(disconnect! port-id) ["Disconnect"] :error true)
-      (button #(reset-params! port-id) ["RESET Params and COMMIT"] :error true)]
+      (button #(refresh-params port-id) ["Refresh Params"])]
+
      [param-table args]]))
 

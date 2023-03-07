@@ -19,6 +19,7 @@
    [app.components :refer [button concat-classes]]
    [app.serial.constants :refer [*ports dummy-port-id get-port]]
    [app.serial :as serial :refer [has-web-serial-api?]]
+   [app.serial.ops :as ops :refer []]
    [app.views.params :refer [params-view]]
    [app.views.keymap :refer [keymap-view]]
    [app.views.resets :refer [resets-view]]
@@ -51,6 +52,11 @@
   (button #(oset! js/window "location" "?")
           ["Switch to Real Device Mode"]
           :size "xsmall" :warning true :classes ["mr0"]))
+
+(defn disconnect-button [port-id]
+  (button #(ops/disconnect! port-id) ["Disconnect"]
+          :size "xsmall"
+          :warning true))
 
 (defn reboot-tool-button []
   (button #(oset! js/window "location" "?")
@@ -175,6 +181,7 @@
         (gen-button :params "Parameters")
         (gen-button :resets "RESETS Toolbox")
         [:div {:class "absolute top-0 right-0 h-100 flex items-center mr3"}
+         [disconnect-button port-id]
          [reboot-tool-button]]])]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
