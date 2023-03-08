@@ -12,3 +12,8 @@
   (or (and (not port)
            (.has @*url-search-params "cc1-layout"))
       (str/starts-with? @*device-name "CHARACHORDER ONE ")))
+
+(defn is-device-cc-lite? [{:as port :keys [*device-name]}]
+  (or (and (not port)
+           (.has @*url-search-params "cc-lite-layout"))
+      (str/starts-with? @*device-name "CHARACHORDER LITE ")))

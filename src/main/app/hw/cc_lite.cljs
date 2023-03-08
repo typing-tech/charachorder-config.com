@@ -1,4 +1,4 @@
-(ns app.hw.ccl)
+(ns app.hw.cc-lite)
 
 (def switch-keys
   {;; bottom row

@@ -39,13 +39,15 @@
     (reset! *url-search-params obj)))
 
 (defn update-layout-from-url! []
-  (when (.has @*url-search-params "cc1-layout")
-    (transact! *db [{:port/id dummy-port-id}])
-    (swap! *num-devices-connected inc)
-    (reset! *active-port-id dummy-port-id)
-    (let [csv (.get @*url-search-params "cc1-layout")]
-      (when-not (str/blank? csv)
-        (load-compressed-csv-text! dummy-port-id csv)))))
+  (dorun
+   (for [param ["cc-lite-layout" "cc1-layout"]]
+     (when (.has @*url-search-params param)
+       (transact! *db [{:port/id dummy-port-id}])
+       (swap! *num-devices-connected inc)
+       (reset! *active-port-id dummy-port-id)
+       (let [csv (.get @*url-search-params param)]
+         (when-not (str/blank? csv)
+           (load-compressed-csv-text! dummy-port-id csv)))))))
 
 (defn on-url-change! [_e]
   (js/console.log "updating layout due to URL change!")

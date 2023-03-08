@@ -12,7 +12,11 @@
    [testdouble.cljs.csv :as csv]
    [app.macros :as mac :refer-macros [cond-xlet ->hash]]
    [app.ratoms :refer [*url-search-params]]
-   [app.hw.cc1 :as cc1]
+   [app.preds :refer [is-device-cc1?
+                      is-device-cc-lite?]]
+   [app.hw :refer [get-hw-switch-keys
+                   get-hw-location->switch-key-id
+                   get-hw-layers+sorted-switch-key-ids]]
    [app.db :as db :refer [*db]]
    [app.serial.constants :refer [get-port dummy-port-id]]
    [app.serial.ops :as ops]))
@@ -35,21 +39,26 @@
       ((oget base64url "stringify"))))
 
 (defn set-url! [csv]
-  (let [current-layout (when (.has @*url-search-params "cc1-layout")
-                         (-> (.get @*url-search-params "cc1-layout")
-                             (compressed-text->csv)))]
-    (when (not= csv current-layout)
-      (let [encoded-layout (csv->compressed-text csv)
-            url (str "?cc1-layout=" encoded-layout)]
-        ; (js/console.log (count encoded-layout))
-        (.pushState js/window.history #js {} "" url)))))
+  (dorun
+   (for [param ["cc-lite-layout" "cc1-layout"]]
+     (when (.has @*url-search-params param)
+       (let [current-layout (-> (.get @*url-search-params param)
+                                (compressed-text->csv))]
+         (when (not= csv current-layout)
+           (let [encoded-layout (csv->compressed-text csv)
+                 url (str "?" param "="  encoded-layout)]
+             ; (js/console.log (count encoded-layout))
+             (.pushState js/window.history #js {} "" url))))))))
 
 (defn load-csv-text! [port-id csv]
-  (let [csv (str/replace csv #"\r\n" "\n")
+  (let [port (get-port port-id)
+        location->switch-key-id (get-hw-location->switch-key-id port)
+
+        csv (str/replace csv #"\r\n" "\n")
         xs (->> (csv/read-csv csv)
                 (remove (partial = [""])))
         txs (mapv (fn [[layer location code]]
-                    (let [switch-key-id (get cc1/location->switch-key-id location)
+                    (let [switch-key-id (get location->switch-key-id location)
                           attr-ns (str layer "." switch-key-id)
                           attr (keyword attr-ns "code")]
                       [:db/add [:port/id port-id] attr code]))
@@ -58,7 +67,7 @@
     (when (not= port-id dummy-port-id)
       (dorun
        (mapv (fn [[layer location code]]
-               (let [switch-key-id (get cc1/location->switch-key-id location)]
+               (let [switch-key-id (get location->switch-key-id location)]
                  (ops/set-keymap! port-id layer switch-key-id code)))
              xs)))
     ;; assume success
@@ -96,14 +105,18 @@
    :return (.readAsText fr file)))
 
 (defn compute-csv [port-id]
-  (let [m (ds/pull @*db '[*] [:port/id port-id])
+  (let [port (get-port port-id)
+        switch-keys (get-hw-switch-keys port)
+        layers+sorted-switch-key-ids (get-hw-layers+sorted-switch-key-ids port)
+
+        m (ds/pull @*db '[*] [:port/id port-id])
         xs (mapv (fn [[layer switch-key-id]]
-                   (let [loc (get-in cc1/switch-keys [switch-key-id :location])
+                   (let [loc (get-in switch-keys [switch-key-id :location])
                          attr-ns (str layer "." switch-key-id)
                          attr (keyword attr-ns "code")
                          code (get m attr)]
                      [layer loc code]))
-                 cc1/layers+sorted-switch-key-ids)
+                 layers+sorted-switch-key-ids)
         csv (csv/write-csv xs)]
     csv))
 
@@ -114,9 +127,13 @@
     (set-url! csv)))
 
 (defn download-csv! [port-id]
-  (let [csv (compute-csv port-id)
+  (let [port (get-port port-id)
+        csv (compute-csv port-id)
         blob (new js/Blob
                   #js [csv]
                   #js {:type "text/plain;charset=utf-8"})]
-    (.saveAs file-saver blob "cc1-layout.csv")
+    (cond
+      (is-device-cc1? port) (.saveAs file-saver blob "cc1-layout.csv")
+      (is-device-cc-lite? port) (.saveAs file-saver blob "cc-lite-layout.csv"))
+
     nil))

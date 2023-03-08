@@ -136,7 +136,9 @@
 
     [:div {:class "card card--li"}
      [:ol
-      [:li "You " [:a {:href "?cc1-layout="} "start the tool in read-only mode"] "."]
+      [:li
+       "You " [:a {:href "?cc1-layout="} "start the tool in CC1 read-only mode"] ","]
+      [:li [:a {:href "?cc-lite-layout="} "or CC Lite mode."]]
       [:li "You drag and drop the default layout CSV to get started."]
       [:li "You make changes to the layout."]
       [:li "You share the layout via CSV or the URL."]]]
