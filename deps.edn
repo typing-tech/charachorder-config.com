@@ -18,13 +18,13 @@
         codox/codox {:mvn/version "0.10.8"}
         binaryage/devtools {:mvn/version "1.0.6"}
         fipp/fipp {:mvn/version "0.6.26"}
-        com.taoensso/timbre {:mvn/version "6.0.4"}
+        com.taoensso/timbre {:mvn/version "6.1.0"}
         org.slf4j/slf4j-simple {:mvn/version "2.0.6"}
         com.taoensso/tufte {:mvn/version "2.4.5"}
         camel-snake-kebab/camel-snake-kebab {:mvn/version "0.4.3"}
         funcool/promesa {:mvn/version "10.0.594"}
         org.clojars.mmb90/cljs-cache {:mvn/version "0.1.4"}
-        testdouble/clojurescript.csv {:mvn/version "0.6.0"}
+        testdouble/clojurescript.csv {:mvn/version "0.7.0"}
 
         ;; spec + testing
         metosin/spec-tools {:mvn/version "0.10.5"}
@@ -33,10 +33,10 @@
 
         ;; frontend
         hiccup/hiccup {:mvn/version "2.0.0-alpha2"}
-        reagent/reagent {:mvn/version "1.1.1"}
+        reagent/reagent {:mvn/version "1.2.0"}
 
         ;; DB
-        datascript/datascript {:mvn/version "1.4.0"}
+        datascript/datascript {:mvn/version "1.4.1"}
         denistakeda/posh {:mvn/version "0.5.9"}
 
         ;; communication to backend
@@ -47,7 +47,7 @@
         cljfmt/cljfmt {:mvn/version "0.9.2"}}
 
  :aliases
- {:charachorder-config {:extra-deps {thheller/shadow-cljs {:mvn/version "2.20.20"}}}
+ {:charachorder-config {:extra-deps {thheller/shadow-cljs {:mvn/version "2.21.0"}}}
   :local-development {:jvm-opts ["-XX:+UseZGC"]}
   :outdated {:extra-deps {com.github.liquidz/antq {:mvn/version "RELEASE"}}
              :main-opts ["-m" "antq.core"]}}}
