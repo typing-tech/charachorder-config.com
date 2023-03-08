@@ -221,46 +221,61 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn cc-lite-key [{:keys [switch-keys]} key-id]
+(defn cc-lite-key [{:keys [port-id switch-keys selected-layer]}
+                   key-id]
   (let [{:keys [location u]} (get switch-keys key-id)
         u (or u 1)]
     [:div {:class "cc-lite-key"
            :data-ccos-location-number location
            :style {:width (format "calc(%f * var(--cc-lite-key-base-width))" u)}}
-     (js/console.log u)
-     key-id]))
+     (js/console.log port-id selected-layer key-id)
+     [action-chooser-com port-id selected-layer key-id]]))
 
 (defn cc-lite-keymap-view [{:as args :keys [port-id]}]
   (let [port (get-port port-id)
         switch-keys (get-hw-switch-keys port)
         location->switch-key-id (get-hw-location->switch-key-id port)
+
+        selected-layer-key (keyword port-id "selected-layer")
+        m @(posh/pull *db [selected-layer-key] [:port/id port-id])
+
+        selected-layer (or (get m selected-layer-key) "A1")
+
+        set-selected-layer!
+        (fn [x]
+          (transact! *db [[:db/add [:port/id port-id] selected-layer-key x]]))
         commit-and-refresh!
         (fn []
           (commit! port-id)
           (refresh-keymaps-after-commit! port-id))
-        args (mac/args switch-keys)]
-    ; (js/console.log location->switch-key-id)
-    [:div {:class "ph5"}
-     (into
-      [:div]
-      (for [loc-num (range 53 (inc 66))]
-        [cc-lite-key args (get location->switch-key-id (str loc-num))]))
-     (into
-      [:div]
-      (for [loc-num (range 39 (inc 52))]
-        [cc-lite-key args (get location->switch-key-id (str loc-num))]))
-     (into
-      [:div]
-      (for [loc-num (range 26 (inc 38))]
-        [cc-lite-key args (get location->switch-key-id (str loc-num))]))
-     (into
-      [:div]
-      (for [loc-num (range 12 (inc 25))]
-        [cc-lite-key args (get location->switch-key-id (str loc-num))]))
-     (into
-      [:div]
-      (for [loc-num (range 0 (inc 11))]
-        [cc-lite-key args (get location->switch-key-id (str loc-num))]))]))
+
+        args (mac/args switch-keys selected-layer)]
+    [:<>
+     [:div {:class "mv3 tc"}
+      (button #(set-selected-layer! "A1") ["Primary Layer (A1)"] :active (= selected-layer "A1"))
+      (button #(set-selected-layer! "A2") ["Fn Layer (A2)"] :active (= selected-layer "A2"))
+      (button #(set-selected-layer! "A3") ["Tertiary Layer (A3)"] :active (= selected-layer "A3"))]
+     [:div {:class "ph5"}
+      (into
+       [:div]
+       (for [loc-num (range 53 (inc 66))]
+         [cc-lite-key args (get location->switch-key-id (str loc-num))]))
+      (into
+       [:div]
+       (for [loc-num (range 39 (inc 52))]
+         [cc-lite-key args (get location->switch-key-id (str loc-num))]))
+      (into
+       [:div]
+       (for [loc-num (range 26 (inc 38))]
+         [cc-lite-key args (get location->switch-key-id (str loc-num))]))
+      (into
+       [:div]
+       (for [loc-num (range 12 (inc 25))]
+         [cc-lite-key args (get location->switch-key-id (str loc-num))]))
+      (into
+       [:div]
+       (for [loc-num (range 0 (inc 11))]
+         [cc-lite-key args (get location->switch-key-id (str loc-num))]))]]))
 
 (defn unsupported-keymap-view [_args]
   [:h1.mv5.tc.red "There is no keymap support for this device yet."])

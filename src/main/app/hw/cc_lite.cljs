@@ -23,9 +23,9 @@
    "b" {:location "17"}
    "n" {:location "18"}
    "m" {:location "19"}
-   "," {:location "20"}
-   "." {:location "21"}
-   "/" {:location "22"}
+   "comma" {:location "20"}
+   "period" {:location "21"}
+   "slash" {:location "22"}
    "rshift" {:location "23"}
    "up" {:location "24"}
    "del" {:location "25"}
@@ -70,8 +70,8 @@
    "8" {:location "61"}
    "9" {:location "62"}
    "0" {:location "63"}
-   "-" {:location "64"}
-   "=" {:location "65"}
+   "hypen" {:location "64"}
+   "equal" {:location "65"}
    "bs" {:location "66" :u 2}})
 
 (def location->switch-key-id

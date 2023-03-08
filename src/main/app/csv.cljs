@@ -63,6 +63,7 @@
                           attr (keyword attr-ns "code")]
                       [:db/add [:port/id port-id] attr code]))
                   xs)]
+    ; (js/console.log txs)
     (transact! *db txs)
     (when (not= port-id dummy-port-id)
       (dorun
