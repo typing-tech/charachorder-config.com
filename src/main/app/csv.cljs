@@ -38,17 +38,25 @@
       ((oget snappyjs "compress"))
       ((oget base64url "stringify"))))
 
-(defn set-url! [csv]
-  (dorun
-   (for [param ["cc-lite-layout" "cc1-layout"]]
-     (when (.has @*url-search-params param)
-       (let [current-layout (-> (.get @*url-search-params param)
-                                (compressed-text->csv))]
-         (when (not= csv current-layout)
-           (let [encoded-layout (csv->compressed-text csv)
-                 url (str "?" param "="  encoded-layout)]
-             ; (js/console.log (count encoded-layout))
-             (.pushState js/window.history #js {} "" url))))))))
+(defn set-url! [port-id csv]
+  (cond-xlet
+   :let [port (get-port port-id)]
+   (is-device-cc1? port) (let [param "cc1-layout"
+                               current-layout (when (.has @*url-search-params param)
+                                                (-> (.get @*url-search-params param)
+                                                    (compressed-text->csv)))]
+                           (when (not= csv current-layout)
+                             (let [encoded-layout (csv->compressed-text csv)
+                                   url (str "?" param "="  encoded-layout)]
+                               (.pushState js/window.history #js {} "" url))))
+   (is-device-cc-lite? port) (let [param "cc-lite-layout"
+                                   current-layout (when (.has @*url-search-params param)
+                                                    (-> (.get @*url-search-params param)
+                                                        (compressed-text->csv)))]
+                               (when (not= csv current-layout)
+                                 (let [encoded-layout (csv->compressed-text csv)
+                                       url (str "?" param "="  encoded-layout)]
+                                   (.pushState js/window.history #js {} "" url))))))
 
 (defn load-csv-text! [port-id csv]
   (let [port (get-port port-id)
@@ -72,7 +80,7 @@
                  (ops/set-keymap! port-id layer switch-key-id code)))
              xs)))
     ;; assume success
-    (set-url! csv)))
+    (set-url! port-id csv)))
 
 (defn load-compressed-csv-text! [port-id text]
   (->> (compressed-text->csv text)
@@ -125,7 +133,7 @@
   "synchronous, not a Promise, not a channel."
   [port-id]
   (let [csv (compute-csv port-id)]
-    (set-url! csv)))
+    (set-url! port-id csv)))
 
 (defn download-csv! [port-id]
   (let [port (get-port port-id)
