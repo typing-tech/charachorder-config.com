@@ -27,7 +27,7 @@ const main = async () => {
     "docs/CCOS Key Remapping Reference Guide.txt",
     {encoding: "binary"})
   const doc = windows1252.decode(docBytes)
-  const lines = doc.split("\r\n")
+  const lines = doc.split("\r\n").splice(1)
 
   const header = lines[0]
   const keys = header.split("\t")
