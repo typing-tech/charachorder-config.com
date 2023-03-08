@@ -14,6 +14,7 @@
    [oops.core :refer [oget oset! ocall oapply ocall! oapply!
                       oget+ oset!+ ocall+ oapply+ ocall!+ oapply!+]]
 
+   [app.macros :as mac]
    [app.components :refer [button popover concat-classes]]
    [app.db :as db :refer [*db]]
    [app.codes :refer [keymap-codes
@@ -28,7 +29,10 @@
                       charachorder-one-keymap-codes
                       raw-keymap-codes]]
    [app.preds :refer [is-device-not-yet-determined?
-                      is-device-cc1?]]
+                      is-device-cc1?
+                      is-device-cc-lite?]]
+   [app.hw :refer [get-hw-switch-keys
+                   get-hw-location->switch-key-id]]
    [app.csv :refer [download-csv! update-url-from-db!]]
    [app.serial.constants :refer [get-port dummy-port-id]]
    [app.serial.ops :refer [set-keymap!
@@ -139,6 +143,8 @@
              action]
             [:div.gray (gstring/unescapeEntities "&nbsp;")])])))))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (defn cc1-stick-key [{:keys [port-id]} switch-key]
   [:<>
    [:div.action-chooser
@@ -213,7 +219,50 @@
                        ["Download" [:br] "Layout as CSV"]
                        :primary true :size "small" :classes ["mr0"])]]]]))
 
-(defn unsupported-keymap-view [args]
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn cc-lite-key [{:keys [switch-keys]} key-id]
+  (let [{:keys [location u]} (get switch-keys key-id)
+        u (or u 1)]
+    [:div {:class "cc-lite-key"
+           :data-ccos-location-number location
+           :style {:width (format "calc(%f * var(--cc-lite-key-base-width))" u)}}
+     (js/console.log u)
+     key-id]))
+
+(defn cc-lite-keymap-view [{:as args :keys [port-id]}]
+  (let [port (get-port port-id)
+        switch-keys (get-hw-switch-keys port)
+        location->switch-key-id (get-hw-location->switch-key-id port)
+        commit-and-refresh!
+        (fn []
+          (commit! port-id)
+          (refresh-keymaps-after-commit! port-id))
+        args (mac/args switch-keys)]
+    ; (js/console.log location->switch-key-id)
+    [:div {:class "ph5"}
+     (into
+      [:div]
+      (for [loc-num (range 53 (inc 66))]
+        [cc-lite-key args (get location->switch-key-id (str loc-num))]))
+     (into
+      [:div]
+      (for [loc-num (range 39 (inc 52))]
+        [cc-lite-key args (get location->switch-key-id (str loc-num))]))
+     (into
+      [:div]
+      (for [loc-num (range 26 (inc 38))]
+        [cc-lite-key args (get location->switch-key-id (str loc-num))]))
+     (into
+      [:div]
+      (for [loc-num (range 12 (inc 25))]
+        [cc-lite-key args (get location->switch-key-id (str loc-num))]))
+     (into
+      [:div]
+      (for [loc-num (range 0 (inc 11))]
+        [cc-lite-key args (get location->switch-key-id (str loc-num))]))]))
+
+(defn unsupported-keymap-view [_args]
   [:h1.mv5.tc.red "There is no keymap support for this device yet."])
 
 (defn keymap-view [{:as args :keys [port-id]}]
@@ -227,4 +276,5 @@
        ; true [unsupported-keymap-view args]
        (is-device-not-yet-determined? port) [:div]
        (is-device-cc1? port) [cc1-keymap-view args]
+       (is-device-cc-lite? port) [cc-lite-keymap-view args]
        :else [unsupported-keymap-view args])]))
