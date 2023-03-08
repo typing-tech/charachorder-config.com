@@ -2503,861 +2503,861 @@
         "Raw Scancode",
         "COMPOSE",
         "Keyboard Application",
-        ""
+        "Officially supported by Win, Unix, and Boot"
     ],
     [
         "358",
         "Raw Scancode",
         "POWER",
         "Keyboard Power",
-        ""
+        "Only officially supported by Mac and Unix"
     ],
     [
         "359",
         "Raw Scancode",
         "KP_EQUAL",
         "Keypad =",
-        ""
+        "Only officially supported by Mac"
     ],
     [
         "360",
         "Raw Scancode",
         "F13",
         "Keyboard F13",
-        ""
+        "Only officially supported by Mac"
     ],
     [
         "361",
         "Raw Scancode",
         "F14",
         "Keyboard F14",
-        ""
+        "Only officially supported by Mac"
     ],
     [
         "362",
         "Raw Scancode",
         "F15",
         "Keyboard F15",
-        ""
+        "Only officially supported by Mac"
     ],
     [
         "363",
         "Raw Scancode",
         "F16",
         "Keyboard F16",
-        ""
+        "Only officially supported by Mac"
     ],
     [
         "364",
         "Raw Scancode",
         "F17",
         "Keyboard F17",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "365",
         "Raw Scancode",
         "F18",
         "Keyboard F18",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "366",
         "Raw Scancode",
         "F19",
         "Keyboard F19",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "367",
         "Raw Scancode",
         "F20",
         "Keyboard F20",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "368",
         "Raw Scancode",
         "F21",
         "Keyboard F21",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "369",
         "Raw Scancode",
         "F22",
         "Keyboard F22",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "370",
         "Raw Scancode",
         "F23",
         "Keyboard F23",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "371",
         "Raw Scancode",
         "F24",
         "Keyboard F24",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "372",
         "Raw Scancode",
         "EXECUTE",
         "Keyboard Execute",
-        ""
+        "Only officially supported by Unix"
     ],
     [
         "373",
         "Raw Scancode",
         "HELP",
         "Keyboard Help",
-        ""
+        "Only officially supported by Unix"
     ],
     [
         "374",
         "Raw Scancode",
         "MENU",
         "Keyboard Menu",
-        ""
+        "Only officially supported by Unix"
     ],
     [
         "375",
         "Raw Scancode",
         "SELECT",
         "Keyboard Select",
-        ""
+        "Only officially supported by Unix"
     ],
     [
         "376",
         "Raw Scancode",
         "STOP",
         "Keyboard Stop",
-        ""
+        "Only officially supported by Unix"
     ],
     [
         "377",
         "Raw Scancode",
         "AGAIN",
         "Keyboard Again",
-        ""
+        "Only officially supported by Unix"
     ],
     [
         "378",
         "Raw Scancode",
         "UNDO",
         "Keyboard Undo",
-        ""
+        "Only officially supported by Unix"
     ],
     [
         "379",
         "Raw Scancode",
         "CUT",
         "Keyboard Cut",
-        ""
+        "Only officially supported by Unix"
     ],
     [
         "380",
         "Raw Scancode",
         "COPY",
         "Keyboard Copy",
-        ""
+        "Only officially supported by Unix"
     ],
     [
         "381",
         "Raw Scancode",
         "PASTE",
         "Keyboard Paste",
-        ""
+        "Only officially supported by Unix"
     ],
     [
         "382",
         "Raw Scancode",
         "FIND",
         "Keyboard Find",
-        ""
+        "Only officially supported by Unix"
     ],
     [
         "383",
         "Raw Scancode",
         "MUTE",
         "Keyboard Mute",
-        ""
+        "Only officially supported by Unix"
     ],
     [
         "384",
         "Raw Scancode",
         "VOL_UP",
         "Keyboard Volume Up",
-        ""
+        "Only officially supported by Unix"
     ],
     [
         "385",
         "Raw Scancode",
         "VOL_DN",
         "Keyboard Volume Down",
-        ""
+        "Only officially supported by Unix"
     ],
     [
         "386",
         "Raw Scancode",
         "KSC_82",
         "Keyboard Locking Caps Lock",
-        ""
+        "Only officially supported by Unix"
     ],
     [
         "387",
         "Raw Scancode",
         "KSC_83",
         "Keyboard Locking Num Lock",
-        ""
+        "Only officially supported by Unix"
     ],
     [
         "388",
         "Raw Scancode",
         "KSC_84",
         "Keyboard Locking Scroll Lock",
-        ""
+        "Only officially supported by Unix"
     ],
     [
         "389",
         "Raw Scancode",
         "KP_COMMA",
         "Keypad Comma",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "390",
         "Raw Scancode",
         "KSC_86",
         "Keypad Equals Sign",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "391",
         "Raw Scancode",
         "INTL1",
         "Keyboard International1",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "392",
         "Raw Scancode",
         "INTL2",
         "Keyboard International2",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "393",
         "Raw Scancode",
         "INTL3",
         "Keyboard International3",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "394",
         "Raw Scancode",
         "INTL4",
         "Keyboard International4",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "395",
         "Raw Scancode",
         "INTL5",
         "Keyboard International5",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "396",
         "Raw Scancode",
         "INTL6",
         "Keyboard International6",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "397",
         "Raw Scancode",
         "INTL7",
         "Keyboard International7",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "398",
         "Raw Scancode",
         "INTL8",
         "Keyboard International8",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "399",
         "Raw Scancode",
         "INTL9",
         "Keyboard International9",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "400",
         "Raw Scancode",
         "LANG1",
         "Keyboard LANG1",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "401",
         "Raw Scancode",
         "LANG2",
         "Keyboard LANG2",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "402",
         "Raw Scancode",
         "LANG3",
         "Keyboard LANG3",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "403",
         "Raw Scancode",
         "LANG4",
         "Keyboard LANG4",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "404",
         "Raw Scancode",
         "LANG5",
         "Keyboard LANG5",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "405",
         "Raw Scancode",
         "LANG6",
         "Keyboard LANG6",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "406",
         "Raw Scancode",
         "LANG7",
         "Keyboard LANG7",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "407",
         "Raw Scancode",
         "LANG8",
         "Keyboard LANG8",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "408",
         "Raw Scancode",
         "LANG9",
         "Keyboard LANG9",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "409",
         "Raw Scancode",
         "KSC_99",
         "Keyboard Alternate Erase",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "410",
         "Raw Scancode",
         "KSC_9A",
         "Keyboard SysReq/Attention",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "411",
         "Raw Scancode",
         "KSC_9B",
         "Keyboard Cancel",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "412",
         "Raw Scancode",
         "KSC_9C",
         "Keyboard Clear",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "413",
         "Raw Scancode",
         "KSC_9D",
         "Keyboard Prior",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "414",
         "Raw Scancode",
         "KSC_9E",
         "Keyboard Return",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "415",
         "Raw Scancode",
         "KSC_9F",
         "Keyboard Separator",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "416",
         "Raw Scancode",
         "KSC_A0",
         "Keyboard Out",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "417",
         "Raw Scancode",
         "KSC_A1",
         "Keyboard Oper",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "418",
         "Raw Scancode",
         "KSC_A2",
         "Keyboard Clear/Again",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "419",
         "Raw Scancode",
         "KSC_A3",
         "Keyboard CrSel/Props",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "420",
         "Raw Scancode",
         "KSC_A4",
         "Keyboard ExSel",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "421",
         "Raw Scancode",
         "KSC_A5",
         "",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "422",
         "Raw Scancode",
         "KSC_A6",
         "",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "423",
         "Raw Scancode",
         "KSC_A7",
         "",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "424",
         "Raw Scancode",
         "KSC_A8",
         "",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "425",
         "Raw Scancode",
         "KSC_A9",
         "",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "426",
         "Raw Scancode",
         "KSC_AA",
         "",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "427",
         "Raw Scancode",
         "KSC_AB",
         "",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "428",
         "Raw Scancode",
         "KSC_AC",
         "",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "429",
         "Raw Scancode",
         "KSC_AD",
         "",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "430",
         "Raw Scancode",
         "KSC_AE",
         "",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "431",
         "Raw Scancode",
         "KSC_AF",
         "",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "432",
         "Raw Scancode",
         "KSC_B0",
         "Keypad 00",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "433",
         "Raw Scancode",
         "KSC_B1",
         "Keypad 000",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "434",
         "Raw Scancode",
         "KSC_B2",
         "Thousands Separator",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "435",
         "Raw Scancode",
         "KSC_B3",
         "Decimal Separator",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "436",
         "Raw Scancode",
         "KSC_B4",
         "Currency Unit",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "437",
         "Raw Scancode",
         "KSC_B5",
         "Currency Sub-unit",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "438",
         "Raw Scancode",
         "KSC_B6",
         "Keypad (",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "439",
         "Raw Scancode",
         "KSC_B7",
         "Keypad )",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "440",
         "Raw Scancode",
         "KSC_B8",
         "Keypad {",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "441",
         "Raw Scancode",
         "KSC_B9",
         "Keypad }",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "442",
         "Raw Scancode",
         "KSC_BA",
         "Keypad Tab",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "443",
         "Raw Scancode",
         "KSC_BB",
         "Keypad Backspace",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "444",
         "Raw Scancode",
         "KSC_BC",
         "Keypad A",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "445",
         "Raw Scancode",
         "KSC_BD",
         "Keypad B",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "446",
         "Raw Scancode",
         "KSC_BE",
         "Keypad C",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "447",
         "Raw Scancode",
         "KSC_BF",
         "Keypad D",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "448",
         "Raw Scancode",
         "KSC_C0",
         "Keypad E",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "449",
         "Raw Scancode",
         "KSC_C1",
         "Keypad F",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "450",
         "Raw Scancode",
         "KSC_C2",
         "Keypad XOR",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "451",
         "Raw Scancode",
         "KSC_C3",
         "Keypad ^",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "452",
         "Raw Scancode",
         "KSC_C4",
         "Keypad %",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "453",
         "Raw Scancode",
         "KSC_C5",
         "Keypad <",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "454",
         "Raw Scancode",
         "KSC_C6",
         "Keypad >",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "455",
         "Raw Scancode",
         "KSC_C7",
         "Keypad &",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "456",
         "Raw Scancode",
         "KSC_C8",
         "Keypad &&",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "457",
         "Raw Scancode",
         "KSC_C9",
         "Keypad |",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "458",
         "Raw Scancode",
         "KSC_CA",
         "Keypad ||",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "459",
         "Raw Scancode",
         "KSC_CB",
         "Keypad :",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "460",
         "Raw Scancode",
         "KSC_CC",
         "Keypad #",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "461",
         "Raw Scancode",
         "KSC_CD",
         "Keypad Space",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "462",
         "Raw Scancode",
         "KSC_CE",
         "Keypad @",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "463",
         "Raw Scancode",
         "KSC_CF",
         "Keypad !",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "464",
         "Raw Scancode",
         "KSC_D0",
         "Keypad Memory Store",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "465",
         "Raw Scancode",
         "KSC_D1",
         "Keypad Memory Recall",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "466",
         "Raw Scancode",
         "KSC_D2",
         "Keypad Memory Clear",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "467",
         "Raw Scancode",
         "KSC_D3",
         "Keypad Memory Add",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "468",
         "Raw Scancode",
         "KSC_D4",
         "Keypad Memory Subtract",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "469",
         "Raw Scancode",
         "KSC_D5",
         "Keypad Memory Multiply",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "470",
         "Raw Scancode",
         "KSC_D6",
         "Keypad Memory Divide",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "471",
         "Raw Scancode",
         "KSC_D7",
         "Keypad +/-",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "472",
         "Raw Scancode",
         "KSC_D8",
         "Keypad Clear",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "473",
         "Raw Scancode",
         "KSC_D9",
         "Keypad Clear Entry",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "474",
         "Raw Scancode",
         "KSC_DA",
         "Keypad Binary",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "475",
         "Raw Scancode",
         "KSC_DB",
         "Keypad Octal",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "476",
         "Raw Scancode",
         "KSC_DC",
         "Keypad Decimal",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "477",
         "Raw Scancode",
         "KSC_DD",
         "Keypad Hexadecimal",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "478",
         "Raw Scancode",
         "KSC_DE",
         "",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "479",
         "Raw Scancode",
         "KSC_DF",
         "",
-        ""
+        "Not required to be supported by any OS"
     ],
     [
         "480",
@@ -3420,168 +3420,168 @@
         "Raw Scancode",
         "KSC_E8",
         "Media Play Pause",
-        ""
+        "Not required to be supported by any OS. Possibly deprecated."
     ],
     [
         "489",
         "Raw Scancode",
         "KSC_E9",
         "Media Stop CD",
-        ""
+        "Not required to be supported by any OS. Possibly deprecated."
     ],
     [
         "490",
         "Raw Scancode",
         "KSC_EA",
         "Media Previous Song",
-        ""
+        "Not required to be supported by any OS. Possibly deprecated."
     ],
     [
         "491",
         "Raw Scancode",
         "KSC_EB",
         "Media Next Song",
-        ""
+        "Not required to be supported by any OS. Possibly deprecated."
     ],
     [
         "492",
         "Raw Scancode",
         "KSC_EC",
         "Media Eject CD",
-        ""
+        "Not required to be supported by any OS. Possibly deprecated."
     ],
     [
         "493",
         "Raw Scancode",
         "KSC_ED",
         "Media Volume Up",
-        ""
+        "Not required to be supported by any OS. Possibly deprecated."
     ],
     [
         "494",
         "Raw Scancode",
         "KSC_EE",
         "Media Volume Down",
-        ""
+        "Not required to be supported by any OS. Possibly deprecated."
     ],
     [
         "495",
         "Raw Scancode",
         "KSC_EF",
         "Media Mute",
-        ""
+        "Not required to be supported by any OS. Possibly deprecated."
     ],
     [
         "496",
         "Raw Scancode",
         "KSC_F0",
         "Media www",
-        ""
+        "Not required to be supported by any OS. Possibly deprecated."
     ],
     [
         "497",
         "Raw Scancode",
         "KSC_F1",
         "Media Back",
-        ""
+        "Not required to be supported by any OS. Possibly deprecated."
     ],
     [
         "498",
         "Raw Scancode",
         "KSC_F2",
         "Media Forward",
-        ""
+        "Not required to be supported by any OS. Possibly deprecated."
     ],
     [
         "499",
         "Raw Scancode",
         "KSC_F3",
         "Media Stop",
-        ""
+        "Not required to be supported by any OS. Possibly deprecated."
     ],
     [
         "500",
         "Raw Scancode",
         "KSC_F4",
         "Media Find",
-        ""
+        "Not required to be supported by any OS. Possibly deprecated."
     ],
     [
         "501",
         "Raw Scancode",
         "KSC_F5",
         "Media Scroll Up",
-        ""
+        "Not required to be supported by any OS. Possibly deprecated."
     ],
     [
         "502",
         "Raw Scancode",
         "KSC_F6",
         "Media Scroll Down",
-        ""
+        "Not required to be supported by any OS. Possibly deprecated."
     ],
     [
         "503",
         "Raw Scancode",
         "KSC_F7",
         "Media Edit",
-        ""
+        "Not required to be supported by any OS. Possibly deprecated."
     ],
     [
         "504",
         "Raw Scancode",
         "KSC_F8",
         "Media Sleep",
-        ""
+        "Not required to be supported by any OS. Possibly deprecated."
     ],
     [
         "505",
         "Raw Scancode",
         "KSC_F9",
         "Media Coffee",
-        ""
+        "Not required to be supported by any OS. Possibly deprecated."
     ],
     [
         "506",
         "Raw Scancode",
         "KSC_FA",
         "Media Refresh",
-        ""
+        "Not required to be supported by any OS. Possibly deprecated."
     ],
     [
         "507",
         "Raw Scancode",
         "KSC_FB",
         "Media Calc",
-        ""
+        "Not required to be supported by any OS. Possibly deprecated."
     ],
     [
         "508",
         "Raw Scancode",
         "KSC_FC",
         "",
-        ""
+        "Not required to be supported by any OS."
     ],
     [
         "509",
         "Raw Scancode",
         "KSC_FD",
         "",
-        ""
+        "Not required to be supported by any OS."
     ],
     [
         "510",
         "Raw Scancode",
         "KSC_FE",
         "",
-        ""
+        "Not required to be supported by any OS."
     ],
     [
         "511",
         "Raw Scancode",
         "KSC_FF",
         "",
-        ""
+        "Not required to be supported by any OS."
     ],
     [
         "512",
