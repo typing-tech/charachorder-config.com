@@ -221,6 +221,8 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(def ^:dynamic *cc-lite-debug* true)
+
 (defn cc-lite-key [{:keys [port-id switch-keys selected-layer]}
                    key-id]
   (let [{:keys [location u]} (get switch-keys key-id)
@@ -228,7 +230,7 @@
     [:div {:class "cc-lite-key"
            :data-ccos-location-number location
            :style {:width (format "calc(%f * var(--cc-lite-key-base-width))" u)}}
-     (js/console.log port-id selected-layer key-id)
+     ; (js/console.log port-id selected-layer key-id)
      [action-chooser-com port-id selected-layer key-id]]))
 
 (defn cc-lite-keymap-view [{:as args :keys [port-id]}]
@@ -275,7 +277,24 @@
       (into
        [:div]
        (for [loc-num (range 0 (inc 11))]
-         [cc-lite-key args (get location->switch-key-id (str loc-num))]))]]))
+         [cc-lite-key args (get location->switch-key-id (str loc-num))]))
+      [:div.mb4]
+      [:div.dib.w-50.tc.v-top
+       (when (or *cc-lite-debug* (not= port-id dummy-port-id))
+         [:<>
+          [:div.dib.w-40.v-top
+           [:span.pink "WARNING: "]
+           [:span "Do not excessively use COMMIT."]]
+          [:div.dib.w-20.v-top
+           (button #(commit-and-refresh!)
+                   ["COMMIT"]
+                   :primary true :danger true :size "small" :classes ["mr0"])]
+          [:div.dib.w-40.v-top
+           [:span "A CC device is only guaranteed at least 10,000 commits per lifetime of the device."]]])]
+      [:div.dib.w-50.tc.v-top
+       (button #(download-csv! port-id)
+               ["Download" [:br] "Layout as CSV"]
+               :primary true :size "small" :classes ["mr0"])]]]))
 
 (defn unsupported-keymap-view [_args]
   [:h1.mv5.tc.red "There is no keymap support for this device yet."])
