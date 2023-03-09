@@ -221,7 +221,7 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(def ^:dynamic *cc-lite-debug* true)
+(def ^:dynamic *cc-lite-debug* false)
 
 (defn cc-lite-key [{:keys [port-id switch-keys selected-layer]}
                    key-id]
