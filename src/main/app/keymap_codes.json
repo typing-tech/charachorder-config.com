@@ -3921,37 +3921,37 @@
     ],
     [
         "560",
-        "",
-        "",
-        "",
+        "Mouse",
+        "MS_CLICK_BWD",
+        "Mouse Backward Button Press/Release",
         ""
     ],
     [
         "561",
-        "",
-        "",
-        "",
+        "Mouse",
+        "MS_CLICK_FWD",
+        "Mouse Forward Button Press/Release",
         ""
     ],
     [
         "562",
         "Mouse",
         "MS_CLICK_LF",
-        "Mouse Left Button Press and Release",
+        "Mouse Left Button Press/Release",
         ""
     ],
     [
         "563",
         "Mouse",
         "MS_CLICK_RT",
-        "Mouse Right Button Press and Release",
+        "Mouse Right Button Press/Release",
         ""
     ],
     [
         "564",
         "Mouse",
         "MS_CLICK_MD",
-        "Mouse Middle Button Press and Release",
+        "Mouse Middle Button Press/Release",
         ""
     ],
     [

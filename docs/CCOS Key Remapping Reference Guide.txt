@@ -560,11 +560,11 @@ Code Id (Decimal)	Type	UTF-8 Representation of Action	Action Description	Notes
 557				
 558				
 559				
-560				
-561				
-562	Mouse	MS_CLICK_LF	Mouse Left Button Press and Release	
-563	Mouse	MS_CLICK_RT	Mouse Right Button Press and Release	
-564	Mouse	MS_CLICK_MD	Mouse Middle Button Press and Release	
+560	Mouse	MS_CLICK_BWD	Mouse Backward Button Press/Release	
+561	Mouse	MS_CLICK_FWD	Mouse Forward Button Press/Release	
+562	Mouse	MS_CLICK_LF	Mouse Left Button Press/Release	
+563	Mouse	MS_CLICK_RT	Mouse Right Button Press/Release	
+564	Mouse	MS_CLICK_MD	Mouse Middle Button Press/Release	
 565	Mouse	MS_MOVE_RT	Mouse Move Right	
 566	Mouse	MS_MOVE_LF	Mouse Move Left	
 567	Mouse	MS_MOVE_DN	Mouse Move Down	
