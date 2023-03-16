@@ -140,15 +140,22 @@
 .cc1-cell-mw {
   max-width: 150px;
 }
+
+$action-font-size: 15px;
 table.cc1 {
   margin-left: auto;
   margin-right: auto;
   margin-bottom: 16px;
   line-height: 1.0;
 
+  td {
+    padding-left: 0px;
+    padding-right: 1px;
+    margin: 0;
+  }
+
   .action-chooser {
     $action-width: 44px;
-    $action-font-size: 15px;
 
     vertical-align: top;
     white-space: nowrap; 
@@ -191,4 +198,70 @@ table.cc1 {
       }
     }
   }
+
+  $clean-width: 55px;
+
+  &.cc1--clean {
+    border-spacing: 4px;
+    td {
+      padding: 0;
+    }
+  }
+
+  table.cc1-stick--clean {
+    position: relative;
+    border-spacing: 4px;
+    td {
+      width: $clean-width;
+      height: $clean-width;
+      margin: 0;
+      padding: 0;
+    }
+    &::before {
+      content: " ";
+      position: absolute;
+      $ring-margin: 16px;
+      left: $ring-margin;
+      right: $ring-margin;
+      top: $ring-margin;
+      bottom: $ring-margin;
+      background-color: #555;
+      border-radius: 50%;
+    }
+  }
+
+  table.cc1-stick--clean.cc1-stick--dark {
+    background-color: #222;
+    &::before {
+      background-color: #000;
+    }
+  }
+
+
+  .action-chooser--clean {
+    $action-width: $clean-width;
+    $action-height: $action-width;
+    margin: 0;
+
+    .action-chooser__action {
+      width: $action-width;
+      height: $action-height;
+      display: flex;
+      align-items: center;
+
+      &--down {
+        background-color: #111;
+      }
+
+      & > * {
+        white-space: normal;
+        word-break: break-all; 
+        min-width: $action-width;
+        width: $action-width;
+        height: auto;
+        position: static;
+      }
+    }
+  }
+
 }

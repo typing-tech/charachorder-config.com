@@ -115,7 +115,7 @@
 
 (defn action-chooser-com []
   (let [*hovered (r/atom false)]
-    (fn [port-id layer switch-key]
+    (fn [port-id layer switch-key is-down-dir]
       (let [key-ns (str layer "." switch-key)
             open-key (keyword key-ns "editing")
             code-key (keyword key-ns "code")
@@ -133,7 +133,8 @@
           :content (if (and (not is-open) @*hovered)
                      (r/as-element [code-tooltip keymap-code])
                      (r/as-element [action-chooser-popover port-id layer switch-key key-ns]))}
-         [:div {:class "action-chooser__action"
+         [:div {:class (concat-classes "action-chooser__action"
+                                       (when is-down-dir "action-chooser__action--down"))
                 :on-mouse-enter #(reset! *hovered true)
                 :on-mouse-leave #(reset! *hovered false)
                 :on-click #(db-set! port-id open-key true)}
@@ -145,79 +146,115 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn cc1-stick-key [{:keys [port-id]} switch-key]
-  [:<>
-   [:div.action-chooser
-    [:div.action-chooser__layer "1"]
-    [action-chooser-com port-id "A1" switch-key]]
-   [:div.action-chooser
-    [:div.action-chooser__layer "2"]
-    [action-chooser-com port-id "A2" switch-key]]
-   [:div.action-chooser
-    [:div.action-chooser__layer "3"]
-    [action-chooser-com port-id "A3" switch-key]]])
+(defn cc1-stick-key [{:keys [port-id selected-layer is-compact-mode is-down-dir]}
+                     switch-key]
+  (let []
+    (if is-compact-mode
+      [:<>
+       [:div.action-chooser
+        [:div.action-chooser__layer "1"]
+        [action-chooser-com port-id "A1" switch-key]]
+       [:div.action-chooser
+        [:div.action-chooser__layer "2"]
+        [action-chooser-com port-id "A2" switch-key]]
+       [:div.action-chooser
+        [:div.action-chooser__layer "3"]
+        [action-chooser-com port-id "A3" switch-key]]]
+      [:div {:class (concat-classes "action-chooser"
+                                    "action-chooser--clean")}
+       [action-chooser-com port-id selected-layer switch-key is-down-dir]])))
 
-(defn cc1-stick [args switch-key-prefix]
-  (let [td (fn [dir]
-             [:td (when dir [cc1-stick-key args (str switch-key-prefix dir)])])]
+(def dark-sticks #{"lr1" "lm1" "lt2"
+                   "rr1" "rm1" "rt2"})
+
+(defn cc1-stick [{:as args :keys [is-compact-mode]}
+                 switch-key-prefix]
+  (let [td (fn td
+             ([dir]
+              (td dir false))
+             ([dir is-down-dir]
+              [:td (when dir
+                     [cc1-stick-key
+                      (mac/args is-down-dir)
+                      (str switch-key-prefix dir)])]))]
     [:td
-     [:table {:class "cc1"}
+     [:table {:class (concat-classes
+                      "cc1-stick"
+                      (when-not is-compact-mode "cc1-stick--clean")
+                      (when (dark-sticks switch-key-prefix) "cc1-stick--dark"))}
       [:tbody
        [:tr (td nil) (td "n")]
-       [:tr (td "w") (td "d") (td "e")]
+       [:tr (td "w") (td "d" true) (td "e")]
        [:tr (td nil) (td "s")]]]]))
 
 (defn cc1-keymap-view [{:as args :keys [port-id]}]
-  (let [commit-and-refresh!
+  (let [is-compact-mode false
+
+        selected-layer-key (keyword port-id "selected-layer")
+        m @(posh/pull *db [selected-layer-key] [:port/id port-id])
+        selected-layer (or (get m selected-layer-key) "A1")
+        set-selected-layer!
+        (fn [x]
+          (transact! *db [[:db/add [:port/id port-id] selected-layer-key x]]))
+
+        commit-and-refresh!
         (fn []
           (commit! port-id)
-          (refresh-keymaps-after-commit! port-id))]
-    [:table {:class "cc1"}
-     [:tbody
-      [:tr
-       [cc1-stick args "lp0"]
-       [cc1-stick args "lr0"]
-       [cc1-stick args "lm0"]
-       [cc1-stick args "li0"]
-       [cc1-stick args "lt0"]
+          (refresh-keymaps-after-commit! port-id))
 
-       [cc1-stick args "rt0"]
-       [cc1-stick args "ri0"]
-       [cc1-stick args "rm0"]
-       [cc1-stick args "rr0"]
-       [cc1-stick args "rp0"]]
-      [:tr
-       [:td]
-       [cc1-stick args "lr1"]
-       [cc1-stick args "lm1"]
-       [:td]
-       [cc1-stick args "lt1"]
-       [cc1-stick args "rt1"]
-       [:td]
-       [cc1-stick args "rm1"]
-       [cc1-stick args "rr1"]]
-      [:tr
-       [:td]
-       [:td
-        (when (not= port-id dummy-port-id)
-          [:div.cc1-cell-mw.tr.fr
-           [:span.pink "WARNING: "]
-           [:span "Do not excessively use COMMIT."]])]
-       [:td.tc (when (not= port-id dummy-port-id)
-                 (button #(commit-and-refresh!)
-                         ["COMMIT"]
-                         :primary true :danger true :size "small" :classes ["mr0"]))]
-       [:td
-        (when (not= port-id dummy-port-id)
-          [:div.cc1-cell-mw
-           [:span "A CC device is only guaranteed at least 10,000 commits per lifetime of the device."]])]
+        args (mac/args selected-layer is-compact-mode)]
+    [:<>
+     [:div {:class "mv3 tc"}
+      (button #(set-selected-layer! "A1") ["(A1) Primary Layer"] :active (= selected-layer "A1"))
+      (button #(set-selected-layer! "A2") ["(A2) Number Layer"] :active (= selected-layer "A2"))
+      (button #(set-selected-layer! "A3") ["(A3) Function Layer"] :active (= selected-layer "A3"))]
+     [:table {:class (concat-classes "cc1"
+                                     (when-not is-compact-mode "cc1--clean"))}
+      [:tbody
+       [:tr
+        [cc1-stick args "lp0"]
+        [cc1-stick args "lr0"]
+        [cc1-stick args "lm0"]
+        [cc1-stick args "li0"]
+        [cc1-stick args "lt0"]
 
-       [cc1-stick args "lt2"]
-       [cc1-stick args "rt2"]
-       [:td]
-       [:td.tc (button #(download-csv! port-id)
-                       ["Download" [:br] "Layout as CSV"]
-                       :primary true :size "small" :classes ["mr0"])]]]]))
+        [cc1-stick args "rt0"]
+        [cc1-stick args "ri0"]
+        [cc1-stick args "rm0"]
+        [cc1-stick args "rr0"]
+        [cc1-stick args "rp0"]]
+       [:tr
+        [:td]
+        [cc1-stick args "lr1"]
+        [cc1-stick args "lm1"]
+        [:td]
+        [cc1-stick args "lt1"]
+        [cc1-stick args "rt1"]
+        [:td]
+        [cc1-stick args "rm1"]
+        [cc1-stick args "rr1"]]
+       [:tr
+        [:td]
+        [:td
+         (when (not= port-id dummy-port-id)
+           [:div.cc1-cell-mw.tr.fr
+            [:span.pink "WARNING: "]
+            [:span "Do not excessively use COMMIT."]])]
+        [:td.tc (when (not= port-id dummy-port-id)
+                  (button #(commit-and-refresh!)
+                          ["COMMIT"]
+                          :primary true :danger true :size "small" :classes ["mr0"]))]
+        [:td
+         (when (not= port-id dummy-port-id)
+           [:div.cc1-cell-mw
+            [:span "A CC device is only guaranteed at least 10,000 commits per lifetime of the device."]])]
+
+        [cc1-stick args "lt2"]
+        [cc1-stick args "rt2"]
+        [:td]
+        [:td.tc (button #(download-csv! port-id)
+                        ["Download" [:br] "Layout as CSV"]
+                        :primary true :size "small" :classes ["mr0"])]]]]]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -254,9 +291,9 @@
         args (mac/args switch-keys selected-layer)]
     [:<>
      [:div {:class "mv3 tc"}
-      (button #(set-selected-layer! "A1") ["Primary Layer (A1)"] :active (= selected-layer "A1"))
-      (button #(set-selected-layer! "A2") ["Fn Layer (A2)"] :active (= selected-layer "A2"))
-      (button #(set-selected-layer! "A3") ["Tertiary Layer (A3)"] :active (= selected-layer "A3"))]
+      (button #(set-selected-layer! "A1") ["(A1) Primary Layer"] :active (= selected-layer "A1"))
+      (button #(set-selected-layer! "A2") ["(A2) Fn Layer"] :active (= selected-layer "A2"))
+      (button #(set-selected-layer! "A3") ["(A3) Tertiary Layer"] :active (= selected-layer "A3"))]
      [:div {:class "ph5"}
       (into
        [:div]
@@ -303,9 +340,11 @@
   (let [port (get-port port-id)]
     [:<>
      [:div.mv2.tc.light-purple
-      [:p.lh-solid "Did you know you can drag and drop a CSV here? And share the URL once it changes?"]
-      [:p.lh-solid "A yellow action means that the action has not been COMMITted."]
-      [:p.lh-solid "Action changes immediately take effect, but are not COMMITted."]]
+      [:p.lh-solid
+       "Did you know you can drag and drop a CSV here? And share the URL once it changes? "]
+      [:p.lh-solid
+       "A " [:span.yellow "yellow"] " action means that the action has not been COMMITted. "
+       "Action changes immediately take effect, but are not COMMITted. "]]
      (cond
        ; true [unsupported-keymap-view args]
        (is-device-not-yet-determined? port) [:div]
