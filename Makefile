@@ -31,7 +31,7 @@ styles-once:
 	./node_modules/.bin/sass scss/$(name).scss:./public/$(name).css
 
 release: node_modules styles-once
-	./node_modules/.bin/shadow-cljs release $(name)
+	DEV_WATCH_PATH=$(dev_watch_path) DEV_ASSET_PATH=$(dev_asset_path) ./node_modules/.bin/shadow-cljs release $(name)
 release-js:
 	./node_modules/.bin/babel src/js --out-dir src/gen
 
