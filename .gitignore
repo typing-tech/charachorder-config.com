@@ -2,9 +2,12 @@
 .cpcache
 /.shadow-cljs/
 /node_modules/
+/.nrepl-port
 
 /cc.jks
 
 /public/compiled/
 /public/charachorder-config.css
 /public/charachorder-config.css.map
+/dev_watch_path.txt
+/dev_asset_path.txt

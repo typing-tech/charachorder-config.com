@@ -1,5 +1,7 @@
 current_dir := $(shell pwd)
 name := charachorder-config
+dev_watch_path := $(shell cat dev_watch_path.txt)
+dev_asset_path := $(shell cat dev_asset_path.txt)
 
 .PHONY: all watch
 
@@ -17,7 +19,7 @@ keystore:
 watch:
 	rm -f public/compiled/$(name).js
 	rm -f public/compiled/manifest.edn
-	./node_modules/.bin/shadow-cljs watch $(name)
+	DEV_WATCH_PATH=$(dev_asset_path) DEV_ASSET_PATH=$(dev_asset_path) ./node_modules/.bin/shadow-cljs watch $(name)
 watch-js:
 	./node_modules/.bin/babel src/js --out-dir src/gen --watch
 

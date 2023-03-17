@@ -9,8 +9,8 @@
   {:target :browser
    :js-options {:js-package-dirs ["node_modules" "src/gen"]}
    :output-dir "./public/compiled/"
+   :asset-path #shadow/env "DEV_ASSET_PATH"
    :build-hooks [(shadow.cljs.build-report/hook)]
-   :asset-path "/ce5368ea-99a5-450d-8240-276a99fe8647/compiled"
    :modules {:charachorder-config {:init-fn app.core/init}}
    :compiler-options {:externs ["datascript/externs.js"]
                       :output-feature-set :es8
@@ -24,7 +24,7 @@
               ;; this makes it so big, it does not load properly from Lambda
               :pseudo-names false}}
    :devtools {:watch-dir "./public"
-              :watch-path "/ce5368ea-99a5-450d-8240-276a99fe8647"
+              :watch-path #shadow/env "DEV_WATCH_PATH"
               :use-document-protocol true
               :preloads [devtools.preload]
               :after-load app.core/render}}}}
