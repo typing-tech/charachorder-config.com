@@ -23,6 +23,7 @@
    [app.views.params :refer [params-view]]
    [app.views.keymap :refer [keymap-view]]
    [app.views.resets :refer [resets-view]]
+   [app.views.settings :refer [settings-view]]
    [app.csv :refer [on-drag-over! read-dropped-keymap-csv!]]))
 (def ScrollToBottom react-scroll-to-bottom/default)
 
@@ -182,6 +183,7 @@
         (gen-button :keymap "Key Map")
         (gen-button :params "Parameters")
         (gen-button :resets "RESETS Toolbox")
+        (gen-button :settings "Settings")
         [:div {:class "absolute top-0 right-0 h-100 flex items-center mr3"}
          [disconnect-button port-id]
          [reboot-tool-button]]])]))
@@ -242,7 +244,8 @@
       (case tab-view
         :keymap [keymap-view args]
         :params [params-view args]
-        :resets [resets-view args]))
+        :resets [resets-view args]
+        :settings [settings-view args]))
     [footer-com]
     (when (not= port-id dummy-port-id)
       [:<>
