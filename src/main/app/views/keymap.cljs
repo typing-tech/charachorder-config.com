@@ -34,6 +34,7 @@
    [app.hw :refer [get-hw-switch-keys
                    get-hw-location->switch-key-id]]
    [app.csv :refer [download-csv! update-url-from-db!]]
+   [app.settings :as settings]
    [app.serial.constants :refer [get-port dummy-port-id]]
    [app.serial.ops :refer [set-keymap!
                            commit!
@@ -188,7 +189,7 @@
        [:tr (td nil) (td "s")]]]]))
 
 (defn cc1-keymap-view [{:as args :keys [port-id]}]
-  (let [is-compact-mode false
+  (let [is-compact-mode (settings/get :cc1-compact-mode false)
 
         selected-layer-key (keyword port-id "selected-layer")
         m @(posh/pull *db [selected-layer-key] [:port/id port-id])
@@ -204,10 +205,11 @@
 
         args (mac/args selected-layer is-compact-mode)]
     [:<>
-     [:div {:class "mv3 tc"}
-      (button #(set-selected-layer! "A1") ["(A1) Primary Layer"] :active (= selected-layer "A1"))
-      (button #(set-selected-layer! "A2") ["(A2) Number Layer"] :active (= selected-layer "A2"))
-      (button #(set-selected-layer! "A3") ["(A3) Function Layer"] :active (= selected-layer "A3"))]
+     (when-not is-compact-mode
+       [:div {:class "mv3 tc"}
+        (button #(set-selected-layer! "A1") ["(A1) Primary Layer"] :active (= selected-layer "A1"))
+        (button #(set-selected-layer! "A2") ["(A2) Number Layer"] :active (= selected-layer "A2"))
+        (button #(set-selected-layer! "A3") ["(A3) Function Layer"] :active (= selected-layer "A3"))])
      [:table {:class (concat-classes "cc1"
                                      (when-not is-compact-mode "cc1--clean"))}
       [:tbody
