@@ -19,7 +19,7 @@ keystore:
 watch:
 	rm -f public/compiled/$(name).js
 	rm -f public/compiled/manifest.edn
-	DEV_WATCH_PATH=$(dev_asset_path) DEV_ASSET_PATH=$(dev_asset_path) ./node_modules/.bin/shadow-cljs watch $(name)
+	DEV_WATCH_PATH=$(dev_watch_path) DEV_ASSET_PATH=$(dev_asset_path) ./node_modules/.bin/shadow-cljs watch $(name)
 watch-js:
 	./node_modules/.bin/babel src/js --out-dir src/gen --watch
 
