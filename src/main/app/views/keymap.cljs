@@ -27,7 +27,8 @@
                       mouse-keymap-codes
                       charachorder-keymap-codes
                       charachorder-one-keymap-codes
-                      raw-keymap-codes]]
+                      raw-keymap-codes
+                      none-keymap-codes]]
    [app.preds :refer [is-device-not-yet-determined?
                       is-device-cc1?
                       is-device-cc-lite?]]
@@ -46,9 +47,12 @@
 (defn db-set! [port-id a v]
   (transact! *db [[:db/add [:port/id port-id] a v]]))
 
-(defn code-tooltip [{:keys [code type action action-desc notes]}]
+(defn code-tooltip [hw-location
+                    {:keys [code type action action-desc notes]}]
+  (js/console.log hw-location)
   [:table {:class "pure-table pure-table-horizontal pure-table-striped measure-wide"}
    [:tbody
+    [:tr [:td.tr "Location"] [:td hw-location]]
     [:tr [:td.tr "Code"] [:td code]]
     [:tr [:td.tr "Type"] [:td type]]
     [:tr [:td.tr "Action"] [:td action]]
@@ -71,6 +75,7 @@
         (gen-button :charachorder "CharaChorder")
         (gen-button :charachorder-one "CharaChorder One")
         (gen-button :raw "Raw Scancode")
+        (gen-button :none "None Scancode")
         (button #(db-set! port-id (keyword key-ns "editing") false)
                 ["X"] :classes ["button-xsmall" "fr" "close-button ma0 mr0"] :error true)]
 
@@ -87,7 +92,8 @@
                :mouse mouse-keymap-codes
                :charachorder charachorder-keymap-codes
                :charachorder-one charachorder-one-keymap-codes
-               :raw raw-keymap-codes)
+               :raw raw-keymap-codes
+               :none none-keymap-codes)
              gen-code
              (fn [{:keys [code action]}]
                (let [tab @*tab
@@ -97,6 +103,7 @@
                                 :charachorder 1
                                 :charachorder-one 1
                                 :raw 1
+                                :none 1
                                 (int (* 0.75 (count action))))]
                  [:td {:colSpan (str col-span)
                        :class (when (= tab :raw) "small")
@@ -109,7 +116,9 @@
                          (update-url-from-db! port-id)
                          (when (not= port-id dummy-port-id)
                            (set-keymap! port-id layer switch-key-id code)))}
-                  action]))
+                  (cond
+                    (not (str/blank? action)) action
+                    :else code)]))
              gen-row (fn [xs] (into [:tr] (map gen-code xs)))]
          [:table {:class "action-chooser-popover__codes mt3"}
           (into [:tbody] (map gen-row codes))])])))
@@ -117,7 +126,10 @@
 (defn action-chooser-com []
   (let [*hovered (r/atom false)]
     (fn [port-id layer switch-key is-down-dir]
-      (let [key-ns (str layer "." switch-key)
+      (let [port (get-port port-id)
+            switch-keys (get-hw-switch-keys port)
+
+            key-ns (str layer "." switch-key)
             open-key (keyword key-ns "editing")
             code-key (keyword key-ns "code")
             hw-code-key (keyword key-ns "hw.code")
@@ -125,14 +137,16 @@
             is-open (-> m open-key boolean)
             code (-> m code-key)
             hw-code (-> m hw-code-key)
-            {:as keymap-code :keys [action]} (get code->keymap-code code)]
+            {:as keymap-code :keys [action]} (get code->keymap-code code)
+            
+            {:keys [location]} (get switch-keys switch-key)]
         (popover
          {:isOpen (or @*hovered is-open)
           :positions ["bottom" "top" "right" "left"]
           :align "start"
           :reposition true
           :content (if (and (not is-open) @*hovered)
-                     (r/as-element [code-tooltip keymap-code])
+                     (r/as-element [code-tooltip location keymap-code])
                      (r/as-element [action-chooser-popover port-id layer switch-key key-ns]))}
          [:div {:class (concat-classes "action-chooser__action"
                                        (when is-down-dir "action-chooser__action--down"))
@@ -149,21 +163,20 @@
 
 (defn cc1-stick-key [{:keys [port-id selected-layer is-compact-mode is-down-dir]}
                      switch-key]
-  (let []
-    (if is-compact-mode
-      [:<>
-       [:div.action-chooser
-        [:div.action-chooser__layer "1"]
-        [action-chooser-com port-id "A1" switch-key]]
-       [:div.action-chooser
-        [:div.action-chooser__layer "2"]
-        [action-chooser-com port-id "A2" switch-key]]
-       [:div.action-chooser
-        [:div.action-chooser__layer "3"]
-        [action-chooser-com port-id "A3" switch-key]]]
-      [:div {:class (concat-classes "action-chooser"
-                                    "action-chooser--clean")}
-       [action-chooser-com port-id selected-layer switch-key is-down-dir]])))
+  (if is-compact-mode
+    [:<>
+     [:div.action-chooser
+      [:div.action-chooser__layer "1"]
+      [action-chooser-com port-id "A1" switch-key]]
+     [:div.action-chooser
+      [:div.action-chooser__layer "2"]
+      [action-chooser-com port-id "A2" switch-key]]
+     [:div.action-chooser
+      [:div.action-chooser__layer "3"]
+      [action-chooser-com port-id "A3" switch-key]]]
+    [:div {:class (concat-classes "action-chooser"
+                                  "action-chooser--clean")}
+     [action-chooser-com port-id selected-layer switch-key is-down-dir]]))
 
 (def dark-sticks #{"lr1" "lm1" "lt2"
                    "rr1" "rm1" "rt2"})
