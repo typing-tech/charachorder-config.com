@@ -164,3 +164,10 @@
         #(contains? #{"KEY_A" "KEY_N" "KEY_1" "ENTER" "F1" "PRTSCN" "KP_1" "F13" "EXECUTE"
                       "INTL1" "KSC_99"}
                     (:action %)))))
+
+(def none-keymap-codes
+  (->> (filter #(= (:type %) "None") keymap-codes)
+       (sort-by :code-int)
+       (partition-when-too-big-or-pred
+        19
+        #(contains? #{} (:action %)))))
