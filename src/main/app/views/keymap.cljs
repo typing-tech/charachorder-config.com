@@ -49,7 +49,7 @@
 
 (defn code-tooltip [hw-location
                     {:keys [code type action action-desc notes]}]
-  (js/console.log hw-location)
+  ; (js/console.log hw-location)
   [:table {:class "pure-table pure-table-horizontal pure-table-striped measure-wide"}
    [:tbody
     [:tr [:td.tr "Location"] [:td hw-location]]
