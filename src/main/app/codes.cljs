@@ -169,5 +169,5 @@
   (->> (filter #(= (:type %) "None") keymap-codes)
        (sort-by :code-int)
        (partition-when-too-big-or-pred
-        19
+        20
         #(contains? #{} (:action %)))))
