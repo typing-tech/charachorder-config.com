@@ -2,12 +2,22 @@
   display: inline-block;
   width: 6.67%;
   height: 75px;
-  line-height: 75px;
   text-align: center;
   border: 1px solid white;
-
+  vertical-align: top;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
+
   &:hover {
     background-color: rgba(255, 255, 255, 0.15);
+  }
+
+  .action-chooser__action {
+    &>* {
+      width: 100%;
+      word-break: break-all;
+    }
   }
 }
