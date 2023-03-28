@@ -66,7 +66,9 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn nav [{:as args :keys [port-id nav-expanded num-devices]}]
+(defn nav
+  "The left nav bar."
+  [{:as args :keys [port-id nav-expanded num-devices]}]
   (let [xs (->> @*ports
                 vals
                 (sort-by :i))
