@@ -3,6 +3,8 @@
 /.shadow-cljs/
 /node_modules/
 /.nrepl-port
+/.calva/
+/.joyride/.nrepl-port
 
 /cc.jks
 
