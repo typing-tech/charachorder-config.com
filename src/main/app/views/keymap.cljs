@@ -15,7 +15,8 @@
                       oget+ oset!+ ocall+ oapply+ ocall!+ oapply!+]]
 
    [app.macros :as mac]
-   [app.components :refer [button popover concat-classes]]
+   [app.components :refer [button popover concat-classes
+                           upload-csv-button]]
    [app.db :as db :refer [*db]]
    [app.codes :refer [keymap-codes
                       code->keymap-code
@@ -138,7 +139,6 @@
             code (-> m code-key)
             hw-code (-> m hw-code-key)
             {:as keymap-code :keys [action]} (get code->keymap-code code)
-            
             {:keys [location]} (get switch-keys switch-key)]
         (popover
          {:isOpen (or @*hovered is-open)
@@ -269,7 +269,8 @@
         [:td]
         [:td.tc (button #(download-csv! port-id)
                         ["Download" [:br] "Layout as CSV"]
-                        :primary true :size "small" :classes ["mr0"])]]]]]))
+                        :primary true :size "small" :classes ["mr0"])]
+        [:td.tc [upload-csv-button port-id]]]]]]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -346,7 +347,9 @@
       [:div.dib.w-50.tc.v-top
        (button #(download-csv! port-id)
                ["Download" [:br] "Layout as CSV"]
-               :primary true :size "small" :classes ["mr0"])]]]))
+               :primary true :size "small" :classes ["mr0"])
+       [:div.dib.mh5]
+       [upload-csv-button port-id]]]]))
 
 (defn unsupported-keymap-view [_args]
   [:h1.mv5.tc.red "There is no keymap support for this device yet."])
