@@ -1,13 +1,10 @@
 (ns app.components
-  (:require
-   ["react-tiny-popover" :as react-tiny-popover]
-
-   [clojure.string :as str]
-
-   [app.macros :as mac :refer-macros [cond-xlet ->hash]]
-   [app.ratoms :refer [*num-devices-connected *active-port-id]]
-
-   [app.utils :refer [get-main-root-element]]))
+  (:require ["react-tiny-popover" :as react-tiny-popover]
+            [app.csv :refer [load-csv-text!]]
+            [app.macros :as mac :refer-macros [cond-xlet ->hash]]
+            [app.utils :refer [get-main-root-element]]
+            [clojure.string :as str]
+            [datascript.core :refer [squuid]]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -80,3 +77,31 @@
                :always (assoc :parentElement parent))]
     (into [:> Popover args]
           els)))
+
+(defn upload-csv-button [port-id]
+  (let [input-id (squuid)]
+    (fn []
+      (let [on-change!
+            (fn [e]
+              (let [file (-> e .-target .-files (aget 0))]
+                (when file
+                  (let [reader (new js/FileReader)]
+                    (set! (.-onload reader)
+                          (fn [e]
+                            (let [csv (-> e .-target .-result)]
+                              (load-csv-text! port-id csv))))
+                    (.readAsText reader file)))))
+            f
+            (fn []
+              (.click (js/document.getElementById input-id)))]
+        [:<>
+         [:input {:type "file" :class "dn" :id input-id
+                  :on-change on-change!}]
+         (button f
+                 [[:span
+                   "Upload and " [:br]
+                   " Apply CSV"]]
+                 :classes ["ma0"
+                           "button-primary"
+                           "button-small"
+                           "button-success"])]))))
