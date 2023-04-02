@@ -196,7 +196,7 @@
   (let [is-advanced (settings/get :advanced-params false)
         param-values @(pull *db '[*] [:port/id port-id])
         args (mac/args is-advanced param-values)]
-    [:div {:class "pa3"}
+    [:div {:class "pa3 pb0"}
      [:div {:class "mb2"}
       (button #(refresh-params port-id) ["Refresh Params"] :size "small")
       (button #(commit! port-id)
