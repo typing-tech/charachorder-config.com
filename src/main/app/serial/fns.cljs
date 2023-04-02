@@ -19,7 +19,8 @@
 
    [app.hw :refer [get-hw-switch-keys
                    get-hw-layers+sorted-switch-key-ids]]
-   [app.codes :refer [var-subcmds var-params code->var-param]]))
+   [app.codes :refer [var-subcmds
+                      var-params code->var-param]]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -32,7 +33,7 @@
          (interpose " ")
          (apply str))))
 
-(defn parse-get-parameter-ret [ret]
+(defn parse-var-get-parameter-ret [ret]
   (let [[cmd-code subcmd-code param-code raw-data success-str] (str/split ret #"\s+")
         success (js/parseInt success-str)
         success (if (< 0 success) false true)
@@ -45,6 +46,38 @@
                                 "1" true)
                  raw-data))]
     (->hash param cmd-code subcmd-code param-code raw-data data success)))
+
+(defn cmd-var-set-parameter [param value]
+  (let [arg0 (:set-parameter var-subcmds)
+        arg1 (get-in var-params [param :code])
+        arg2 (case (get-in var-params [param :type])
+               :num-boolean (if value "1" "0")
+               value)]
+    (assert arg0)
+    (assert arg1)
+    (assert arg2)
+    (->> ["VAR" arg0 arg1 arg2]
+         (interpose " ")
+         (apply str))))
+
+(defn parse-var-set-parameter-ret [ret]
+  (let [[cmd-code subcmd-code param-code data-out-str success-str]
+        (str/split ret #"\s+")
+        success (js/parseInt success-str)
+        success (and (if (< 0 success) false true)
+                     (not= data-out-str "00"))
+        {param-type :type
+         param :param} (get code->var-param param-code)
+        data (when success
+               (case param-type
+                 :num-boolean (case data-out-str
+                                "0" false
+                                "1" true)
+                 data-out-str))]
+    (->hash param param-type
+            cmd-code subcmd-code param-code data success)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn store-device-name [{:keys [read-ch write-ch *device-name]}]
   (go
@@ -74,13 +107,17 @@
     (go
       (>! write-ch (cmd-var-get-parameter param))
       (let [ret (<! read-ch)
-            {:as m :keys [param data]} (parse-get-parameter-ret ret)
+            {:as m :keys [param data]} (parse-var-get-parameter-ret ret)
             port [:port/id port-id]]
         ; (js/console.log m)
         (when-not (nil? data)
           (let [tx-data [[:db/add port param data]]]
             ; (js/console.log tx-data)
             (transact! *db tx-data)))))))
+
+(defn query-var-param! [{:as port :keys [fn-ch]} param]
+  (let [fns [(gen-var-get-param-fn port param)]]
+    (onto-chan! fn-ch fns false)))
 
 (defn query-all-var-params! [{:as port :keys [fn-ch]}]
   (let [params (->> (map key var-params))
