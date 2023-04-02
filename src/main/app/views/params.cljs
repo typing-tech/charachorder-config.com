@@ -30,9 +30,9 @@
                               (.preventDefault %))
           :on-mouse-up #(.stopPropagation %)
           :on-click #(.stopPropagation %)}
-    "min: " min [:div.dib.mh2]
-    "max: " max [:div.dib.mh2]
-    "step:" step
+    "Min: " min [:div.dib.mh2]
+    "Max: " max [:div.dib.mh2]
+    "Step:" step
     [:div.mb2]
     (when defaults
       (into
@@ -203,7 +203,9 @@
               ["COMMIT"]
               :primary true :danger true :size "small" :classes ["mr0" "ml6"])
       [:div.dib.gray.ml2 "A CC device is only guaranteed at least 10,000 commits per lifetime of the device."]]
-     [:div.light-purple "Changes take effect immediately, but you must COMMIT so they survive being powered off."]
+     [:div.light-purple
+      "Changes take effect immediately, but you must COMMIT so they survive being powered off." [:br]
+      "Focus on a number input to see a popup with more options." [:br]]
      (if is-advanced
        [advanced-param-tables args]
        [nice-param-tables args])]))
