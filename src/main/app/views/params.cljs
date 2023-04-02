@@ -91,6 +91,15 @@
                     min (assoc :min min)
                     max (assoc :max max))]])))))
 
+(defn dropdown-control [port-id param-key curr]
+  (let [{:as param :keys [values]} (get var-params param-key)]
+    (into [:select {:value curr
+                    :on-change #(ops/set-param! port-id param-key (-> % .-target .-value))}]
+          (for [[k v] values]
+            [:option {:value k
+                      :selected (= k curr)}
+             v]))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (def number-types #{:ms :us :mouse :pos-int :non-neg-int})
@@ -108,6 +117,9 @@
 
                 (= param-type :num-boolean)
                 [boolean-control port-id param-key raw-value]
+
+                (= param-type :dropdown)
+                [dropdown-control port-id param-key raw-value]
 
                 (contains? number-types param-type)
                 [number-control port-id param-key raw-value]

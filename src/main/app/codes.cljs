@@ -136,13 +136,13 @@
                                       [:span.white " (CC Lite only)"]]}
 
    :operating-system {:code "91" :type :dropdown
-                      :values (bimap
-                               {"Windows" "0"
-                                "Mac" "1"
-                                "Linux" "2"
-                                "iOS" "3"
-                                "Android" "4"
-                                "Unknown" "255"})
+                      :values
+                      [["0" "Windows"]
+                       ["1" "Mac"]
+                       ["2" "Linux"]
+                       ["3" "iOS"]
+                       ["4" "Android"]
+                       ["255" "Unknown"]]
                       :label ["Operating System"]}
    :enable-realtime-feedback {:code "92" :type :num-boolean
                               :label ["Realtime Feedback" [:br]
