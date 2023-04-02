@@ -5,12 +5,13 @@
 
 @use "./components";
 @use "./buttons";
+@use "./switch";
 @use "./cc-lite-keymap";
 
 @import url('https://fonts.googleapis.com/css2?family=Readex+Pro:wght@400;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap');
 
-$root: #charachorder-config;
+$root: "#charachorder-config";
 $left-nav-width: 250px;
 $left-nav-width-collapsed: 36px;
 $tab-height: 32px;
