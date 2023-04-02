@@ -16,6 +16,7 @@
                                  *ports
                                  get-port
                                  dummy-port-id]]
+   [app.codes :refer [var-params]]
    [app.serial.fns :as fns :refer [query-all-var-keymaps!]]))
 
 (defn disconnect! [port-id]
@@ -23,9 +24,34 @@
     (reset! *active-port-id nil)
     (close-port-and-cleanup!)))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn refresh-param [port-id param]
+  (let [port (get-port port-id)]
+    (fns/query-var-param! port param)))
+
 (defn refresh-params [port-id]
   (let [port (get-port port-id)]
     (fns/query-all-var-params! port)))
+
+(defn set-param! [port-id param raw-value]
+  (assert (keyword? param))
+  (let [{:as port :keys [fn-ch]} (get-port port-id)
+        cmd (fns/cmd-var-set-parameter param raw-value)]
+    (letfn [(f [{:keys [write-ch read-ch]}]
+              (go
+                (js/console.log "SEND" cmd)
+                (>! write-ch cmd)
+                (let [ret (<! read-ch)
+                      {:keys [success]} (fns/parse-var-set-parameter-ret ret)]
+                  (js/console.log "RECV" ret)
+                  (if success
+                    (js/console.log "set parameter success")
+                    (js/console.error "set parameter ERROR"))
+                  (refresh-param port-id param))))]
+      (put! fn-ch f))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn reset-restart! [port-id]
   (let [{:keys [close-port-and-cleanup! fn-ch]} (get-port port-id)]
