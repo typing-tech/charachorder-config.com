@@ -124,6 +124,7 @@ ol, ul {
   padding-right: 0;
 
   & > * {
+    overflow-x: hidden;
     overflow-anchor: none;
   }
   p {
@@ -150,4 +151,10 @@ ol, ul {
   font-size: 14px;
   width: 70%;
   border-radius: 4px;
+}
+
+.pure-table td {
+  &.bg-black {
+    @extend .bg-black;
+  }
 }
