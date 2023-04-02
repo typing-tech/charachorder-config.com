@@ -92,10 +92,10 @@
     :label ["Chording Character Counter Timeout" [:br] "(deciseconds)"]}
    :chord-detection-press-tolerance {:code "34" :type :ms :min 1 :max 50 :step 1
                                      :defaults [["Universal: 25ms" 25]]
-                                     :label ["Chord Detection Press Tolerance (ms)"]}
+                                     :label ["Chord Press Tolerance (ms)"]}
    :chord-detection-release-tolerance {:code "35" :type :ms :min 1 :max 50 :step 1
                                        :defaults [["Universal: 25ms" 25]]
-                                       :label ["Chord Detection Release Tolerance (ms)"]}
+                                       :label ["Chord Release Tolerance (ms)"]}
 
    :enable-spurring {:code "41" :type :num-boolean
                      :label ["Spurring"]}
@@ -124,16 +124,18 @@
                     :type :non-neg-int :min 0 :max 50 :step 1
                     :defaults [["CC Lite: 5" 5]]
                     :label ["LED Brightness" [:br]
-                            [:span.white " (CC Lite only)"] [:br]
-                            [:span.gray " (> 5 may use too much power)"]]}
+                            ;; [:span.white " (CC Lite only)"] [:br]
+                            [:span.gold " (> 5 may use too much power)"]]}
    :led-color-code {:code "82" :ccl-only true
                     :type :non-neg-int
                     :label ["LED Color Code" [:br]
-                            [:span.white " (CC Lite only)"]]}
+                            ;; [:span.white " (CC Lite only)"]
+                            ]}
    :enable-led-key-highlight {:code "83" :ccl-only true
                               :type :num-boolean
                               :label ["LED Key Highlight" [:br]
-                                      [:span.white " (CC Lite only)"]]}
+                                      ;; [:span.white " (CC Lite only)"]
+                                      ]}
 
    :operating-system {:code "91" :type :dropdown
                       :values
@@ -146,9 +148,9 @@
                       :label ["Operating System"]}
    :enable-realtime-feedback {:code "92" :type :num-boolean
                               :label ["Realtime Feedback" [:br]
-                                      [:span.gray "(mode switch messages typed out)"]]}
+                                      [:span.gray "(mode switch typed out)"]]}
    :enable-charachorder-ready-on-startup {:code "93" :type :num-boolean
-                                          :label ["Type Ready Message when Powered On"]}})
+                                          :label ["Type Ready Message" [:br] "when Powered On"]}})
 (def code->var-param
   (into {} (map (fn [[k {:as v :keys [code]}]]
                   [code (assoc v :param k)])

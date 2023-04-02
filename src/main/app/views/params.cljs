@@ -4,7 +4,7 @@
             [app.components :refer [button concat-classes popover]]
             [app.db :as db :refer [*db]]
             [app.macros :as mac]
-            [app.serial.ops :as ops :refer [disconnect! refresh-params
+            [app.serial.ops :as ops :refer [commit! disconnect! refresh-params
                                             reset-params!]]
             [app.settings :as settings]
             [posh.reagent :as posh :refer [pull q]]
@@ -138,36 +138,73 @@
      (when is-advanced [:td (str param-type)])
      (when is-advanced [:td code])]))
 
-(defn param-tables [{:as args :keys [port-id]}]
-  (let [is-advanced (settings/get :advanced-params false)
-        param-keys (->> (sort-by #(get-in % [1 :code]) var-params)
+(defn param-table [{:as args :keys [is-advanced param-values]}
+                   ks]
+  [:table {:class "pure-table"}
+   [:thead
+    [:tr [:th "Param"] [:th "Value"]
+     (when is-advanced [:th "Type"])
+     (when is-advanced [:th "Code"])]]
+   (into [:tbody]
+         (map (fn [param-key]
+                [param-table-row args param-key (get param-values param-key)])
+              ks))])
+
+(defn advanced-param-tables [{:as args :keys [is-advanced]}]
+  (let [param-keys (->> (sort-by #(get-in % [1 :code]) var-params)
                         (remove #(and (not is-advanced)
                                       (get-in % [1 :advanced])))
                         (map first))
         ;; partition a sequence in half
-        [param-keys1 param-keys2] (partition-all (js/Math.round (/ (count param-keys) 2.0)) param-keys)
-        param-values @(pull *db '[*] [:port/id port-id])
-        
-        args (mac/args is-advanced)]
+        split-n (js/Math.round (/ (count param-keys) 2.0))
+        [param-keys1 param-keys2] (partition-all split-n param-keys)]
     (into
      [:<>]
      (for [ks [param-keys1 param-keys2]]
        [:div {:class "dib v-top mr4"}
-        [:table {:class "pure-table"}
-         [:thead
-          [:tr [:th "Param"] [:th "Value"]
-           (when is-advanced [:th "Type"])
-           (when is-advanced [:th "Code"])]]
-         (into [:tbody]
-               (map (fn [param-key]
-                      [param-table-row args param-key (get param-values param-key)])
-                    ks))]]))))
+        [param-table args ks]]))))
+
+(def nice-param-table-data
+  [["Modes" [:enable-chording
+             :enable-arpeggiates
+             :enable-compound-chording
+             :enable-character-entry
+             :enable-spurring
+             :enable-active-mouse
+             :enable-realtime-feedback
+             :operating-system
+             :enable-charachorder-ready-on-startup]]
+   ["Keyboard" [:key-scan-duration :key-debounce-press-duration :key-debounce-release-duration
+                :keyboard-output-character-microsecond-delays]]
+   ["Mouse" [:slow-mouse-speed :fast-mouse-speed
+             :mouse-scroll-speed :mouse-poll-duration]]
+   ["Chording" [:chord-detection-press-tolerance :chord-detection-release-tolerance
+                :enable-chording-character-counter-timeout :chording-character-counter-timeout-timer
+                :enable-spurring-character-counter-timeout :spurring-character-counter-timeout-timer
+                :arpeggiate-tolerance :compound-tolerance]]
+   ["LED (CC Lite Only)" [:led-brightness :led-color-code :enable-led-key-highlight]]])
+
+(defn nice-param-tables [args]
+  (into
+   [:<>]
+   (for [[title ks] nice-param-table-data]
+     [:div {:class "dib v-top mr4 mb4 mt2"}
+      [:h3.tc.mb1 title]
+      [param-table args ks]])))
 
 (defn params-view [{:as args :keys [port-id]}]
-  (let []
+  (let [is-advanced (settings/get :advanced-params false)
+        param-values @(pull *db '[*] [:port/id port-id])
+        args (mac/args is-advanced param-values)]
     [:div {:class "pa3"}
      [:div {:class "mb2"}
-      (button #(refresh-params port-id) ["Refresh Params"])]
-
-     [param-tables args]]))
+      (button #(refresh-params port-id) ["Refresh Params"] :size "small")
+      (button #(commit! port-id)
+              ["COMMIT"]
+              :primary true :danger true :size "small" :classes ["mr0" "ml6"])
+      [:div.dib.gray.ml2 "A CC device is only guaranteed at least 10,000 commits per lifetime of the device."]]
+     [:div.light-purple "Changes take effect immediately, but you must COMMIT so they survive being powered off."]
+     (if is-advanced
+       [advanced-param-tables args]
+       [nice-param-tables args])]))
 

@@ -30,7 +30,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn footer-com []
-  [:div {:class "footer tc mw-100 f6 pt5 pb5 light-purple"}
+  [:div {:class "footer tc mw-100 f6 pt3 pb3 light-purple"}
    "Disclaimer: This site is not affiliated, associated, authorized, endorsed by,
    or in any way officially connected with CharaChorder.
    The official CharaChorder website can be found at "
