@@ -33,7 +33,7 @@
 
 (defn has-web-serial-api? [] (boolean Serial))
 (def is-valid-response-output?
-  (partial re-matches #"(CMD|ID|-betaID|VERSION|CML|VAR|RST|RAM|SIM)\s.+"))
+  (partial re-matches #"(\d+\s+)?(CMD|ID|-betaID|VERSION|CML|VAR|RST|RAM|SIM)\s.+"))
 
 (def cmd-encoder (new js/TextEncoder))
 (def output-decoder (new js/TextDecoder))
@@ -99,7 +99,6 @@
         *api-log-size (r/atom 0)
         *serial-log (r/atom {})
         *serial-log-size (r/atom 0)
-        *console (r/atom [])
         *ready (r/atom false)
 
         write-to-api-log!
@@ -168,9 +167,14 @@
               (when-let [x (first lines)]
                 (if (is-valid-response-output? x)
                   (do (read-to-api-log! x)
-                      (>! read-ch x))
+                      (let [[_ serial-header-prefix] (re-find #"^(\d+\s+).+" x)
+                            x (if serial-header-prefix
+                                (subs x (count serial-header-prefix))
+                                x)]
+                        ;; (js/console.log "putting on read-ch" x)
+                        (>! read-ch x)))
                   (do (read-to-serial-log! x)
-                      nil))
+                      (js/console.debug "SERIAL OUT" x)))
                 (recur (rest lines)))))]
       (reset! *reader r)
       (go-loop [prev-buf (new js/Uint8Array)]
