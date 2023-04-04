@@ -88,10 +88,10 @@
    {:code "33" :type :ds :min 0 :max 255 :step 1
     :defaults [["Universal: 40ds" 40]]
     :label ["Chording Character Counter Timeout" [:br] "(deciseconds)"]}
-   :chord-detection-press-tolerance {:code "34" :type :ms :min 1 :max 1000 :step 1
+   :chord-detection-press-tolerance {:code "34" :type :ms :min 1 :max 255 :step 1
                                      :defaults [["Universal: 25ms" 25]]
                                      :label ["Chord Press Tolerance (ms)"]}
-   :chord-detection-release-tolerance {:code "35" :type :ms :min 1 :max 1000 :step 1
+   :chord-detection-release-tolerance {:code "35" :type :ms :min 1 :max 255 :step 1
                                        :defaults [["Universal: 25ms" 25]]
                                        :label ["Chord Release Tolerance (ms)"]}
 
