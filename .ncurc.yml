@@ -1,3 +1,4 @@
 reject:
   - react
   - react-dom
+  - sass
