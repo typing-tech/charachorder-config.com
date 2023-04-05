@@ -96,8 +96,7 @@
     (into [:select {:value curr
                     :on-change #(ops/set-param! port-id param-key (-> % .-target .-value))}]
           (for [[k v] values]
-            [:option {:value k
-                      :selected (= k curr)}
+            [:option {:value k}
              v]))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
