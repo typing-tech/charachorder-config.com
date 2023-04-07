@@ -18,7 +18,7 @@
     "eslint-plugin-react": "7.32.2",
     "eslint-plugin-react-flow": "0.0.1",
     "sass": "1.58.3",
-    "shadow-cljs": "2.22.9",
+    "shadow-cljs": "2.22.10",
     "stylelint": "15.4.0",
     "stylelint-config-standard": "32.0.0",
     "windows-1252": "3.0.4"
