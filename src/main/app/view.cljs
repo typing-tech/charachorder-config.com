@@ -221,8 +221,7 @@
   (let [{:keys [*serial-log]} (get-port port-id)
         log (if-not *serial-log {} (or @*serial-log {}))
         ks (->> (keys log)
-                (sort)
-                (take-last 500))
+                (sort))
         f
         (fn [index]
           (let [{:keys [stdout stdout-t]} (get log index)]

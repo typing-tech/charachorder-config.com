@@ -86,6 +86,25 @@
         (<! (f port))
         (recur)))))
 
+(defn find-max-key [m]
+  (->> m keys (reduce max js/Number.MIN_SAFE_INTEGER)))
+(defn find-min-key [m]
+  (->> m keys (reduce min js/Number.MAX_SAFE_INTEGER)))
+
+(def log-limit 200)
+(defn add-entry-to-atom! [*log stdout]
+  (let [i (-> (find-max-key @*log)
+              inc)
+        stdout-t (timestamp-ms)
+        x (->hash stdout stdout-t)
+        f (fn [m]
+            (if (>= (count m) log-limit)
+              (-> m
+                  (dissoc (find-min-key m))
+                  (assoc i x))
+              (assoc m i x)))]
+    (swap! *log f)))
+
 (defn setup-io-loops! [port-id
                        ^js port]
   (let [read-ch (chan)
@@ -98,7 +117,6 @@
         *api-log (r/atom {})
         *api-log-size (r/atom 0)
         *serial-log (r/atom {})
-        *serial-log-size (r/atom 0)
         *ready (r/atom false)
 
         write-to-api-log!
@@ -116,11 +134,8 @@
             (swap! *api-log-size inc)))
         read-to-serial-log!
         (fn [stdout]
-          (let [i @*serial-log-size
-                stdout-t (timestamp-ms)
-                x (->hash stdout stdout-t)]
-            (swap! *serial-log update i merge x)
-            (swap! *serial-log-size inc)))
+          (add-entry-to-atom! *serial-log stdout)
+          (js/console.log (count @*serial-log)))
 
         close-port-and-cleanup!
         (fn []
