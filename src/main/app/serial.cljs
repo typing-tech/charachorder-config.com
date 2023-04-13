@@ -1,30 +1,24 @@
 (ns app.serial
-  (:require
-   [cljs.core.async :as async
-    :refer [chan <! >! onto-chan! close! put!]
-    :refer-macros [go go-loop]]
-   [cljs.core.async.interop :refer-macros [<p!]]
-   [clojure.string :as str]
-
-   [oops.core :refer [oget oset! ocall oapply ocall! oapply!
-                      oget+ oset!+ ocall+ oapply+ ocall!+ oapply!+]]
-   [promesa.core :as p]
-   [datascript.core :as ds :refer [squuid]]
-   [posh.reagent :as posh :refer [transact!]]
-   [reagent.core :as r]
-
-   [app.macros :refer-macros [cond-xlet ->hash]]
-   [app.ratoms :refer [*num-devices-connected *active-port-id]]
-   [app.db :refer [*db]]
-   [app.utils :refer [timestamp-ms
-                      human-time-with-seconds]]
-
-   [app.csv :as csv]
-   [app.serial.constants :refer [baud-rates
-                                 *ports
-                                 get-port
-                                 dummy-port-id]]
-   [app.serial.fns :as fns :refer [issue-connect-cmds!]]))
+  (:require [app.csv :as csv]
+            [app.db :refer [*db]]
+            [app.macros :refer-macros [cond-xlet ->hash]]
+            [app.ratoms :refer [*active-port-id *num-devices-connected]]
+            [app.serial.constants :refer [*ports baud-rates dummy-port-id
+                                          get-port]]
+            [app.serial.fns :as fns :refer [issue-connect-cmds!]]
+            [app.utils :refer [human-time-with-seconds
+                               parse-binary-chord-string timestamp-ms]]
+            [cljs.core.async :as async
+             :refer [<! >! chan close! onto-chan! put!]
+             :refer-macros [go go-loop]]
+            [cljs.core.async.interop :refer-macros [<p!]]
+            [clojure.string :as str]
+            [datascript.core :as ds :refer [squuid]]
+            [oops.core :refer [oapply oapply! oapply!+ oapply+ ocall ocall!
+                               ocall!+ ocall+ oget oget+ oset! oset!+]]
+            [posh.reagent :as posh :refer [transact!]]
+            [promesa.core :as p]
+            [reagent.core :as r]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -34,6 +28,12 @@
 (defn has-web-serial-api? [] (boolean Serial))
 (def is-valid-response-output?
   (partial re-matches #"(\d+\s+)?(CMD|ID|-betaID|VERSION|CML|VAR|RST|RAM|SIM)\s.+"))
+
+(def chordmap-read-msg? (partial re-matches #"^Chordmaps_::read_uint128.+"))
+(def binary-chord-string? (partial re-matches #"^\d{128}$"))
+(def strange-chord? (partial re-matches #"^Strange chord: (\d{128}.*)$"))
+(def unmodified-chord? (partial re-matches #"^unmodified chord: (\d{128}.*)$"))
+(def nil-chords #{"00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"})
 
 (def cmd-encoder (new js/TextEncoder))
 (def output-decoder (new js/TextDecoder))
@@ -105,6 +105,41 @@
               (assoc m i x)))]
     (swap! *log f)))
 
+(defn log-bcs [bcs chunks]
+  (js/console.debug "BCS" bcs)
+  ;; (js/console.debug "CHORD" chunks)
+  nil)
+
+(defn set-bcs-if-valid! [bcs *binary-chord-string]
+  (let [{:keys [chunks]} (parse-binary-chord-string bcs)]
+    (log-bcs bcs chunks)
+    (reset! *binary-chord-string bcs)))
+
+(defn detect-chord! [x *should-consume-unprefixed-chord-string *binary-chord-string]
+  (cond-xlet
+   :let [match (unmodified-chord? x)] 
+   match (do (let [[_ bcs] match]
+               (set-bcs-if-valid! bcs *binary-chord-string)))
+
+   (chordmap-read-msg? x)
+   (reset! *should-consume-unprefixed-chord-string true)
+
+   (and @*should-consume-unprefixed-chord-string
+        (contains? nil-chords x))
+   (reset! *should-consume-unprefixed-chord-string false)
+
+   (and @*should-consume-unprefixed-chord-string
+        (binary-chord-string? x))
+   (do (reset! *should-consume-unprefixed-chord-string false)
+       (set-bcs-if-valid! x *binary-chord-string)
+       nil)
+
+   :let [match (strange-chord? x)]
+   (not match) nil
+   :let [[_ bcs] match]
+   (contains? nil-chords bcs) nil
+   :return (set-bcs-if-valid! bcs *binary-chord-string)))
+
 (defn setup-io-loops! [port-id
                        ^js port]
   (let [read-ch (chan)
@@ -117,6 +152,8 @@
         *api-log (r/atom {})
         *api-log-size (r/atom 0)
         *serial-log (r/atom {})
+        *should-consume-unprefixed-chord-string (atom false)
+        *binary-chord-string (r/atom nil)
         *ready (r/atom false)
 
         write-to-api-log!
@@ -134,8 +171,7 @@
             (swap! *api-log-size inc)))
         read-to-serial-log!
         (fn [stdout]
-          (add-entry-to-atom! *serial-log stdout)
-          (js/console.log (count @*serial-log)))
+          (add-entry-to-atom! *serial-log stdout))
 
         close-port-and-cleanup!
         (fn []
@@ -154,7 +190,7 @@
             (reset! *num-devices-connected (-> @*ports count))))
 
         m (->hash port-id port read-ch write-ch fn-ch *device-name *device-version *ready
-                  *api-log *serial-log read-to-serial-log!
+                  *api-log *serial-log read-to-serial-log! *binary-chord-string
                   close-port-and-cleanup!)]
 
     (let [writable (oget port "writable")
@@ -188,8 +224,9 @@
                                 x)]
                         ;; (js/console.log "putting on read-ch" x)
                         (>! read-ch x)))
-                  (do (read-to-serial-log! x)
-                      (js/console.debug "SERIAL OUT" x)))
+                  (do (js/console.debug "SERIAL OUT" x)
+                      (detect-chord! x *should-consume-unprefixed-chord-string *binary-chord-string)
+                      (read-to-serial-log! x)))
                 (recur (rest lines)))))]
       (reset! *reader r)
       (go-loop [prev-buf (new js/Uint8Array)]
