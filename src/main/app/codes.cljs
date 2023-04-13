@@ -1,7 +1,8 @@
 (ns app.codes
   (:require
    [shadow.resource :as rc]
-   [app.macros :as mac :refer-macros [cond-xlet ->hash]]))
+   [app.macros :as mac :refer-macros [cond-xlet ->hash]]
+   [clojure.string :as str]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -156,8 +157,10 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(def keymap-code-json (-> (rc/inline "app/keymap_codes.json")
-                          (js/JSON.parse)))
+(def keymap-code-json
+  "Action codes imported from the Google Sheet from CharaChorder."
+  (-> (rc/inline "app/keymap_codes.json")
+      (js/JSON.parse)))
 (def keymap-codes
   (->> keymap-code-json
        (map (fn [[code type action action-desc notes]]
@@ -182,6 +185,12 @@
 
 (defn code-int->label [code]
   (get-in code-int->keymap-code [code :action-desc]))
+(defn code-int->short-dom [code]
+  (let [{:keys [action action-desc]} (get-in code-int->keymap-code [code])]
+    [:span {:title action-desc}
+     (if-not (str/blank? action)
+       action
+       (str code))]))
 
 (defn partition-when [pred xs]
   (reduce (fn [v x]
