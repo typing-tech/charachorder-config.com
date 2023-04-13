@@ -175,6 +175,13 @@
   (into {} (map (fn [{:as m :keys [code]}]
                   [code m])
                 keymap-codes)))
+(def code-int->keymap-code
+  (into {} (map (fn [{:as m :keys [code-int]}]
+                  [code-int m])
+                keymap-codes)))
+
+(defn code-int->label [code]
+  (get-in code-int->keymap-code [code :action-desc]))
 
 (defn partition-when [pred xs]
   (reduce (fn [v x]
