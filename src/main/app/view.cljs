@@ -11,6 +11,7 @@
             [app.serial.ops :as ops]
             [app.utils :refer [human-time-with-seconds]]
             [app.views.chords :refer [chords-view]]
+            [app.views.codes :refer [codes-view]]
             [app.views.keymap :refer [keymap-view]]
             [app.views.params :refer [params-view]]
             [app.views.resets :refer [resets-view]]
@@ -181,6 +182,7 @@
         (gen-button :params "Parameters") 
         [:div.dib.ph3]
         (gen-button :resets "RESETS Toolbox")
+        (gen-button :codes "Action Codes")
         [:div.dib.ph3]
         (gen-button :settings "Settings")
         [:div {:class "absolute top-0 right-0 h-100 flex items-center mr3"}
@@ -244,6 +246,7 @@
         :chords [chords-view args]
         :params [params-view args]
         :resets [resets-view args]
+        :codes [codes-view args]
         :settings [settings-view args]))
     [footer-com]
     (when (not= port-id dummy-port-id)
