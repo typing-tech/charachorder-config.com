@@ -1,30 +1,24 @@
 (ns app.view
-  (:require
-   ["react-scroll-to-bottom" :as react-scroll-to-bottom]
-   [goog.string :as gstring :refer [format]]
-
-   [clojure.string :as str]
-   [oops.core :refer [oget oset! ocall oapply ocall! oapply!
-                      oget+ oset!+ ocall+ oapply+ ocall!+ oapply!+]]
-   [reagent.dom :as rdom]
-   [posh.reagent :as posh :refer [transact! pull q]]
-
-   [app.macros :as mac :refer-macros [cond-xlet ->hash]]
-   [app.ratoms :refer [*nav-expanded
-                       *num-devices-connected
-                       *active-port-id
-                       *current-tab-view]]
-   [app.db :as db :refer [*db]]
-   [app.utils :refer [human-time-with-seconds]]
-   [app.components :refer [button concat-classes]]
-   [app.serial.constants :refer [*ports dummy-port-id get-port]]
-   [app.serial :as serial :refer [has-web-serial-api?]]
-   [app.serial.ops :as ops :refer []]
-   [app.views.params :refer [params-view]]
-   [app.views.keymap :refer [keymap-view]]
-   [app.views.resets :refer [resets-view]]
-   [app.views.settings :refer [settings-view]]
-   [app.csv :refer [on-drag-over! read-dropped-keymap-csv!]]))
+  (:require ["react-scroll-to-bottom" :as react-scroll-to-bottom]
+            [app.components :refer [button concat-classes]]
+            [app.csv :refer [on-drag-over! read-dropped-keymap-csv!]]
+            [app.db :as db :refer [*db]]
+            [app.macros :as mac :refer-macros [cond-xlet ->hash]]
+            [app.ratoms :refer [*active-port-id *current-tab-view
+                                *nav-expanded *num-devices-connected]]
+            [app.serial :as serial :refer [has-web-serial-api?]]
+            [app.serial.constants :refer [*ports dummy-port-id get-port]]
+            [app.serial.ops :as ops]
+            [app.utils :refer [human-time-with-seconds]]
+            [app.views.chords :refer [chords-view]]
+            [app.views.keymap :refer [keymap-view]]
+            [app.views.params :refer [params-view]]
+            [app.views.resets :refer [resets-view]]
+            [app.views.settings :refer [settings-view]]
+            [goog.string :as gstring :refer [format]]
+            [oops.core :refer [oapply oapply! oapply!+ oapply+ ocall ocall!
+                               ocall!+ ocall+ oget oget+ oset! oset!+]]
+            [posh.reagent :as posh :refer [pull q transact!]]))
 (def ScrollToBottom react-scroll-to-bottom/default)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -183,8 +177,11 @@
         [:div {:class "device-string"}
          (format "%s - %s" @*device-name @*device-version)]
         (gen-button :keymap "Key Map")
-        (gen-button :params "Parameters")
+        (gen-button :chords "Chords")
+        (gen-button :params "Parameters") 
+        [:div.dib.ph3]
         (gen-button :resets "RESETS Toolbox")
+        [:div.dib.ph3]
         (gen-button :settings "Settings")
         [:div {:class "absolute top-0 right-0 h-100 flex items-center mr3"}
          [disconnect-button port-id]
@@ -244,6 +241,7 @@
     (let [tab-view (or @*current-tab-view :params)]
       (case tab-view
         :keymap [keymap-view args]
+        :chords [chords-view args]
         :params [params-view args]
         :resets [resets-view args]
         :settings [settings-view args]))
