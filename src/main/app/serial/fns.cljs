@@ -211,7 +211,7 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn issue-connect-cmds! [{:as port :keys [fn-ch *ready *device-name]}]
+(defn issue-connect-cmds! [{:as port :keys [fn-ch *ready]}]
   (go
     (>! fn-ch store-device-name)
     (>! fn-ch store-device-version)
