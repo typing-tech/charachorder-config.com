@@ -91,7 +91,6 @@
         cmd "RST FACTORY"]
     (letfn [(f [{:keys [write-ch read-ch]}]
               (go
-               (js/console.log )
                 (>! write-ch "RST FACTORY")
                 (let [ret (<! read-ch)]
                   (js/console.log ret))
@@ -180,6 +179,8 @@
                   success)))]
       (put! fn-ch f))))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (defn set-keymap! [port-id layer switch-key-id code]
   (assert layer)
   (assert (string? switch-key-id))
@@ -205,3 +206,19 @@
   (assert port-id)
   (let [{:as port} (get-port port-id)]
     (query-all-var-keymaps! port :boot true)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn store-chord-count [port-id]
+  (let [{:as port :keys [fn-ch *num-chords]} (get-port port-id)
+        cmd (fns/cmd-cml-get-chordmap-count)]
+    (letfn [(f [{:as p :keys [write-ch read-ch]}]
+              (go
+                (>! write-ch cmd)
+                (let [ret (<! read-ch)
+                      {:keys [success count]} (fns/parse-cml-get-chordmap-count-ret ret)]
+                  (js/console.log ret)
+                  (when success
+                    (reset! *num-chords count)
+                    (transact! *db [[:db/add [:port/id port-id] :port/chord-count count]])))))]
+      (put! fn-ch f))))
