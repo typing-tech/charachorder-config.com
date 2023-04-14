@@ -155,6 +155,13 @@
                   [code (assoc v :param k)])
                 var-params)))
 
+(def cml-subcmds
+  {:get-chordmap-count "C0"
+   :get-chordmap-by-index "C1"
+   :get-chordmap-by-chord "C2"
+   :set-chordmap-by-chord "C3"
+   :del-chordmap-by-chord "C4"})
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (def keymap-code-json
@@ -185,6 +192,7 @@
 
 (defn code-int->label [code]
   (get-in code-int->keymap-code [code :action-desc]))
+
 (defn code-int->short-dom [code]
   (let [{:keys [action action-desc]} (get-in code-int->keymap-code [code])]
     [:span {:title action-desc}
