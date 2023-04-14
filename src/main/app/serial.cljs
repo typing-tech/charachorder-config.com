@@ -5,7 +5,10 @@
             [app.ratoms :refer [*active-port-id *num-devices-connected]]
             [app.serial.constants :refer [*ports baud-rates dummy-port-id
                                           get-port]]
-            [app.serial.fns :as fns :refer [issue-connect-cmds!]]
+            [app.serial.fns :refer [query-all-chordmaps!
+                                    query-all-var-keymaps! query-all-var-params! store-device-name
+                                    store-device-version]]
+            [app.serial.ops :refer [store-chord-count]]
             [app.utils :refer [human-time-with-seconds
                                parse-binary-chord-string timestamp-ms]]
             [cljs.core.async :as async
@@ -149,11 +152,12 @@
         *reader (atom nil)
         *device-name (r/atom "???")
         *device-version (r/atom "???")
+        *num-chords (r/atom 0)
         *api-log (r/atom {})
         *api-log-size (r/atom 0)
         *serial-log (r/atom {})
         *should-consume-unprefixed-chord-string (atom false)
-        *binary-chord-string (r/atom nil)
+        *binary-chord-string (r/atom "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
         *ready (r/atom false)
 
         write-to-api-log!
@@ -190,7 +194,7 @@
             (reset! *num-devices-connected (-> @*ports count))))
 
         m (->hash port-id port read-ch write-ch fn-ch *device-name *device-version *ready
-                  *api-log *serial-log read-to-serial-log! *binary-chord-string
+                  *api-log *serial-log read-to-serial-log! *binary-chord-string *num-chords
                   close-port-and-cleanup!)]
 
     (let [writable (oget port "writable")
@@ -261,6 +265,16 @@
     (reset! *num-devices-connected num-devices)
     (reset! *active-port-id port-id)
     (assoc m port-id x)))
+
+(defn issue-connect-cmds! [{:as port :keys [port-id fn-ch *ready]}]
+  (go
+    (>! fn-ch store-device-name)
+    (>! fn-ch store-device-version)
+    (store-chord-count port-id)
+    (<! (query-all-var-params! port))
+    (<! (query-all-var-keymaps! port :boot true))
+    (<! (query-all-chordmaps! port))
+    (reset! *ready true)))
 
 (defn on-device-connect! [{:as port :keys [port-id]}]
   (go
