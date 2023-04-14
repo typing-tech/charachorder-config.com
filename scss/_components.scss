@@ -277,22 +277,26 @@ table.cc1 {
 
 }
 ////////////////////////////////////////////////////////////////////////////////
-$chord-chunk-size: 48px;
+
 .chord-chunks {
+  $chord-chunk-size: 24px;
   display: inline-block;
-  border: 1px solid #aaa;
-  font-size: 32px;
-  line-height: $chord-chunk-size;
-  height: $chord-chunk-size;
+  vertical-align: middle;
+  margin-top: 4px;
+  margin-bottom: 4px;
+  font-size: 16px;
+
   &__chunk {
-    display: inline-block;
+    display: inline;
+    border: 1px solid #888;
     padding-left: 8px;
     padding-right: 8px;
+    padding-top: 4px;
+    padding-bottom: 4px;
     text-align: center;
-    width: $chord-chunk-size;
-    height: $chord-chunk-size;
+    min-width: $chord-chunk-size;
   }
   &__chunk:nth-child(even) {
-    background-color: rgba(255, 255, 255, 0.2);
+    background-color: rgba(255, 255, 255, 0.15);
   }
 }
