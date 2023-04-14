@@ -10,6 +10,14 @@
 (defn get-main-root-element []
   (js/document.getElementById "charachorder-config"))
 
+(defn debug-pipe
+  ([x]
+   (js/console.log x)
+   x)
+  ([x msg]
+   (js/console.log msg x)
+   x))
+
 (defn bimap [m]
   (merge m (set/map-invert m)))
 
@@ -30,8 +38,29 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn binary->decimal [b]
-  (js/parseInt b 2))
+(defn pad-left [s n]
+  (let [s (str s)]
+    (if (< (count s) n)
+      (str (apply str (repeat (- n (count s)) "0")) s)
+      s)))
+
+(defn binary->decimal
+  "Unprefixed binary string."
+  [b]
+  (-> (str "0b" b)
+      (js/BigInt)))
+
+(defn hex-str->bin-str
+  "Unprefixed hex string."
+  [hex-str]
+  (-> (str "0x" hex-str)
+      (js/BigInt)
+      (.toString 2)
+      (pad-left 128)))
+
+(def small-binary->decimal
+  (comp (map binary->decimal)
+        (map js/Number)))
 
 (defn parse-binary-chord-string
   "`chunks` is a vector of 12 action codes, each 10 bits long, represented as an integer."
@@ -44,5 +73,5 @@
    :do (assert (= 120 (count bcs)))
    :let [bs (vec (for [i (range 12)]
                    (subs bcs (* 10 i) (* 10 (+ i 1)))))
-         chunks (mapv binary->decimal bs)]
+         chunks (into [] small-binary->decimal bs)]
    :return (->hash unused-binary-string chunks)))
