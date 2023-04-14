@@ -19,7 +19,8 @@
             [goog.string :as gstring :refer [format]]
             [oops.core :refer [oapply oapply! oapply!+ oapply+ ocall ocall!
                                ocall!+ ocall+ oget oget+ oset! oset!+]]
-            [posh.reagent :as posh :refer [pull q transact!]]))
+            [posh.reagent :as posh :refer [pull q transact!]]
+            [app.settings :as settings]))
 (def ScrollToBottom react-scroll-to-bottom/default)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -164,19 +165,22 @@
 
 (defn tab-menu [{:keys [port-id]}]
   (let [current @*current-tab-view
-        {:keys [*device-name *device-version]} (get-port port-id)
-        gen-button (fn [tab label & {:keys [danger]}]
-                     (button #(reset! *current-tab-view tab) [label]
-                             :size "xsmall"
-                             :active (= current tab)
-                             :danger danger))]
+        {:keys [*device-name *device-version *num-chords]} (get-port port-id)
+        gen-button (fn [tab label & {:keys [danger]}] 
+                     (letfn [(f []
+                                (settings/set! :last-view tab)
+                                (reset! *current-tab-view tab))]
+                       (button f [label]
+                               :size "xsmall"
+                               :active (= current tab)
+                               :danger danger)))]
     [:div {:id "tab-menu"}
      (if (= port-id dummy-port-id)
        [:<>
         [switch-to-real-device-mode-button]]
        [:<>
         [:div {:class "device-string"}
-         (format "%s - %s" @*device-name @*device-version)]
+         (format "%s - %s - %d chords" @*device-name @*device-version @*num-chords)]
         (gen-button :keymap "Key Map")
         (gen-button :chords "Chords")
         (gen-button :params "Parameters") 
@@ -237,22 +241,23 @@
    [serial-log-content port-id]])
 
 (defn main-view [{:as args :keys [port-id]}]
-  [:div {:id "main" :class ""}
-   [tab-menu args]
-   [:div {:id "viewport"}
-    (let [tab-view (or @*current-tab-view :params)]
-      (case tab-view
-        :keymap [keymap-view args]
-        :chords [chords-view args]
-        :params [params-view args]
-        :resets [resets-view args]
-        :codes [codes-view args]
-        :settings [settings-view args]))
-    [footer-com]
-    (when (not= port-id dummy-port-id)
-      [:<>
-       [api-log-view args]
-       [serial-log-view args]])]])
+  (let [last-view (settings/get :last-view :keymap)]
+    [:div {:id "main" :class ""}
+    [tab-menu args]
+    [:div {:id "viewport"}
+     (let [tab-view (or @*current-tab-view last-view)]
+       (case tab-view
+         :keymap [keymap-view args]
+         :chords [chords-view args]
+         :params [params-view args]
+         :resets [resets-view args]
+         :codes [codes-view args]
+         :settings [settings-view args]))
+     [footer-com]
+     (when (not= port-id dummy-port-id)
+       [:<>
+        [api-log-view args]
+        [serial-log-view args]])]]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
