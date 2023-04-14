@@ -1,26 +1,23 @@
 (ns app.serial.fns
   "All fns here MUST return a channel!"
-  (:require
-   [cljs.core.async :as async
-    :refer [chan <! >! onto-chan! close!]
+  (:require [app.codes :refer [cml-subcmds code->var-param var-params
+                               var-subcmds]]
+            [app.db :refer [*db]]
+            [app.hw :refer [get-hw-layers+sorted-switch-key-ids
+                            get-hw-switch-keys]]
+            [app.macros :refer-macros [cond-xlet ->hash]]
+            [app.ratoms :refer [*active-port-id]]
+            [cljs.core.async :as async
+    :refer [<! >! chan close! onto-chan!]
     :refer-macros [go go-loop]]
-   [cljs.core.async.interop :refer-macros [<p!]]
-   [clojure.string :as str]
-
-   [oops.core :refer [oget oset! ocall oapply ocall! oapply!
-                      oget+ oset!+ ocall+ oapply+ ocall!+ oapply!+]]
-   [promesa.core :as p]
-   [datascript.core :refer [squuid]]
-   [posh.reagent :as posh :refer [transact!]]
-
-   [app.macros :refer-macros [cond-xlet ->hash]]
-   [app.ratoms :refer [*active-port-id]]
-   [app.db :refer [*db]]
-
-   [app.hw :refer [get-hw-switch-keys
-                   get-hw-layers+sorted-switch-key-ids]]
-   [app.codes :refer [var-subcmds
-                      var-params code->var-param]]))
+            [cljs.core.async.interop :refer-macros [<p!]]
+            [clojure.string :as str]
+            [datascript.core :refer [squuid]]
+            [oops.core :refer [oapply oapply! oapply!+ oapply+ ocall ocall!
+                               ocall!+ ocall+ oget oget+ oset! oset!+]]
+            [posh.reagent :as posh :refer [transact!]]
+            [promesa.core :as p]
+            [goog.object :as go]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -155,7 +152,7 @@
         (when-not (nil? code)
           (let [tx-data (cond-> [[:db/add port attr code]]
                           boot (conj [:db/add port hw-attr code]))]
-            (js/console.log (pr-str tx-data))
+            ;; (js/console.log (pr-str tx-data))
             (transact! *db tx-data)))))))
 
 (defn query-all-var-keymaps!
@@ -211,10 +208,55 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn issue-connect-cmds! [{:as port :keys [fn-ch *ready]}]
-  (go
-    (>! fn-ch store-device-name)
-    (>! fn-ch store-device-version)
-    (<! (query-all-var-params! port))
-    (<! (query-all-var-keymaps! port :boot true))
-    (reset! *ready true)))
+(defn cmd-cml-get-chordmap-count []
+  (let [arg0 (:get-chordmap-count cml-subcmds)]
+    (assert arg0)
+    (->> ["CML" arg0]
+         (interpose " ")
+         (apply str))))
+
+(defn parse-cml-get-chordmap-count-ret [ret]
+  (let [[cmd-code subcmd-code count-str] (str/split ret #"\s+")
+        count (js/parseInt count-str)
+        success (boolean count)]
+    (->hash cmd-code subcmd-code count success)))
+
+(defn cmd-cml-get-chordmap-by-index [index]
+  (let [arg0 (:get-chordmap-by-index cml-subcmds)
+        index-str (str index)]
+    (assert arg0)
+    (assert (number? index))
+    (->> ["CML" arg0 index-str]
+         (interpose " ")
+         (apply str))))
+
+(defn parse-cml-get-chordmap-by-index [ret]
+  (let [[cmd-code subcmd-code index-str hex-chord-string phrase] (str/split ret #"\s+")
+        index (js/parseInt index-str)
+        success (and (not= "0" hex-chord-string)
+                     (not= "0" phrase))]
+    (->hash cmd-code subcmd-code index
+            hex-chord-string phrase
+            success)))
+
+(defn gen-cml-get-chordmap-by-index-fn [index]
+  (fn [{:keys [port-id read-ch write-ch]}]
+    (assert port-id)
+    (go
+      (>! write-ch (cmd-cml-get-chordmap-by-index index))
+      (let [ret (<! read-ch)
+            {:as m :keys [index hex-chord-string phrase success]}
+            (parse-cml-get-chordmap-by-index ret)]
+        (when success
+          (js/console.log m)
+          (transact! *db [{:chord/id [port-id hex-chord-string]
+                           :chord/port-id port-id
+                           :chord/index index
+                           :chord/hex-chord-string hex-chord-string
+                           :chord/phrase phrase}]))))))
+
+(defn query-all-chordmaps! [{:as port :keys [fn-ch *num-chords]}]
+  (let [fns (map gen-cml-get-chordmap-by-index-fn (range @*num-chords))]
+    (onto-chan! fn-ch fns false)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
