@@ -4,7 +4,7 @@
             [app.db :refer [*db]]
             [app.macros :refer-macros [->hash cond-xlet]]
             [app.serial.constants :refer [dummy-port-id get-port]]
-            [app.serial.fns :refer [query-all-chordmaps!]]
+            [app.serial.ops :refer [del-chord! query-all-chordmaps!]]
             [app.utils :refer [hex-str->bin-str parse-binary-chord-string]]
             [goog.string :refer [format]]
             [posh.reagent :as posh]))
@@ -39,6 +39,7 @@
          [:th "Index"]
     ;;  [:th "Hex Chord String"]
     ;;  [:th "Chunks"]
+         [:th ""]
          [:th "Chord"]
          [:th "Phrase"]]]
        [:tbody
@@ -51,6 +52,8 @@
              [:td index]
         ;; [:td hex-chord-string]
         ;; [:td (pr-str chunks)]
+             [:td (button #(del-chord! port-id hex-chord-string)
+                          ["Delete"] :size "xsmall" :danger true)]
              [:td [chord-chunks-com chunks]]
              [:td phrase]]))]])))
 

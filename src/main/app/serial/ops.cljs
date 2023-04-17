@@ -1,23 +1,17 @@
 (ns app.serial.ops
-  (:require
-   [cljs.core.async :as async
-    :refer [chan <! >! onto-chan! close! put!]
+  (:require [app.db :refer [*db]]
+            [app.hw :refer [get-hw-layers+sorted-switch-key-ids
+                            get-hw-switch-keys]]
+            [app.ratoms :refer [*active-port-id *num-devices-connected]]
+            [app.serial.constants :refer [*ports baud-rates dummy-port-id
+                                          get-port]]
+            [app.serial.fns :as fns :refer [gen-cml-get-chordmap-by-index-fn
+                                            query-all-var-keymaps!]]
+            [cljs.core.async :as async
+    :refer [<! >! chan close! onto-chan! put!]
     :refer-macros [go go-loop]]
-   [cljs.core.async.interop :refer-macros [<p!]]
-   [clojure.string :as str]
-   [posh.reagent :as posh :refer [transact!]]
-   [datascript.core :as ds]
-
-   [app.ratoms :refer [*num-devices-connected *active-port-id]]
-   [app.db :refer [*db]]
-   [app.hw :refer [get-hw-switch-keys
-                   get-hw-layers+sorted-switch-key-ids]]
-   [app.serial.constants :refer [baud-rates
-                                 *ports
-                                 get-port
-                                 dummy-port-id]]
-   [app.codes :refer [var-params]]
-   [app.serial.fns :as fns :refer [query-all-var-keymaps!]]))
+            [datascript.core :as ds]
+            [posh.reagent :as posh :refer [transact!]]))
 
 (defn disconnect! [port-id]
   (let [{:keys [close-port-and-cleanup!]} (get-port port-id)]
@@ -171,7 +165,7 @@
                 (>! write-ch cmd)
                 (let [ret (<! read-ch)
                       {:keys [success]} (fns/parse-commit-ret ret)]
-                  (js/console.log ret)
+                  ;; (js/console.log ret)
                   (if success
                     (read-to-serial-log! "COMMIT success")
                     (read-to-serial-log! "COMMIT ERROR"))
@@ -209,15 +203,42 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn store-chord-count [port-id]
-  (let [{:as port :keys [fn-ch *num-chords]} (get-port port-id)
-        cmd (fns/cmd-cml-get-chordmap-count)]
+(defn store-chord-count! [{:as port :keys [port-id write-ch read-ch *num-chords]}]
+  (let [cmd (fns/cmd-cml-get-chordmap-count)]
+    (go
+      (>! write-ch cmd)
+      (let [ret (<! read-ch)
+            {:keys [success count]} (fns/parse-cml-get-chordmap-count-ret ret)]
+        (when success
+          (reset! *num-chords count)
+          (transact! *db [[:db/add [:port/id port-id] :port/chord-count count]]))))))
+
+(defn query-all-chordmaps! [port]
+  (let [compute-and-queue-chord-reads!
+        (fn [{:as port :keys [port-id fn-ch *num-chords]}]
+          (let [get-chordmap-fns (map gen-cml-get-chordmap-by-index-fn (range @*num-chords))
+                fns (concat [(fn [{:keys [*is-reading-chords *chord-read-index]}]
+                               (go
+                                 (reset! *chord-read-index 0)
+                                 (reset! *is-reading-chords true)))]
+                            get-chordmap-fns
+                            [(fn [{:keys [*is-reading-chords]}]
+                               (go
+                                 (reset! *is-reading-chords false)))])]
+            (onto-chan! fn-ch fns false)))]
+    (go
+      (<! (store-chord-count! port))
+      (compute-and-queue-chord-reads! port))))
+
+(defn del-chord! [port-id hex-chord-string]
+  (let [{:as port :keys [fn-ch]} (get-port port-id)
+        cmd (fns/cmd-cml-del-chordmap-by-chord hex-chord-string)]
     (letfn [(f [{:as p :keys [write-ch read-ch]}]
               (go
                 (>! write-ch cmd)
                 (let [ret (<! read-ch)
-                      {:keys [success count]} (fns/parse-cml-get-chordmap-count-ret ret)]
+                      {:keys [success]} (fns/parse-cml-del-chordmap-by-chord-ret ret)]
                   (when success
-                    (reset! *num-chords count)
-                    (transact! *db [[:db/add [:port/id port-id] :port/chord-count count]])))))]
+                    (let [chord [:chord/id [port-id hex-chord-string]]]
+                      (transact! *db [[:db/retractEntity chord]]))))))]
       (put! fn-ch f))))

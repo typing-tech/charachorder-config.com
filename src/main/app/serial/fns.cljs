@@ -256,16 +256,33 @@
                            :chord/hex-chord-string hex-chord-string
                            :chord/phrase phrase}]))))))
 
-(defn query-all-chordmaps! [{:as port :keys [fn-ch *num-chords]}]
-  (let [get-chordmap-fns (map gen-cml-get-chordmap-by-index-fn (range @*num-chords))
-        fns (concat [(fn [{:keys [*is-reading-chords *chord-read-index]}]
-                       (go
-                         (reset! *chord-read-index 0)
-                         (reset! *is-reading-chords true)))]
-                    get-chordmap-fns
-                    [(fn [{:keys [*is-reading-chords *chord-read-index]}]
-                       (go
-                         (reset! *is-reading-chords false)))])]
-    (onto-chan! fn-ch fns false)))
+(defn cmd-cml-set-chordmap-by-chord [hex-chord-string phrase]
+  (let [arg0 (:set-chordmap-by-chord cml-subcmds)]
+    (assert arg0)
+    (assert hex-chord-string)
+    (assert phrase)
+    (->> ["CML" arg0 hex-chord-string phrase]
+         (interpose " ")
+         (apply str))))
+
+(defn parse-cml-set-chordmap-by-chord-ret [ret]
+  (let [[cmd-code subcmd-code hex-chord-string phrase success-str] (str/split ret #"\s+")
+        success (js/parseInt success-str)
+        success (if (< 0 success) false true)]
+    (->hash cmd-code subcmd-code hex-chord-string phrase success)))
+
+(defn cmd-cml-del-chordmap-by-chord [hex-chord-string]
+  (let [arg0 (:del-chordmap-by-chord cml-subcmds)]
+    (assert arg0)
+    (assert hex-chord-string)
+    (->> ["CML" arg0 hex-chord-string]
+         (interpose " ")
+         (apply str))))
+
+(defn parse-cml-del-chordmap-by-chord-ret [ret]
+  (let [[cmd-code subcmd-code hex-chord-string success-str] (str/split ret #"\s+")
+        success (js/parseInt success-str)
+        success (if (< 0 success) false true)]
+    (->hash cmd-code subcmd-code hex-chord-string success)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
