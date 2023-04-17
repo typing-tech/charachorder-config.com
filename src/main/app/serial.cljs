@@ -5,10 +5,9 @@
             [app.ratoms :refer [*active-port-id *num-devices-connected]]
             [app.serial.constants :refer [*ports baud-rates dummy-port-id
                                           get-port]]
-            [app.serial.fns :refer [query-all-chordmaps!
-                                    query-all-var-keymaps! query-all-var-params! store-device-name
-                                    store-device-version]]
-            [app.serial.ops :refer [store-chord-count]]
+            [app.serial.fns :refer [query-all-var-keymaps!
+                                    query-all-var-params! store-device-name store-device-version]]
+            [app.serial.ops :refer [query-all-chordmaps!]]
             [app.utils :refer [human-time-with-seconds
                                parse-binary-chord-string timestamp-ms]]
             [cljs.core.async :as async
@@ -169,16 +168,19 @@
           (let [i @*api-log-size
                 stdin-t (timestamp-ms)
                 x (->hash stdin stdin-t)]
+            (js/console.log (str "%c" stdin) "color: #008800")
             (swap! *api-log update i merge x)))
         read-to-api-log!
         (fn [stdout]
           (let [i @*api-log-size
                 stdout-t (timestamp-ms)
                 x (->hash stdout stdout-t)]
+            (js/console.log (str "%c" stdout) "color: #0000ff")
             (swap! *api-log update i merge x)
             (swap! *api-log-size inc)))
         read-to-serial-log!
         (fn [stdout]
+          (js/console.debug stdout)
           (add-entry-to-atom! *serial-log stdout))
 
         close-port-and-cleanup!
@@ -233,8 +235,7 @@
                                 x)]
                         ;; (js/console.log "putting on read-ch" x)
                         (>! read-ch x)))
-                  (do (js/console.debug "SERIAL OUT" x)
-                      (detect-chord! x *should-consume-unprefixed-chord-string *binary-chord-string)
+                  (do (detect-chord! x *should-consume-unprefixed-chord-string *binary-chord-string)
                       (read-to-serial-log! x)))
                 (recur (rest lines)))))]
       (reset! *reader r)
@@ -275,7 +276,6 @@
   (go
     (>! fn-ch store-device-name)
     (>! fn-ch store-device-version)
-    (store-chord-count port-id)
     (<! (query-all-var-params! port))
     (<! (query-all-var-keymaps! port :boot true))
     (<! (query-all-chordmaps! port))
