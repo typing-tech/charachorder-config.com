@@ -276,6 +276,7 @@ table.cc1 {
   }
 
 }
+
 ////////////////////////////////////////////////////////////////////////////////
 
 .chord-chunks {
@@ -298,5 +299,19 @@ table.cc1 {
   }
   &__chunk:nth-child(even) {
     background-color: rgba(255, 255, 255, 0.15);
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+.phrase {
+  &__chunk {
+    &--complex {
+      background-color: #ccc;
+      color: #000;
+      padding: 2px;
+      border-radius: 2px;
+      margin: 0px;
+    }
   }
 }
