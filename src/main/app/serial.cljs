@@ -110,7 +110,7 @@
 
 (defn log-bcs [bcs chunks]
   (js/console.debug "BCS" bcs)
-  ;; (js/console.debug "CHORD" chunks)
+  (js/console.debug "CHORD" chunks)
   nil)
 
 (defn set-bcs-if-valid! [bcs *binary-chord-string]
