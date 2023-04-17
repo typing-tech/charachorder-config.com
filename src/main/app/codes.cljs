@@ -210,7 +210,7 @@
 
 (defn code-int->short-dom [code]
   (let [{:keys [action action-desc]} (get-in code-int->keymap-code [code])]
-    [:span {:title action-desc}
+    [:span {:title action-desc :data-code (str code)}
      (if-not (str/blank? action)
        action
        (str code))]))
