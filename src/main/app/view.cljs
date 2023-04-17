@@ -57,7 +57,7 @@
 
 (defn reboot-tool-button []
   (button #(oset! js/window "location" "?")
-          ["Reboot Tool"]
+          ["Reboot"]
           :size "xsmall" :warning true :classes ["mr0"]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -180,14 +180,15 @@
         [switch-to-real-device-mode-button]]
        [:<>
         [:div {:class "device-string"}
-         (format "%s - %s - %d chords" @*device-name @*device-version @*num-chords)]
+         @*device-name [:br]
+         @*device-version " - " @*num-chords " chords"]
         (gen-button :keymap "Key Map")
         (gen-button :chords "Chords")
         (gen-button :params "Parameters") 
-        [:div.dib.ph3]
-        (gen-button :resets "RESETS Toolbox")
-        (gen-button :codes "Action Codes")
-        [:div.dib.ph3]
+        [:div.dib.ph2]
+        (gen-button :resets "RESETs Toolbox")
+        ;; (gen-button :codes "Action Codes")
+        [:div.dib.ph2]
         (gen-button :settings "Settings")
         [:div {:class "absolute top-0 right-0 h-100 flex items-center mr3"}
          [disconnect-button port-id]
