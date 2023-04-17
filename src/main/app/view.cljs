@@ -247,7 +247,7 @@
      [serial-log-view args]]))
 
 (defn main-view [{:as args :keys [port-id]}]
-  (let [last-view (settings/get :last-view :keymap)]
+  (let [last-view :keymap]
     [:div {:id "main" :class ""}
     [tab-menu args]
     [:div {:id "viewport"}
