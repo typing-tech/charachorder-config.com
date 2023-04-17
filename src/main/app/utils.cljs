@@ -110,15 +110,13 @@
           (cond-xlet
            (<= n i) chunks
            :let [x (nth xs i)
-                 x (if (variable-length-prefixes x)
+                 is-wide (contains? variable-length-prefixes x)
+                 x (if is-wide
                      (str x (nth xs (inc i)))
-                     x)]
-           (variable-length-prefixes x)
-           (let [y (nth xs (inc i))]
-             (recur (+ i 2)
-                    (conj chunks (str x y))))
-
-           :else (recur (inc i)
+                     x)] 
+           :else (recur (if is-wide
+                          (+ i 2)
+                          (inc i))
                         (conj chunks x))))]
     (mapv small-hex->decimal chunks)))
 ;; (js/console.log (phrase->chunks "01386061"))
