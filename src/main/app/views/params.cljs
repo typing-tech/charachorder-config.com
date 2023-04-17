@@ -1,6 +1,5 @@
 (ns app.views.params
   (:require [app.codes :refer [var-params]]
-            [app.codes :refer [var-params]]
             [app.components :refer [button concat-classes popover]]
             [app.db :as db :refer [*db]]
             [app.macros :as mac]
@@ -16,12 +15,11 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn boolean-control [port-id param-key curr]
-  (let []
-    [:label {:class "switch"}
-     [:input {:type "checkbox"
-              :checked curr
-              :on-change #(ops/set-param! port-id param-key (not curr))}]
-     [:span {:class "slider round"}]]))
+  [:label {:class "switch"}
+   [:input {:type "checkbox"
+            :checked curr
+            :on-change #(ops/set-param! port-id param-key (not curr))}]
+   [:span {:class "slider round"}]])
 
 (defn number-control-popup [port-id param-key {:keys [min max step defaults]}
                             *curr *focused]
@@ -181,14 +179,21 @@
                 :enable-chording-character-counter-timeout :chording-character-counter-timeout-timer
                 :enable-spurring-character-counter-timeout :spurring-character-counter-timeout-timer
                 :arpeggiate-tolerance :compound-tolerance]]
-   ["LED (CC Lite Only)" [:led-brightness :led-color-code :enable-led-key-highlight]]])
+   ["LED (CC Lite Only)" [:led-brightness :led-color-code :enable-led-key-highlight]
+    [:div.mv2
+     "These settings require a "
+     [:span.light-yellow "COMMIT"]
+     " and a " [:br]
+     [:span.light-yellow "REBOOT or POWER CYCLE"]
+     [:span " to take effect."]]]])
 
 (defn nice-param-tables [args]
   (into
    [:<>]
-   (for [[title ks] nice-param-table-data]
+   (for [[title ks description-dom] nice-param-table-data]
      [:div {:class "dib v-top mr4 mb4 mt2"}
       [:h3.tc.mb1 title]
+      description-dom
       [param-table args ks]])))
 
 (defn params-view [{:as args :keys [port-id]}]
