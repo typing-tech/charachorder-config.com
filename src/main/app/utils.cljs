@@ -1,9 +1,9 @@
 (ns app.utils
   (:require ["date-fns" :as date-fns]
-            [app.codes :refer [code-int->keymap-code]]
             [app.macros :refer-macros [cond-xlet ->hash]]
             [cljs.cache :as cache]
-            [clojure.set :as set]))
+            [clojure.set :as set]
+            [clojure.string :as str]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -38,11 +38,14 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn pad-left [s n]
+(defn slow-pad-left [s n]
   (let [s (str s)]
     (if (< (count s) n)
       (str (apply str (repeat (- n (count s)) "0")) s)
       s)))
+
+(defn pad-left [s n]
+  (.padStart s n "0"))
 
 (defn binary->decimal
   "Unprefixed binary string."
@@ -58,11 +61,21 @@
       (.toString 2)
       (pad-left 128)))
 
+(defn small-hex->decimal
+  "two digit hex string to decimal"
+  [hex-str]
+  (-> (str "0x" hex-str)
+      (js/BigInt)
+      (js/Number)))
+
 (def small-binary->decimal
   (comp (map binary->decimal)
         (map js/Number)))
 
-(defn parse-binary-chord-string
+(def parse-binary-chord-string-cache
+  (atom (cache/lru-cache-factory {} :threshold 16384)))
+
+(defn parse-binary-chord-string*
   "`chunks` is a vector of 12 action codes, each 10 bits long, represented as an integer."
   [full-bcs]
   (cond-xlet
@@ -75,3 +88,54 @@
                    (subs bcs (* 10 i) (* 10 (+ i 1)))))
          chunks (into [] small-binary->decimal bs)]
    :return (->hash unused-binary-string chunks)))
+
+(defn parse-binary-chord-string [full-bcs]
+  (swap! parse-binary-chord-string-cache
+         #(cache/through parse-binary-chord-string* % full-bcs))
+  (get @parse-binary-chord-string-cache full-bcs))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(def variable-length-prefixes #{"01" "02" "03" "04"})
+
+(defn phrase->chunks [phrase]
+  (let [xs (for [i (range (/ (count phrase)
+                             2))]
+             (subs phrase (* 2 i) (* 2 (+ i 1))))
+        xs (vec xs)
+        n (count xs)
+        chunks
+        (loop [i 0
+               chunks []]
+          (cond-xlet
+           (<= n i) chunks
+           :let [x (nth xs i)
+                 x (if (variable-length-prefixes x)
+                     (str x (nth xs (inc i)))
+                     x)]
+           (variable-length-prefixes x)
+           (let [y (nth xs (inc i))]
+             (recur (+ i 2)
+                    (conj chunks (str x y))))
+
+           :else (recur (inc i)
+                        (conj chunks x))))]
+    (mapv small-hex->decimal chunks)))
+;; (js/console.log (phrase->chunks "01386061"))
+
+(defn chunks->phrase
+  "`chunks` should be a seq of numbers."
+  [chunks]
+  (->> (reduce (fn [v chunk]
+                 (cond-xlet
+                  :let [x (js/BigInt chunk)
+                        s (-> (.toString x 16)
+                              (str/upper-case))
+                        n (count s)]
+                  (even? n) (conj v s)
+                  :else (conj v
+                              (pad-left s (inc n)))))
+               []
+               chunks)
+       (apply str)))
+;; (js/console.log (chunks->phrase [298 104 105]))
