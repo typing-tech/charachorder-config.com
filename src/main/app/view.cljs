@@ -240,6 +240,12 @@
                       :initial-scroll-behavior "smooth"}
    [serial-log-content port-id]])
 
+(defn logs-com [{:as args :keys [port-id]}]
+  (when (not= port-id dummy-port-id)
+    [:<>
+     [api-log-view args]
+     [serial-log-view args]]))
+
 (defn main-view [{:as args :keys [port-id]}]
   (let [last-view (settings/get :last-view :keymap)]
     [:div {:id "main" :class ""}
@@ -256,10 +262,8 @@
          :codes [codes-view args]
          :settings [settings-view args]))
      [footer-com]
-     (when (not= port-id dummy-port-id)
-       [:<>
-        [api-log-view args]
-        [serial-log-view args]])]]))
+     (comment [logs-com args])
+     nil]]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
