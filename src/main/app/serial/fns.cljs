@@ -240,7 +240,7 @@
             success)))
 
 (defn gen-cml-get-chordmap-by-index-fn [index]
-  (fn [{:keys [port-id read-ch write-ch]}]
+  (fn [{:keys [port-id read-ch write-ch *chord-read-index]}]
     (assert port-id)
     (go
       (>! write-ch (cmd-cml-get-chordmap-by-index index))
@@ -248,7 +248,8 @@
             {:as m :keys [index hex-chord-string phrase success]}
             (parse-cml-get-chordmap-by-index ret)]
         (when success
-          (js/console.log m)
+          ;; (js/console.log m)
+          (swap! *chord-read-index inc)
           (transact! *db [{:chord/id [port-id hex-chord-string]
                            :chord/port-id port-id
                            :chord/index index
@@ -256,7 +257,15 @@
                            :chord/phrase phrase}]))))))
 
 (defn query-all-chordmaps! [{:as port :keys [fn-ch *num-chords]}]
-  (let [fns (map gen-cml-get-chordmap-by-index-fn (range @*num-chords))]
+  (let [get-chordmap-fns (map gen-cml-get-chordmap-by-index-fn (range @*num-chords))
+        fns (concat [(fn [{:keys [*is-reading-chords *chord-read-index]}]
+                       (go
+                         (reset! *chord-read-index 0)
+                         (reset! *is-reading-chords true)))]
+                    get-chordmap-fns
+                    [(fn [{:keys [*is-reading-chords *chord-read-index]}]
+                       (go
+                         (reset! *is-reading-chords false)))])]
     (onto-chan! fn-ch fns false)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
