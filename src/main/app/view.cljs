@@ -245,7 +245,9 @@
     [:div {:id "main" :class ""}
     [tab-menu args]
     [:div {:id "viewport"}
-     (let [tab-view (or @*current-tab-view last-view)]
+     (let [tab-view (if (= port-id dummy-port-id)
+                      :keymap
+                      (or @*current-tab-view last-view))]
        (case tab-view
          :keymap [keymap-view args]
          :chords [chords-view args]
