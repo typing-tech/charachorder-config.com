@@ -126,7 +126,22 @@
                             ;; [:span.white " (CC Lite only)"] [:br]
                             [:span.gold " (> 5 may use too much power)"]]}
    :led-color-code {:code "82" :ccl-only true
-                    :type :non-neg-int
+                    :type :dropdown
+                    :values
+                    [["0" "White"]
+                     ["1" "Red"]
+                     ["2" "Orange"]
+                     ["3" "Yellow"]
+                     ["4" "Lime"]
+                     ["5" "Green"]
+                     ["6" "Spring Green"]
+                     ["7" "Cyan"]
+                     ["8" "Sky Blue"]
+                     ["9" "Blue"]
+                     ["10" "Violet"]
+                     ["11" "Pink"]
+                     ["12" "Rose"]
+                     ["13" "Multicolor"]]
                     :label ["LED Color Code" [:br]
                             ;; [:span.white " (CC Lite only)"]
                             ]}
