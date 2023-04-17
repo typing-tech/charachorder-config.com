@@ -217,7 +217,6 @@
                 (>! write-ch cmd)
                 (let [ret (<! read-ch)
                       {:keys [success count]} (fns/parse-cml-get-chordmap-count-ret ret)]
-                  (js/console.log ret)
                   (when success
                     (reset! *num-chords count)
                     (transact! *db [[:db/add [:port/id port-id] :port/chord-count count]])))))]
