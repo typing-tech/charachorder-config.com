@@ -221,7 +221,7 @@ table.cc1 {
 
   table.cc1-stick--clean {
     position: relative;
-    border-spacing: 4px;
+    border-spacing: 3px;
     td {
       width: $clean-width;
       height: $clean-width;
@@ -231,7 +231,7 @@ table.cc1 {
     &::before {
       content: " ";
       position: absolute;
-      $ring-margin: 16px;
+      $ring-margin: 24px;
       left: $ring-margin;
       right: $ring-margin;
       top: $ring-margin;
