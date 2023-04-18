@@ -1,6 +1,6 @@
 (ns app.ratoms
-  (:require
-   [reagent.core :as r]))
+  (:require [app.settings :as settings]
+            [reagent.core :as r]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -8,4 +8,4 @@
 (defonce *nav-expanded (r/atom false))
 (defonce *num-devices-connected (r/atom 0))
 (defonce *active-port-id (r/atom nil))
-(defonce *current-tab-view (r/atom nil))
+(defonce *current-tab-view (r/atom (settings/get :last-view :keymap)))
