@@ -298,7 +298,7 @@ table.cc1 {
     min-width: $chord-chunk-size;
   }
   &__chunk:nth-child(even) {
-    background-color: rgba(255, 255, 255, 0.15);
+    // background-color: rgba(255, 255, 255, 0.15);
   }
 }
 
@@ -307,11 +307,13 @@ table.cc1 {
 .phrase {
   &__chunk {
     &--complex {
+      display: inline-block;
       background-color: #ccc;
       color: #000;
       padding: 2px;
+      margin-left: 4px;
+      margin-right: 4px;
       border-radius: 2px;
-      margin: 0px;
     }
   }
 }
