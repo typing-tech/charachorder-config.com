@@ -278,7 +278,7 @@
     (>! fn-ch store-device-version)
     (<! (query-all-var-params! port))
     (<! (query-all-var-keymaps! port :boot true))
-    (<! (query-all-chordmaps! port))
+    ;; (<! (query-all-chordmaps! port))
     (reset! *ready true)))
 
 (defn on-device-connect! [{:as port :keys [port-id]}]

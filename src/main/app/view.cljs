@@ -187,7 +187,7 @@
         (gen-button :params "Parameters") 
         [:div.dib.ph2]
         (gen-button :resets "RESETs Toolbox")
-        ;; (gen-button :codes "Action Codes")
+        (gen-button :codes "Action Codes")
         [:div.dib.ph2]
         (gen-button :settings "Settings")
         [:div {:class "absolute top-0 right-0 h-100 flex items-center mr3"}
