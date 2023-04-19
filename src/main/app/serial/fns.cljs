@@ -256,6 +256,21 @@
                            :chord/hex-chord-string hex-chord-string
                            :chord/phrase phrase}]))))))
 
+(defn cmd-cml-get-chordmap-by-chord [hex-chord-string]
+  (let [arg0 (:get-chordmap-by-chord cml-subcmds)]
+    (assert arg0)
+    (assert hex-chord-string)
+    (->> ["CML" arg0 hex-chord-string]
+         (interpose " ")
+         (apply str))))
+
+(defn parse-cml-get-chordmap-by-chord-ret [ret]
+  (let [[cmd-code subcmd-code hex-chord-string phrase] (str/split ret #"\s+")
+        success (and (not= "0" hex-chord-string)
+                     (not= "0" phrase)
+                     (not= "2" phrase))]
+    (->hash cmd-code subcmd-code hex-chord-string phrase success)))
+
 (defn cmd-cml-set-chordmap-by-chord [hex-chord-string phrase]
   (let [arg0 (:set-chordmap-by-chord cml-subcmds)]
     (assert arg0)

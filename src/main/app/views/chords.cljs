@@ -4,7 +4,8 @@
             [app.db :refer [*db]]
             [app.macros :refer-macros [->hash cond-xlet]]
             [app.serial.constants :refer [dummy-port-id get-port]]
-            [app.serial.ops :refer [del-chord! query-all-chordmaps!]]
+            [app.serial.ops :refer [delete-chord! query-all-chordmaps!
+                                    read-chord! simple-delete-chord!]]
             [app.utils :refer [hex-str->bin-str parse-binary-chord-string
                                phrase->chunks small-hex->decimal]]
             [goog.string :refer [format]]
@@ -77,8 +78,10 @@
           [:tr {:key e}
            [:td index]
            [:td
-            ;; (button #(del-chord! port-id hex-chord-string)
-            ;;         ["Delete"] :size "xsmall" :danger true)
+            (button #(delete-chord! port-id hex-chord-string)
+                    ["Delete"] :size "xsmall" :danger true)
+            (button #(read-chord! port-id hex-chord-string)
+                    ["Read"] :size "xsmall")
             nil]
            [:td [chord-chunks-com hex-chord-string]]
            [:td [phrase-chunks-com phrase]]])]])))

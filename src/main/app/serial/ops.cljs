@@ -2,14 +2,15 @@
   (:require [app.db :refer [*db]]
             [app.hw :refer [get-hw-layers+sorted-switch-key-ids
                             get-hw-switch-keys]]
+            [app.macros :refer-macros [->hash cond-xlet]]
             [app.ratoms :refer [*active-port-id *num-devices-connected]]
             [app.serial.constants :refer [*ports baud-rates dummy-port-id
                                           get-port]]
             [app.serial.fns :as fns :refer [gen-cml-get-chordmap-by-index-fn
                                             query-all-var-keymaps!]]
             [cljs.core.async :as async
-    :refer [<! >! chan close! onto-chan! put!]
-    :refer-macros [go go-loop]]
+             :refer [<! >! chan close! onto-chan! put!]
+             :refer-macros [go go-loop]]
             [datascript.core :as ds]
             [posh.reagent :as posh :refer [transact!]]))
 
@@ -230,7 +231,9 @@
       (<! (store-chord-count! port))
       (compute-and-queue-chord-reads! port))))
 
-(defn del-chord! [port-id hex-chord-string]
+(defn simple-delete-chord!
+  "This always fails due to a bug in the firmware."
+  [port-id hex-chord-string]
   (let [{:as port :keys [fn-ch]} (get-port port-id)
         cmd (fns/cmd-cml-del-chordmap-by-chord hex-chord-string)]
     (letfn [(f [{:as p :keys [write-ch read-ch]}]
@@ -241,4 +244,40 @@
                   (when success
                     (let [chord [:chord/id [port-id hex-chord-string]]]
                       (transact! *db [[:db/retractEntity chord]]))))))]
+      (put! fn-ch f))))
+
+(defn delete-chord!
+  [port-id hex-chord-string]
+  (let [{:keys [fn-ch]} (get-port port-id)
+        del-cmd (fns/cmd-cml-del-chordmap-by-chord hex-chord-string)
+        read-cmd (fns/cmd-cml-get-chordmap-by-chord hex-chord-string)]
+    (letfn [(f [{:as p :keys [write-ch read-ch]}]
+              (go
+                (cond-xlet
+                 :do (>! write-ch del-cmd)
+                 ;; as of CCOS 1.0.2 this always reports failure, 
+                 ;; but the chord is probably deleted
+                 :let [_ret (<! read-ch)]
+                 :do (>! write-ch read-cmd)
+                 :let [ret (<! read-ch)
+                       {:keys [success]} (fns/parse-cml-get-chordmap-by-chord-ret ret)]
+                 ;; :do (js/console.log m)
+                 ;; if confirmed deleted, remove from db
+                 (not success)
+                 (let [chord [:chord/id [port-id hex-chord-string]]]
+                   (js/console.log "DELETED CHORD" (pr-str chord))
+                   (transact! *db [[:db/retractEntity chord]]))
+                 :return nil)))]
+      (put! fn-ch f))))
+
+(defn read-chord!
+  [port-id hex-chord-string]
+  (let [{:keys [fn-ch]} (get-port port-id)
+        cmd (fns/cmd-cml-get-chordmap-by-chord hex-chord-string)]
+    (letfn [(f [{:as p :keys [write-ch read-ch]}]
+              (go
+                (>! write-ch cmd)
+                (let [ret (<! read-ch)
+                      {:as m :keys [success]} (fns/parse-cml-get-chordmap-by-chord-ret ret)]
+                  (js/console.log m))))]
       (put! fn-ch f))))
