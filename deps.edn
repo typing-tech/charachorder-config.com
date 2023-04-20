@@ -16,7 +16,7 @@
 
         ;; util
         codox/codox {:mvn/version "0.10.8"}
-        binaryage/devtools {:mvn/version "1.0.6"}
+        binaryage/devtools {:mvn/version "1.0.7"}
         fipp/fipp {:mvn/version "0.6.26"}
         com.taoensso/timbre {:mvn/version "6.1.0"}
         org.slf4j/slf4j-simple {:mvn/version "2.0.7"}
