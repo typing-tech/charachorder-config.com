@@ -6,23 +6,37 @@
             [app.serial.constants :refer [dummy-port-id get-port]]
             [app.serial.ops :refer [delete-chord! query-all-chordmaps!
                                     read-chord! simple-delete-chord!]]
-            [app.utils :refer [hex-str->bin-str parse-binary-chord-string
-                               phrase->chunks small-hex->decimal]]
+            [app.utils :refer [hex-str->bin-str pad-left
+                               parse-binary-chord-string phrase->chunks small-hex->decimal]]
+            [cljs.cache :as cache]
             [goog.string :refer [format]]
             [posh.reagent :as posh]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn chord-chunks-com [hex-chord-string]
+(defn hex-chord-string->sorted-chunks* [hex-chord-string]
   (let [bcs (if (= 128 (count hex-chord-string))
               hex-chord-string
-              (hex-str->bin-str hex-chord-string))
-        chunks (->> bcs
-                    parse-binary-chord-string
-                    :chunks
-                    (filter #(not= 0 %)))]
+              (hex-str->bin-str hex-chord-string))]
+    (->> bcs
+         parse-binary-chord-string
+         :chunks
+         (filter #(not= 0 %))
+         sort
+         vec)))
+
+(def hex-chord-string->sorted-chunks-cache (atom (cache/lru-cache-factory {} :threshold 16384)))
+(defn hex-chord-string->sorted-chunks [hex-chord-string]
+  (swap! hex-chord-string->sorted-chunks-cache
+         #(cache/through hex-chord-string->sorted-chunks* % hex-chord-string))
+  (get @hex-chord-string->sorted-chunks-cache hex-chord-string))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn chord-chunks-com [hex-chord-string]
+  (let [chunks (hex-chord-string->sorted-chunks hex-chord-string)]
     (into
-     [:div {:class "chord-chunks mh2"}]
+     [:div {:class "chord-chunks"}]
      (for [chunk chunks]
        (-> (code-int->short-dom chunk)
            (assoc-in [1 :class] "chord-chunks__chunk"))))))
@@ -50,6 +64,10 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defn lex-comp-numbers [xs]
+  (->> (map (fn [x] (-> (str x) (pad-left 3))) xs)
+       (apply str)))
+
 (defn get-chords [port-id]
   (->> @(posh/q '[:find ?e ?index ?hex-chord-string ?phrase
                   :in $ ?port-id
@@ -60,7 +78,9 @@
                   [?e :chord/phrase ?phrase]]
                 *db port-id)
        (map #(zipmap [:e :index :hex-chord-string :phrase] %))
-       (sort-by :index)))
+       (map (fn [{:as m :keys [hex-chord-string]}]
+              (assoc m :chunks (hex-chord-string->sorted-chunks hex-chord-string))))
+       (sort-by (fn [{:keys [chunks]}] (lex-comp-numbers chunks)))))
 
 (defn chords-table [{:keys [port-id *is-reading-chords *chord-read-index *num-chords]}]
   (if @*is-reading-chords
@@ -69,19 +89,15 @@
       [:table {:class "pure-table pure-table-horizontal"}
        [:thead
         [:tr
-         [:th "Index"]
-         [:th "Ops"]
+         [:th]
          [:th "Chord"]
          [:th "Phrase"]]]
        [:tbody
-        (for [{:keys [e index hex-chord-string phrase]} chords]
+        (for [{:keys [e hex-chord-string phrase]} chords]
           [:tr {:key e}
-           [:td index]
            [:td
             (button #(delete-chord! port-id hex-chord-string)
                     ["Delete"] :size "xsmall" :danger true)
-            (button #(read-chord! port-id hex-chord-string)
-                    ["Read"] :size "xsmall")
             nil]
            [:td [chord-chunks-com hex-chord-string]]
            [:td [phrase-chunks-com phrase]]])]])))
@@ -94,7 +110,7 @@
        [:div.mb2
         (button #(query-all-chordmaps! port) ["Read Chords"] :size "small" :primary true)]
        [:div.f2.mb3
-        [:div.dib "Last Chord: "]
+        [:div.dib.mr3 "Last Chord: "]
         (when-let [bcs @*binary-chord-string]
           [chord-chunks-com bcs])]
        [chords-table port]])))
