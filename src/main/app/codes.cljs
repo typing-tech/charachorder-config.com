@@ -196,7 +196,7 @@
               x prev))
           (->> (map :action keymap-codes) (sort))))
 
-(def code->keymap-code
+(def code-str->keymap-code
   (into {} (map (fn [{:as m :keys [code]}]
                   [code m])
                 keymap-codes)))
@@ -280,3 +280,21 @@
        (partition-when-too-big-or-pred
         20
         #(contains? #{} (:action %)))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(def phrase-keymap-codes
+  (let [xf (comp (remove #(= (:type %) "None"))
+                 (remove #(and (str/blank? (:action %))
+                               (str/blank? (:description %)))))]
+    (into [] xf keymap-codes)))
+
+(def typeable-keymap-codes
+  (-> (->> keymap-codes
+           (filter (fn [{:keys [type action]}]
+                     (or (= 1 (count action)))))
+           (map (fn [{:as m :keys [action]}]
+                  [action m]))
+           (into {}))
+      (assoc " " (get code-int->keymap-code 32))))
+;; (js/console.log typeable-keymap-codes)
