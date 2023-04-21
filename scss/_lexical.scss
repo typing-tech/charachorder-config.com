@@ -1,0 +1,34 @@
+.phrase-editor {
+  $padding-h: 4px;
+  $padding-v: 2px;
+  &__container {
+    position: relative;
+    width: 200px;
+    border: 1px solid #ccc;
+    padding-left: $padding-h;
+    padding-right: $padding-h;
+    padding-top: $padding-v;
+    padding-bottom: $padding-v;
+  }
+  &__input {
+    resize: none;
+    position: relative;
+    tab-size: 1;
+    outline: 0;
+    caret-color: #0ff;
+    font-size: 16px;
+  }
+  &__placeholder {
+    position: absolute;
+    top: $padding-v;
+    left: $padding-h;
+    display: inline-block;
+    color: #888;
+    font-size: 16px;
+    line-height: 1.0;
+    font-style: italic;
+    text-overflow: ellipsis;
+    pointer-events: none;
+    user-select: none;
+  }
+}
