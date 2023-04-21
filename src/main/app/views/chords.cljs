@@ -160,6 +160,15 @@
 
 (defn chord-instructions []
   [:div.pa3
+   [:h3 "Notes"]
+   [:ul.mb3
+    [:li.yellow "This is beta, so BACKUP your chords!"]
+    [:li "Tested on CCOS 1.0.2"]
+    [:li.f7 "There is currently bugs in the firmware preventing full error checking."]
+    [:li "'zuffixes' have code " [:span.white "298"] " in front. (BKSP)"]
+    [:li "'spaceless chords' have codes " [:span.white "32, 298"] " in the back. (SPACE, BKSP)"]
+    [:li "'cursor warping' uses codes for arrow keys " [:span.white "335, 336, 337, 338"]]]
+
    [:h3 "I want to add a new chord"]
    [:ol.mb3
     [:li "Click on the top text box and chord until the correct chord is displayed in 'Active Chord'"]
