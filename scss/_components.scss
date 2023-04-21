@@ -279,6 +279,42 @@ table.cc1 {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+.chords-table-container {
+  overflow-x: hidden;
+  overflow-y: auto;
+  width: 100%;
+  height: calc(100vh - #{175px});
+}
+
+.chords-table {
+  tr.editing {
+    background-color: #2a2a00;
+  }
+  tr, td {
+    &:nth-child(3) {
+      min-width: 500px;
+    }
+  }
+}
+
+input.chord-reader {
+  background-color: #333;
+  border: 1px solid #555;
+  outline: none;
+  width: 100%;
+  caret-color: red;
+
+  &::placeholder {
+    color: #aaa;
+  }
+  &:focus {
+    &::placeholder {
+      color: red;
+    }
+
+  }
+}
+
 .chord-chunks {
   $chord-chunk-size: 24px;
   display: inline-block;
@@ -299,17 +335,23 @@ table.cc1 {
   }
 }
 
-////////////////////////////////////////////////////////////////////////////////
+.complex-chunk {
+  display: inline-block;
+  background-color: #ccc;
+  color: #000;
+  padding: 2px;
+  margin-left: 6px;
+  margin-right: 6px;
+  border-radius: 2px;
+}
+.complex-chunk + .complex-chunk {
+  margin-left: 0;
+}
 
 .phrase {
   &__chunk {
     &--complex {
-      display: inline-block;
-      background-color: #ccc;
-      color: #000;
-      padding: 2px;
-      margin-right: 6px;
-      border-radius: 2px;
+      @extend .complex-chunk;
     }
   }
 }
