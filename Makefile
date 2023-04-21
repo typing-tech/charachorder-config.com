@@ -44,3 +44,5 @@ upgrade-node-deep-deps:
 
 deploy:
 	rsync -rv public/ /var/www/html/
+tinymce:
+	rsync -rv tinymce-react-demo/public/tinymce /var/www/html/
