@@ -19,8 +19,8 @@
 
 (defn query-all-chords-button [port]
   (button #(query-all-chordmaps! port) ["Read Chords"]
-          :size "small" :primary true
-          :classes ["mr0"]))
+          :size "xsmall" :primary true
+          :classes ["v-top" "mr2"]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -77,8 +77,9 @@
                      (transact! *db [[:db/add e :chord/hex-chord-string active-hex-chord-string]]))]
             (set-chord! port-id active-hex-chord-string phrase cb))
           (commit! port-id))
-        apply-chord-button (button apply-active-chord!
-                                   ["Use Active Chord"] :size "xsmall" :secondary true)]
+        apply-chord-button
+        (button apply-active-chord!
+                ["Use Active Chord"] :size "xsmall" :secondary true)]
     [:<>
      [:tr {:key e
            :on-click toggle-editing!
@@ -86,7 +87,8 @@
                                   (when is-editing "editing"))}
       [:td
        (button toggle-editing! ["Edit"]
-               :size "xsmall" :minimal true)]
+               :size "xsmall" :minimal true
+               :classes ["v-top" "mr0"])]
       [:td [chord-chunks-com hex-chord-string]]
       [:td [phrase-chunks-com phrase]]]
      (when is-editing
@@ -116,10 +118,10 @@
     [:div (format "Reading Chords (%d/%d)" @*chord-read-index @*num-chords)]
     (let [chords (get-chords port-id)]
       ;; (js/console.log "re-rendering chords table")
-      [:table {:class "pure-table pure-table-horizontal chords-table"}
+      [:table {:class "pure-table pure-table-horizontal chords-table ml3"}
        [:thead
         [:tr
-         [:th [query-all-chords-button port]]
+         [:th ]
          [:th "Chord"]
          [:th "Phrase"]]]
        (into [:tbody] (map (fn [chord] [chords-table-row port-id active-hex-chord-string chord])
@@ -144,22 +146,64 @@
                                 "Click to focus here and chord set the active chord below."
                                 "Unfocus or dot i/o Manager will break and your device will be slow.")}]))))
 
+(defn add-chord! [port-id active-hex-chord-string *new-chord-index-counter]
+  (let [m @(posh/pull *db '[*] [:chord/id [port-id active-hex-chord-string]])]
+    (if m
+      (transact! *db [[:db/add -1 :error/error
+                       "Chord already exists"]])
+      (transact! *db [{:chord/id [port-id active-hex-chord-string]
+                       :chord/index (swap! *new-chord-index-counter dec)
+                       :chord/port-id port-id
+                       :chord/hex-chord-string active-hex-chord-string
+                       :chord/phrase ""}]))))
+
+(defn chord-instructions []
+  [:div.pa3
+   [:h3 "I want to add a new chord"]
+   [:ol.mb3
+    [:li "Click on the top text box and chord until the correct chord is displayed in 'Active Chord'"]
+    [:li "Click the 'New Chord' button"]
+    [:li "Click the 'Edit' button on the new chord"]
+    [:li "Type in the phrase you want to use for the chord"]
+    [:li "Press 'Enter' to save the chord"]]
+   
+   [:h3 "I want to edit an existing chord phrase"]
+   [:ol.mb3
+    [:li "Click the 'Edit' button on the chord you want to edit"]
+    [:li "Type in the phrase you want to use for the chord"]
+    [:li "Press 'Enter' to save the chord"]]
+   
+   [:h3 "I want to change the chord used to activate a phrase"]
+   [:ol.mb3
+    [:li "Click on the top text box and chord until the correct chord is displayed in 'Active Chord'"]
+    [:li "Click the 'Edit' button on the chord you want to change"]
+    [:li "Click the 'Apply Active Chord' button"]]
+   
+   [:h3 "I want to delete an existing chord"]
+   [:ol.mb3
+    [:li "Click the 'Edit' button on the chord you want to delete"]
+    [:li "Click the 'Delete' button"]]
+   nil])
+
 (defn chords-view [{:keys [port-id]}]
   (when (not= port-id dummy-port-id)
-    (let [port (get-port port-id)
-          {:keys [*binary-chord-string]} port
+    (let [{:as port :keys [*binary-chord-string *new-chord-index-counter]}
+          (get-port port-id)
           active-hex-chord-string (when-let [bcs @*binary-chord-string]
                                     (binary->hex bcs))]
       [:div {:class "pb0"}
        [:div.pt3.pl3
-        [:div.mb2.w-50 [chord-reader port-id]]
+        [:div.mb2.mw6 [chord-reader port-id]]
         [:div.pb2
-         (button #()
+         [query-all-chords-button port]
+         (button #(add-chord! port-id active-hex-chord-string *new-chord-index-counter)
                  ["New Chord"] :size "xsmall" :success true
                  :classes ["button-success" "v-top" "mr2"])
          [:div.f3.dib.mr3.color-secondary "Active Chord: "]
          (when active-hex-chord-string [chord-chunks-com active-hex-chord-string])
          [:div.dib.gray.f7.mh3 active-hex-chord-string]
          nil]]
-       [:div {:class "chords-table-container"}
-        [chords-table port active-hex-chord-string]]])))
+       [:div {:class "chords-table-container dib v-top mw8"}
+        [chords-table port active-hex-chord-string]]
+       [:div.dib.v-top.mw6
+        [chord-instructions]]])))

@@ -156,6 +156,7 @@
         *num-chords (r/atom 0)
         *is-reading-chords (r/atom false)
         *chord-read-index (r/atom 0)
+        *new-chord-index-counter (r/atom 0)
         *chord-sorting-method (r/atom :chord)
 
         *api-log (r/atom {})
@@ -201,10 +202,12 @@
             (swap! *ports dissoc port-id)
             (reset! *num-devices-connected (-> @*ports count))))
 
-        m (->hash port-id port read-ch write-ch fn-ch *device-name *device-version *ready
-                  *api-log *serial-log read-to-serial-log! *binary-chord-string
-                  *chords *num-chords *is-reading-chords *chord-read-index *chord-sorting-method
-                  close-port-and-cleanup!)]
+        m (->hash
+           port-id port read-ch write-ch fn-ch *device-name *device-version *ready
+           *api-log *serial-log read-to-serial-log! *binary-chord-string
+           *chords *num-chords *is-reading-chords *chord-read-index
+           *chord-sorting-method *new-chord-index-counter
+           close-port-and-cleanup!)]
 
     (let [writable (oget port "writable")
           w (.getWriter writable)]
