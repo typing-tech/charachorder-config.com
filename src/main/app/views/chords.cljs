@@ -1,5 +1,5 @@
 (ns app.views.chords
-  (:require [app.codes :refer [code-int->short-dom]]
+  (:require [app.codes :refer [code-int->keymap-code code-int->short-dom]]
             [app.components :refer [button concat-classes]]
             [app.components.phrase-editor :refer [phrase-editor]]
             [app.db :refer [*db]]
@@ -7,8 +7,8 @@
             [app.serial.constants :refer [dummy-port-id get-port]]
             [app.serial.ops :as ops :refer [commit! delete-chord!
                                             query-all-chordmaps! read-chord! set-chord!]]
-            [app.utils :refer [binary->hex hex-chord-string->sorted-chunks
-                               hex-str->bin-str pad-left
+            [app.utils :refer [binary->hex download-file!
+                               hex-chord-string->sorted-chunks hex-str->bin-str pad-left
                                parse-binary-chord-string phrase->chunks small-hex->decimal]]
             [datascript.core :refer [transact!]]
             [goog.string :refer [format]]
@@ -82,6 +82,7 @@
                 ["Use Active Chord"] :size "xsmall" :secondary true)]
     [:<>
      [:tr {:key e
+           :data-chord-index chord-index
            :on-click toggle-editing!
            :class (concat-classes "pointer"
                                   (when is-editing "editing"))}
@@ -112,7 +113,7 @@
        (map #(zipmap [:e :chord-id :index :hex-chord-string :phrase] %))
        (sort-by :index)))
 
-(defn chords-table [{:as port :keys [port-id *is-reading-chords *chord-read-index *num-chords]}
+(defn chords-table [{:keys [port-id *is-reading-chords *chord-read-index *num-chords]}
                     active-hex-chord-string]
   (if @*is-reading-chords
     [:div (format "Reading Chords (%d/%d)" @*chord-read-index @*num-chords)]
@@ -185,6 +186,34 @@
     [:li "Click the 'Delete' button"]]
    nil])
 
+(defn download-chords-button [{:as port :keys [port-id]}]
+  (let [chords
+        (->> @(posh/q '[:find ?hex-chord-string ?phrase
+                        :in $ ?port-id
+                        :where
+                        [?e :chord/port-id ?port-id]
+                        [?e :chord/hex-chord-string ?hex-chord-string]
+                        [?e :chord/phrase ?phrase]]
+                      *db port-id)
+             (map (fn [[hex-chord-string phrase]]
+                    (let [human-chord (->> (hex-chord-string->sorted-chunks hex-chord-string)
+                                           (mapv (fn [x] (get-in code-int->keymap-code [x :action]))))
+                          human-phrase (->> (phrase->chunks phrase)
+                                            (mapv (fn [x] (get-in code-int->keymap-code [x :action])))
+                                            (mapv (fn [x]
+                                                    (if (= 1 (count x))
+                                                      x
+                                                      (str " " x " "))))
+                                            (apply str))]
+                      {:hex-chord-string hex-chord-string
+                       :phrase phrase
+                       :human-chord human-chord
+                       :human-phrase human-phrase})))
+             (clj->js))]
+    (button #(download-file! port "chords.json" (js/JSON.stringify chords nil 4))
+            ["Download Chords"] :size "xsmall" :success true
+            :classes ["button-success" "v-top" "mr2"])))
+
 (defn chords-view [{:keys [port-id]}]
   (when (not= port-id dummy-port-id)
     (let [{:as port :keys [*binary-chord-string *new-chord-index-counter]}
@@ -206,4 +235,6 @@
        [:div {:class "chords-table-container dib v-top mw8"}
         [chords-table port active-hex-chord-string]]
        [:div.dib.v-top.mw6
+        [:div.pa3
+         [download-chords-button port]]
         [chord-instructions]]])))
