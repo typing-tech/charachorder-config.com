@@ -19,7 +19,7 @@
                            upload-csv-button]]
    [app.db :as db :refer [*db]]
    [app.codes :refer [keymap-codes
-                      code->keymap-code
+                      code-str->keymap-code
                       longest-action-text
 
                       ascii-keymap-codes
@@ -80,7 +80,7 @@
         (button #(db-set! port-id (keyword key-ns "editing") false)
                 ["X"] :classes ["button-xsmall" "fr" "close-button ma0 mr0"] :error true)]
 
-       (let [{:as keymap :keys [code action-desc notes]} (get code->keymap-code @*keymap-code)]
+       (let [{:as keymap :keys [code action-desc notes]} (get code-str->keymap-code @*keymap-code)]
          [:div {:class "action-chooser-popover__info mv2 pa2"}
           (when keymap [:div (format "%s - %s" code action-desc)])
           (when notes [:div notes])])
@@ -138,7 +138,7 @@
             is-open (-> m open-key boolean)
             code (-> m code-key)
             hw-code (-> m hw-code-key)
-            {:as keymap-code :keys [action]} (get code->keymap-code code)
+            {:as keymap-code :keys [action]} (get code-str->keymap-code code)
             {:keys [location]} (get switch-keys switch-key)]
         (popover
          {:isOpen (or @*hovered is-open)
