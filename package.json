@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "@lexical/react": "0.10.0",
+    "@tinymce/tinymce-react": "4.3.0",
     "create-react-class": "15.7.0",
     "date-fns": "2.29.3",
     "fast-json-stable-stringify": "2.1.0",
