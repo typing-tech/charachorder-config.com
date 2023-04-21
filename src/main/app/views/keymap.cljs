@@ -16,7 +16,7 @@
 
    [app.macros :as mac]
    [app.components :refer [button popover concat-classes
-                           upload-csv-button]]
+                           ]]
    [app.db :as db :refer [*db]]
    [app.codes :refer [keymap-codes
                       code-str->keymap-code
@@ -35,7 +35,7 @@
                       is-device-cc-lite?]]
    [app.hw :refer [get-hw-switch-keys
                    get-hw-location->switch-key-id]]
-   [app.csv :refer [download-csv! update-url-from-db!]]
+   [app.csv :refer [download-csv! update-url-from-db! upload-csv-button]]
    [app.settings :as settings]
    [app.serial.constants :refer [get-port dummy-port-id]]
    [app.serial.ops :refer [set-keymap!

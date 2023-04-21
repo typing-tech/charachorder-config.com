@@ -240,7 +240,7 @@
             success)))
 
 (defn gen-cml-get-chordmap-by-index-fn [index]
-  (fn [{:keys [port-id read-ch write-ch *chord-read-index]}]
+  (fn [{:keys [port-id read-ch write-ch *chords *chord-read-index]}]
     (assert port-id)
     (go
       (>! write-ch (cmd-cml-get-chordmap-by-index index))
@@ -250,10 +250,10 @@
         (when success
           ;; (js/console.log m)
           (swap! *chord-read-index inc)
-          (transact! *db [{:chord/id [port-id hex-chord-string]
-                           :chord/port-id port-id
-                           :chord/hex-chord-string hex-chord-string
-                           :chord/phrase phrase}]))))))
+          (swap! *chords conj! {:chord/id [port-id hex-chord-string]
+                                :chord/port-id port-id
+                                :chord/hex-chord-string hex-chord-string
+                                :chord/phrase phrase}))))))
 
 (defn cmd-cml-get-chordmap-by-chord [hex-chord-string]
   (let [arg0 (:get-chordmap-by-chord cml-subcmds)]

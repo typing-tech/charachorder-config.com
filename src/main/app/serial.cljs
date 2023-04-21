@@ -152,9 +152,11 @@
         *device-name (r/atom "???")
         *device-version (r/atom "???")
 
+        *chords (atom [])
         *num-chords (r/atom 0)
         *is-reading-chords (r/atom false)
         *chord-read-index (r/atom 0)
+        *chord-sorting-method (r/atom :chord)
 
         *api-log (r/atom {})
         *api-log-size (r/atom 0)
@@ -201,7 +203,7 @@
 
         m (->hash port-id port read-ch write-ch fn-ch *device-name *device-version *ready
                   *api-log *serial-log read-to-serial-log! *binary-chord-string
-                  *num-chords *is-reading-chords *chord-read-index
+                  *chords *num-chords *is-reading-chords *chord-read-index *chord-sorting-method
                   close-port-and-cleanup!)]
 
     (let [writable (oget port "writable")

@@ -8,6 +8,7 @@
                                           get-port]]
             [app.serial.fns :as fns :refer [gen-cml-get-chordmap-by-index-fn
                                             query-all-var-keymaps!]]
+            [app.utils :refer [lex-comp-numbers hex-chord-string->sorted-chunks]] 
             [cljs.core.async :as async
              :refer [<! >! chan close! onto-chan! put!]
              :refer-macros [go go-loop]]
@@ -214,18 +215,37 @@
           (reset! *num-chords count)
           (transact! *db [[:db/add [:port/id port-id] :port/chord-count count]]))))))
 
+(defn sort+add-chords-to-db! [port-id *chord-sorting-method chords]
+  (let [sort-method @*chord-sorting-method]
+    (->> chords
+         (map (fn [{:as m
+                    hex-chord-string :chord/hex-chord-string}]
+                (assoc m :chord-chunks (hex-chord-string->sorted-chunks hex-chord-string))))
+         (sort-by (fn [{:keys [chord-chunks]}]
+                    (lex-comp-numbers chord-chunks)))
+         (map-indexed (fn [index m]
+                        ;; index 0 reserved for new chord
+                        (assoc m :chord/index (inc index))))
+         (vec)
+         (transact! *db))))
+
 (defn query-all-chordmaps! [port]
   (let [compute-and-queue-chord-reads!
         (fn [{:as port :keys [port-id fn-ch *num-chords]}]
           (let [get-chordmap-fns (map gen-cml-get-chordmap-by-index-fn (range @*num-chords))
-                fns (concat [(fn [{:keys [*is-reading-chords *chord-read-index]}]
+                begin! (fn [{:keys [*is-reading-chords *chords *chord-read-index]}]
                                (go
                                  (reset! *chord-read-index 0)
-                                 (reset! *is-reading-chords true)))]
+                                 (reset! *chords (transient []))
+                                 (reset! *is-reading-chords true)))
+                end! (fn [{:keys [*is-reading-chords *chords *chord-sorting-method]}]
+                       (go
+                         (let [chords (persistent! @*chords)]
+                           (sort+add-chords-to-db! port-id *chord-sorting-method chords))
+                         (reset! *is-reading-chords false)))
+                fns (concat [begin!]
                             get-chordmap-fns
-                            [(fn [{:keys [*is-reading-chords]}]
-                               (go
-                                 (reset! *is-reading-chords false)))])]
+                            [end!])]
             (onto-chan! fn-ch fns false)))]
     (go
       (<! (store-chord-count! port))
@@ -247,7 +267,7 @@
       (put! fn-ch f))))
 
 (defn delete-chord!
-  [port-id hex-chord-string]
+  [port-id hex-chord-string cb]
   (let [{:keys [fn-ch]} (get-port port-id)
         del-cmd (fns/cmd-cml-del-chordmap-by-chord hex-chord-string)
         read-cmd (fns/cmd-cml-get-chordmap-by-chord hex-chord-string)]
@@ -263,10 +283,7 @@
                        {:keys [success]} (fns/parse-cml-get-chordmap-by-chord-ret ret)]
                  ;; :do (js/console.log m)
                  ;; if confirmed deleted, remove from db
-                 (not success)
-                 (let [chord [:chord/id [port-id hex-chord-string]]]
-                   (js/console.log "DELETED CHORD" (pr-str chord))
-                   (transact! *db [[:db/retractEntity chord]]))
+                 (not success) (when cb (cb))
                  :return nil)))]
       (put! fn-ch f))))
 
@@ -283,7 +300,7 @@
       (put! fn-ch f))))
 
 (defn set-chord!
-  [port-id hex-chord-string phrase]
+  [port-id hex-chord-string phrase cb]
   (let [{:keys [fn-ch]} (get-port port-id)
         set-cmd (fns/cmd-cml-set-chordmap-by-chord hex-chord-string phrase)
         read-cmd (fns/cmd-cml-get-chordmap-by-chord hex-chord-string)]
@@ -302,8 +319,5 @@
                              ;; wrong/truncated when high actions (two bytes) are used
                              ;; (= phrase (:phrase m))
                              true)
-                    (transact! *db [{:chord/id [port-id hex-chord-string]
-                                     :chord/port-id port-id
-                                     :chord/hex-chord-string hex-chord-string
-                                     :chord/phrase phrase}])))))]
+                    (when cb (cb))))))]
       (put! fn-ch f))))

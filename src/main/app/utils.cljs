@@ -47,6 +47,10 @@
 (defn pad-left [s n]
   (.padStart s n "0"))
 
+(defn lex-comp-numbers [xs]
+  (->> (map (fn [x] (-> (str x) (pad-left 3))) xs)
+       (apply str)))
+
 (defn binary->decimal
   "Unprefixed binary string."
   [b]
@@ -102,6 +106,23 @@
   (swap! parse-binary-chord-string-cache
          #(cache/through parse-binary-chord-string* % full-bcs))
   (get @parse-binary-chord-string-cache full-bcs))
+
+(defn hex-chord-string->sorted-chunks* [hex-chord-string]
+  (let [bcs (if (= 128 (count hex-chord-string))
+              hex-chord-string
+              (hex-str->bin-str hex-chord-string))]
+    (->> bcs
+         parse-binary-chord-string
+         :chunks
+         (filter #(not= 0 %))
+         sort
+         vec)))
+
+(def hex-chord-string->sorted-chunks-cache (atom (cache/lru-cache-factory {} :threshold 16384)))
+(defn hex-chord-string->sorted-chunks [hex-chord-string]
+  (swap! hex-chord-string->sorted-chunks-cache
+         #(cache/through hex-chord-string->sorted-chunks* % hex-chord-string))
+  (get @hex-chord-string->sorted-chunks-cache hex-chord-string))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

@@ -1,25 +1,22 @@
 (ns app.csv
-  (:require
-   ["file-saver" :as file-saver]
-   ["snappyjs" :as snappyjs]
-   ["rfc4648" :refer [base64url]]
-
-   [clojure.string :as str]
-   [datascript.core :as ds]
-   [posh.reagent :as posh :refer [transact! pull q]]
-   [oops.core :refer [oget oset! ocall oapply ocall! oapply!
-                      oget+ oset!+ ocall+ oapply+ ocall!+ oapply!+]]
-   [testdouble.cljs.csv :as csv]
-   [app.macros :as mac :refer-macros [cond-xlet ->hash]]
-   [app.ratoms :refer [*url-search-params]]
-   [app.preds :refer [is-device-cc1?
-                      is-device-cc-lite?]]
-   [app.hw :refer [get-hw-switch-keys
-                   get-hw-location->switch-key-id
-                   get-hw-layers+sorted-switch-key-ids]]
-   [app.db :as db :refer [*db]]
-   [app.serial.constants :refer [get-port dummy-port-id]]
-   [app.serial.ops :as ops]))
+  (:require ["file-saver" :as file-saver]
+            ["rfc4648" :refer [base64url]]
+            ["snappyjs" :as snappyjs]
+            [app.components :refer [button]]
+            [app.db :as db :refer [*db]]
+            [app.hw :refer [get-hw-layers+sorted-switch-key-ids
+                            get-hw-location->switch-key-id get-hw-switch-keys]]
+            [app.macros :as mac :refer-macros [cond-xlet ->hash]]
+            [app.preds :refer [is-device-cc-lite? is-device-cc1?]]
+            [app.ratoms :refer [*url-search-params]]
+            [app.serial.constants :refer [dummy-port-id get-port]]
+            [app.serial.ops :as ops]
+            [clojure.string :as str]
+            [datascript.core :as ds :refer [squuid]]
+            [oops.core :refer [oapply oapply! oapply!+ oapply+ ocall ocall!
+                               ocall!+ ocall+ oget oget+ oset! oset!+]]
+            [posh.reagent :as posh :refer [pull q transact!]]
+            [testdouble.cljs.csv :as csv]))
 
 (defn compressed-text->csv [text]
   (cond-xlet
@@ -146,3 +143,31 @@
       (is-device-cc-lite? port) (.saveAs file-saver blob "cc-lite-layout.csv"))
 
     nil))
+
+(defn upload-csv-button [port-id]
+  (let [input-id (squuid)]
+    (fn []
+      (let [on-change!
+            (fn [e]
+              (let [file (-> e .-target .-files (aget 0))]
+                (when file
+                  (let [reader (new js/FileReader)]
+                    (set! (.-onload reader)
+                          (fn [e]
+                            (let [csv (-> e .-target .-result)]
+                              (load-csv-text! port-id csv))))
+                    (.readAsText reader file)))))
+            f
+            (fn []
+              (.click (js/document.getElementById input-id)))]
+        [:<>
+         [:input {:type "file" :class "dn" :id input-id
+                  :on-change on-change!}]
+         (button f
+                 [[:span
+                   "Upload and " [:br]
+                   " Apply CSV"]]
+                 :classes ["ma0"
+                           "button-primary"
+                           "button-small"
+                           "button-success"])]))))

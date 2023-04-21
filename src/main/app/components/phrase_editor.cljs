@@ -3,10 +3,12 @@
             [app.codes :refer [code-int->keymap-code code-str->keymap-code
                                phrase-keymap-codes typeable-keymap-codes]]
             [app.components :refer [concat-classes]]
+            [app.db :refer [*db]]
             [app.macros :refer-macros [->hash cond-xlet]]
             [app.serial.ops :refer [commit! set-chord!]]
             [app.utils :refer [chunks->phrase phrase->chunks]]
             [clojure.string :as str]
+            [datascript.core :refer [transact!]]
             [goog.string :as gstring :refer [format]]
             [oops.core :refer [oget]]
             [reagent.core :as r]))
@@ -89,7 +91,7 @@
 (defn phrase-editor []
   (let [*editor (r/atom nil)
         *html (r/atom nil)]
-    (fn [port-id hex-chord-string phrase]
+    (fn [port-id e hex-chord-string phrase]
       (let [initial-chunks (phrase->chunks phrase)
             initial-html (->> (map chunk->span-html initial-chunks)
                               (apply str))
@@ -98,9 +100,11 @@
 
             update-phrase!
             (fn []
-              (let [phrase (chunks->phrase html-chunks)]
+              (let [phrase (chunks->phrase html-chunks)
+                    cb (fn []
+                         (transact! *db [[:db/add e :chord/phrase phrase]]))]
                 ;; (js/console.log (pr-str phrase))
-                (set-chord! port-id hex-chord-string phrase)
+                (set-chord! port-id hex-chord-string phrase cb)
                 (commit! port-id)))]
         (when (nil? @*html) (reset! *html initial-html))
         [:<>
