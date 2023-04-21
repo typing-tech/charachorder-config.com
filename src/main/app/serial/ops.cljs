@@ -8,7 +8,8 @@
                                           get-port]]
             [app.serial.fns :as fns :refer [gen-cml-get-chordmap-by-index-fn
                                             query-all-var-keymaps!]]
-            [app.utils :refer [lex-comp-numbers hex-chord-string->sorted-chunks]] 
+            [app.utils :refer [debug-pipe hex-chord-string->sorted-chunks
+                               lex-comp-numbers]]
             [cljs.core.async :as async
              :refer [<! >! chan close! onto-chan! put!]
              :refer-macros [go go-loop]]
@@ -229,15 +230,15 @@
          (vec)
          (transact! *db))))
 
-(defn query-all-chordmaps! [port]
+(defn query-all-chordmaps! [{:as port :keys [port-id]}]
   (let [compute-and-queue-chord-reads!
         (fn [{:as port :keys [port-id fn-ch *num-chords]}]
           (let [get-chordmap-fns (map gen-cml-get-chordmap-by-index-fn (range @*num-chords))
                 begin! (fn [{:keys [*is-reading-chords *chords *chord-read-index]}]
-                               (go
-                                 (reset! *chord-read-index 0)
-                                 (reset! *chords (transient []))
-                                 (reset! *is-reading-chords true)))
+                         (go
+                           (reset! *chord-read-index 0)
+                           (reset! *chords (transient []))
+                           (reset! *is-reading-chords true)))
                 end! (fn [{:keys [*is-reading-chords *chords *chord-sorting-method]}]
                        (go
                          (let [chords (persistent! @*chords)]
@@ -247,6 +248,14 @@
                             get-chordmap-fns
                             [end!])]
             (onto-chan! fn-ch fns false)))]
+    (->> (ds/q '[:find [?e ...]
+                 :in $ ?port-id
+                 :where
+                 [?e :chord/port-id ?port-id]]
+               @*db port-id)
+         (debug-pipe)
+         (mapv (fn [e] [:db/retractEntity e]))
+         (transact! *db))
     (go
       (<! (store-chord-count! port))
       (compute-and-queue-chord-reads! port))))
