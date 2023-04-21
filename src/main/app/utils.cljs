@@ -1,9 +1,12 @@
 (ns app.utils
   (:require ["date-fns" :as date-fns]
+            ["file-saver" :as file-saver]
             [app.macros :refer-macros [cond-xlet ->hash]]
+            [app.preds :refer [is-device-cc-lite? is-device-cc1?]]
             [cljs.cache :as cache]
             [clojure.set :as set]
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            [goog.string :refer [format]]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -35,6 +38,18 @@
    (swap! *human-time-cache
           #(cache/through human-time-with-seconds* % t))
    (get @*human-time-cache t)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn download-file! [port filename-suffix text]
+  (let [blob (new js/Blob
+                  #js [text]
+                  #js {:type "text/plain;charset=utf-8"})]
+    (cond
+      (is-device-cc1? port) (.saveAs file-saver blob (format "cc1-%s" filename-suffix))
+      (is-device-cc-lite? port) (.saveAs file-saver blob (format "cc-lite-%s" filename-suffix)))
+
+    nil))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
