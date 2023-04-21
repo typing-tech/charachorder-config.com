@@ -255,7 +255,7 @@
               (go
                 (cond-xlet
                  :do (>! write-ch del-cmd)
-                 ;; as of CCOS 1.0.2 this always reports failure, 
+                 ;; as of CCOS 1.0.2 this always reports failure,
                  ;; but the chord is probably deleted
                  :let [_ret (<! read-ch)]
                  :do (>! write-ch read-cmd)
@@ -280,4 +280,30 @@
                 (let [ret (<! read-ch)
                       {:as m :keys [success]} (fns/parse-cml-get-chordmap-by-chord-ret ret)]
                   (js/console.log m))))]
+      (put! fn-ch f))))
+
+(defn set-chord!
+  [port-id hex-chord-string phrase]
+  (let [{:keys [fn-ch]} (get-port port-id)
+        set-cmd (fns/cmd-cml-set-chordmap-by-chord hex-chord-string phrase)
+        read-cmd (fns/cmd-cml-get-chordmap-by-chord hex-chord-string)]
+    (letfn [(f [{:as p :keys [write-ch read-ch]}]
+              (go
+                (>! write-ch set-cmd)
+                ;; as of CCOS 1.0.2 this always reports failure,
+                ;; but the chord is probably set
+                (<! read-ch)
+                (>! write-ch read-cmd)
+                (let [{:as m :keys [success]} (fns/parse-cml-get-chordmap-by-chord-ret (<! read-ch))]
+                  (js/console.log m)
+                  (js/console.log phrase)
+                  (when (and success
+                             ;; there is a bug in the firmware that causes the phrase to be
+                             ;; wrong/truncated when high actions (two bytes) are used
+                             ;; (= phrase (:phrase m))
+                             true)
+                    (transact! *db [{:chord/id [port-id hex-chord-string]
+                                     :chord/port-id port-id
+                                     :chord/hex-chord-string hex-chord-string
+                                     :chord/phrase phrase}])))))]
       (put! fn-ch f))))
