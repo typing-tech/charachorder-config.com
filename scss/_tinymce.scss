@@ -1,0 +1,21 @@
+.mce-content-body {
+  outline: none;
+}
+
+.phrase-editor {
+  &__container {
+    position: relative;
+    width: 100%;
+    border: 1px solid #ccc;
+    padding: 0;
+    outline: none;
+    caret-color: #0ff;
+    padding: 2px;
+  }
+  &__actions {
+    margin-top: 4px;
+    max-height: 200px;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+}
