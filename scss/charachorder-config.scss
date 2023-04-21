@@ -7,6 +7,7 @@
 @use "./buttons";
 @use "./switch";
 @use "./cc-lite-keymap";
+@use "./tinymce";
 
 @import url('https://fonts.googleapis.com/css2?family=Readex+Pro:wght@400;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap');
@@ -19,6 +20,11 @@ $log-height: 100px;
 
 :root {
   --cc-lite-key-base-width: #{percentage(math.div(1, 15))};
+  --color-secondary: rgb(25, 157, 197);
+}
+
+.color-secondary {
+  color: var(--color-secondary);
 }
 
 html, body, #{$root} {
