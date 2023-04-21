@@ -53,6 +53,15 @@
   (-> (str "0b" b)
       (js/BigInt)))
 
+(defn binary->hex
+  "Unprefixed binary string."
+  [b]
+  (-> (str "0b" b)
+      (js/BigInt)
+      (.toString 16)
+      (str/upper-case)
+      (pad-left 32)))
+
 (defn hex-str->bin-str
   "Unprefixed hex string."
   [hex-str]
