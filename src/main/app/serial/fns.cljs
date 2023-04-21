@@ -252,7 +252,6 @@
           (swap! *chord-read-index inc)
           (transact! *db [{:chord/id [port-id hex-chord-string]
                            :chord/port-id port-id
-                           :chord/index index
                            :chord/hex-chord-string hex-chord-string
                            :chord/phrase phrase}]))))))
 
@@ -266,10 +265,15 @@
 
 (defn parse-cml-get-chordmap-by-chord-ret [ret]
   (let [[cmd-code subcmd-code hex-chord-string phrase] (str/split ret #"\s+")
+        phrase-n (count phrase)
         success (and (not= "0" hex-chord-string)
                      (not= "0" phrase)
                      (not= "2" phrase))]
-    (->hash cmd-code subcmd-code hex-chord-string phrase success)))
+    (cond-> (->hash cmd-code subcmd-code hex-chord-string phrase success)
+      (and (<= 3 phrase-n)
+           (odd? phrase-n))
+      (assoc :phrase (subs phrase 0 (dec (count phrase)))
+             :success true))))
 
 (defn cmd-cml-set-chordmap-by-chord [hex-chord-string phrase]
   (let [arg0 (:set-chordmap-by-chord cml-subcmds)]
