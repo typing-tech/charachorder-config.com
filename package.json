@@ -24,7 +24,6 @@
     "windows-1252": "3.0.4"
   },
   "dependencies": {
-    "@lexical/react": "0.10.0",
     "@tinymce/tinymce-react": "4.3.0",
     "create-react-class": "15.7.0",
     "date-fns": "2.29.3",
@@ -36,7 +35,6 @@
     "install": "0.13.0",
     "jquery": "3.6.4",
     "js-yaml": "4.1.0",
-    "lexical": "0.10.0",
     "localforage": "1.10.0",
     "magic-bytes.js": "1.0.14",
     "mnemonist": "0.39.5",
