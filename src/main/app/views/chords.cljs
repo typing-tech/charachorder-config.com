@@ -4,6 +4,7 @@
             [app.components.phrase-editor :refer [phrase-editor]]
             [app.db :refer [*db]]
             [app.macros :refer-macros [->hash cond-xlet]]
+            [app.serial :refer [nil-chords]]
             [app.serial.constants :refer [dummy-port-id get-port]]
             [app.serial.ops :as ops :refer [commit! delete-chord!
                                             query-all-chordmaps! read-chord! set-chord!]]
@@ -150,9 +151,14 @@
 
 (defn add-chord! [port-id active-hex-chord-string *new-chord-index-counter]
   (let [m @(posh/pull *db '[*] [:chord/id [port-id active-hex-chord-string]])]
-    (if m
+    (cond
+      (not (contains? nil-chords active-hex-chord-string))
       (transact! *db [[:db/add -1 :error/error
-                       "Chord already exists"]])
+                       "Please set an active chord first."]])
+      m
+      (transact! *db [[:db/add -1 :error/error
+                       "Chord already exists. TODO: implement jump to existing chord."]])
+      :else
       (transact! *db [{:chord/id [port-id active-hex-chord-string]
                        :chord/index (swap! *new-chord-index-counter dec)
                        :chord/port-id port-id
@@ -165,7 +171,8 @@
    [:ul.mb3
     [:li.yellow "This is beta, so BACKUP your chords!"]
     [:li "Tested on CCOS 1.0.2"]
-    [:li.f7 "There is currently bugs in the firmware preventing full error checking."]
+    [:li.f7.gray "There are currently bugs in the firmware preventing full error checking."]
+    [:li.white "If you have to edit in between letters, click on an adjacent letter then press Left or Right key."]
     [:li "'zuffixes' have code " [:span.white "298"] " in front. (BKSP)"]
     [:li "'spaceless chords' have code " [:span.white "127"] " in the back. (DEL)"]
     [:li "'cursor warping' uses codes for arrow keys " [:br] [:span.white "335, 336, 337, 338"]]]
@@ -221,7 +228,7 @@
                        :human-phrase human-phrase})))
              (clj->js))]
     (button #(download-file! port "chords.json" (js/JSON.stringify chords nil 4))
-            ["Download Chords"] :size "xsmall" :success true
+            ["Backup Chords to JSON File"] :size "xsmall" :success true
             :classes ["button-success" "v-top" "mr2"])))
 
 (defn chords-view [{:keys [port-id]}]

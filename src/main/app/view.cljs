@@ -273,9 +273,9 @@
     [:div {:class "modal" :on-click f}
      [:div {:class "modal__content"}
       [:p msg]
-      [:div {:class "absolute top-0 right-0 pointer red f1"
+      [:div {:class "absolute top-0 right-0 pointer red b grow f1"
              :on-click f}
-       [:div.dib.ma2.mt0 "X"]]]]))
+       [:div.dib.ma2.mt0 "✕"]]]]))
 
 (defn root-view []
   (let [active-port-id @*active-port-id
