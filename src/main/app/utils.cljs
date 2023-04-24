@@ -84,6 +84,7 @@
 (defn hex-str->bin-str
   "Unprefixed hex string."
   [hex-str]
+  (assert (= 32 (count hex-str)))
   (-> (str "0x" hex-str)
       (js/BigInt)
       (.toString 2)
@@ -138,6 +139,8 @@
   (swap! hex-chord-string->sorted-chunks-cache
          #(cache/through hex-chord-string->sorted-chunks* % hex-chord-string))
   (get @hex-chord-string->sorted-chunks-cache hex-chord-string))
+
+;; (js/console.log (hex-chord-string->sorted-chunks "000C4000000000000000000000000000"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
