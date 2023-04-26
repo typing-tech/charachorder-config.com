@@ -12,6 +12,7 @@
                                hex-chord-string->sorted-chunks hex-str->bin-str pad-left
                                parse-binary-chord-string phrase->chunks small-hex->decimal]]
             [datascript.core :refer [transact!]]
+            [datascript.core :as ds]
             [goog.string :refer [format]]
             [posh.reagent :as posh]
             [reagent.core :as r]))
@@ -204,15 +205,15 @@
     [:li "Click the 'Delete' button"]]
    nil])
 
-(defn download-chords-button [{:as port :keys [port-id]}]
+(defn download-chords! [{:as port :keys [port-id]}]
   (let [chords
-        (->> @(posh/q '[:find ?hex-chord-string ?phrase
+        (->> (ds/q '[:find ?hex-chord-string ?phrase
                         :in $ ?port-id
                         :where
                         [?e :chord/port-id ?port-id]
                         [?e :chord/hex-chord-string ?hex-chord-string]
                         [?e :chord/phrase ?phrase]]
-                      *db port-id)
+                      @*db port-id)
              (map (fn [[hex-chord-string phrase]]
                     (let [human-chord (->> (hex-chord-string->sorted-chunks hex-chord-string)
                                            (mapv (fn [x] (get-in code-int->keymap-code [x :action]))))
@@ -228,7 +229,11 @@
                        :human-chord human-chord
                        :human-phrase human-phrase})))
              (clj->js))]
-    (button #(download-file! port "chords.json" (js/JSON.stringify chords nil 4))
+    (download-file! port "chords.json" (js/JSON.stringify chords nil 4))))
+
+(defn download-chords-button [port]
+  (let []
+    (button #(download-chords! port)
             ["Backup Chords to JSON File"] :size "xsmall" :success true
             :classes ["button-success" "v-top" "mr2"])))
 
