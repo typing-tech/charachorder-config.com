@@ -152,7 +152,7 @@
 (defn add-chord! [port-id active-hex-chord-string *new-chord-index-counter]
   (let [m @(posh/pull *db '[*] [:chord/id [port-id active-hex-chord-string]])]
     (cond
-      (not (contains? nil-chords active-hex-chord-string))
+      (contains? nil-chords active-hex-chord-string)
       (transact! *db [[:db/add -1 :error/error
                        "Please set an active chord first."]])
       m
