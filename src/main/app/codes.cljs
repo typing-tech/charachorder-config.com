@@ -86,9 +86,9 @@
    {:code "32" :type :num-boolean
     :label ["Chording Character Counter Timeout"]}
    :chording-character-counter-timeout-timer
-   {:code "33" :type :ds :min 0 :max 255 :step 1
+   {:code "33" :type :ms :min 0 :max 900000 :step 1000
     :defaults [["Universal: 40ds" 40]]
-    :label ["Chording Character Counter Timeout" [:br] "(deciseconds)"]}
+    :label ["Chording Character Counter Timeout" [:br] "(ms)"]}
    :chord-detection-press-tolerance {:code "34" :type :ms :min 1 :max 255 :step 1
                                      :defaults [["Universal: 25ms" 25]]
                                      :label ["Chord Press Tolerance (ms)"]}
@@ -102,7 +102,7 @@
    {:code "42" :type :num-boolean
     :label ["Spurring Character Counter Timeout"]}
    :spurring-character-counter-timeout-timer
-   {:code "43" :type :s :min 0 :max 240 :step 1
+   {:code "43" :type :ms :min 0 :max 900000 :step 1000
     :defaults [["Universal: 240s" 240]]
     :label ["Spurring Character Counter Timeout" [:br]
             "(seconds)"]}
