@@ -4,7 +4,7 @@
             [app.components.phrase-editor :refer [phrase-editor]]
             [app.db :refer [*db]]
             [app.macros :refer-macros [->hash cond-xlet]]
-            [app.serial :refer [nil-chords]]
+            [app.serial :refer [nil-hex-string-chords]]
             [app.serial.constants :refer [dummy-port-id get-port]]
             [app.serial.ops :as ops :refer [commit! delete-chord!
                                             query-all-chordmaps! read-chord! set-chord!]]
@@ -150,9 +150,10 @@
                                 "Unfocus or dot i/o Manager will break and your device will be slow.")}]))))
 
 (defn add-chord! [port-id active-hex-chord-string *new-chord-index-counter]
+  (js/console.log (pr-str active-hex-chord-string))
   (let [m @(posh/pull *db '[*] [:chord/id [port-id active-hex-chord-string]])]
     (cond
-      (contains? nil-chords active-hex-chord-string)
+      (contains? nil-hex-string-chords active-hex-chord-string)
       (transact! *db [[:db/add -1 :error/error
                        "Please set an active chord first."]])
       m

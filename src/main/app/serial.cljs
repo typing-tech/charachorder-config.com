@@ -35,7 +35,8 @@
 (def binary-chord-string? (partial re-matches #"^\d{128}$"))
 (def strange-chord? (partial re-matches #"^Strange chord: (\d{128}.*)$"))
 (def unmodified-chord? (partial re-matches #"^unmodified chord: (\d{128}.*)$"))
-(def nil-chords #{"00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"})
+(def nil-binary-string-chords #{"00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"})
+(def nil-hex-string-chords #{"00000000000000000000000000000000"})
 
 (def cmd-encoder (new js/TextEncoder))
 (def output-decoder (new js/TextDecoder))
@@ -127,7 +128,7 @@
    (reset! *should-consume-unprefixed-chord-string true)
 
    (and @*should-consume-unprefixed-chord-string
-        (contains? nil-chords x))
+        (contains? nil-binary-string-chords x))
    (reset! *should-consume-unprefixed-chord-string false)
 
    (and @*should-consume-unprefixed-chord-string
@@ -139,7 +140,7 @@
    :let [match (strange-chord? x)]
    (not match) nil
    :let [[_ bcs] match]
-   (contains? nil-chords bcs) nil
+   (contains? nil-binary-string-chords bcs) nil
    :return (set-bcs-if-valid! bcs *binary-chord-string)))
 
 (defn setup-io-loops! [port-id
