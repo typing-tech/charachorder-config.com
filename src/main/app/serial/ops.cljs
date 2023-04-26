@@ -253,7 +253,7 @@
                  :where
                  [?e :chord/port-id ?port-id]]
                @*db port-id)
-         (debug-pipe)
+        ;;  (debug-pipe)
          (mapv (fn [e] [:db/retractEntity e]))
          (transact! *db))
     (go
