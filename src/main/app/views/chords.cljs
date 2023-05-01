@@ -91,7 +91,13 @@
       [:td
        (button toggle-editing! ["Edit"]
                :size "xsmall" :minimal true
-               :classes ["v-top" "mr0"])]
+               :classes ["v-top" "mr0"])
+      ;;  (button (fn [e]
+      ;;            (.stopPropagation e)
+      ;;            (read-chord! port-id hex-chord-string)) ["Read"]
+      ;;          :size "xsmall" :minimal true
+      ;;          :classes ["v-top" "mr0"])
+       nil]
       [:td [chord-chunks-com hex-chord-string]]
       [:td [phrase-chunks-com phrase]]]
      (when is-editing
