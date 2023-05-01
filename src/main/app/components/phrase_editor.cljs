@@ -86,7 +86,9 @@
       (let [html (chunk->span-html code-int)
             ^js sel (oget editor "selection")]
         (.setContent sel html))
-      :else (js/console.log e))))
+      :else (do nil
+                ;; (js/console.log e)
+                nil))))
 
 (defn phrase-editor []
   (let [*editor (r/atom nil)
