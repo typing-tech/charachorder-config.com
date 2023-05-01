@@ -264,11 +264,13 @@
          (apply str))))
 
 (defn parse-cml-get-chordmap-by-chord-ret [ret]
-  (let [[cmd-code subcmd-code hex-chord-string phrase] (str/split ret #"\s+")
+  (let [[cmd-code subcmd-code hex-chord-string phrase success-str] (str/split ret #"\s+")
         phrase-n (count phrase)
-        success (and (not= "0" hex-chord-string)
-                     (not= "0" phrase)
-                     (not= "2" phrase))]
+        proper-success (and success-str (= "0" success-str))
+        inferred-success (and (not= "0" hex-chord-string)
+                              (not= "0" phrase)
+                              (not= "2" phrase))
+        success (or proper-success inferred-success)]
     (cond-> (->hash cmd-code subcmd-code hex-chord-string phrase success)
       (and (<= 3 phrase-n)
            (odd? phrase-n))
