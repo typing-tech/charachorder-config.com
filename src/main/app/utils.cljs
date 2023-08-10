@@ -147,27 +147,31 @@
 (def variable-length-prefixes #{"01" "02" "03" "04"})
 
 (defn phrase->chunks [phrase]
-  (let [xs (for [i (range (/ (count phrase)
-                             2))]
-             (subs phrase (* 2 i) (* 2 (+ i 1))))
-        xs (vec xs)
-        n (count xs)
-        chunks
-        (loop [i 0
-               chunks []]
-          (cond-xlet
-           (<= n i) chunks
-           :let [x (nth xs i)
-                 is-wide (contains? variable-length-prefixes x)
-                 x (if is-wide
-                     (str x (nth xs (inc i)))
-                     x)] 
-           :else (recur (if is-wide
-                          (+ i 2)
-                          (inc i))
-                        (conj chunks x))))]
-    (mapv small-hex->decimal chunks)))
+  (try
+    (let [xs (for [i (range (/ (count phrase)
+                               2))]
+               (subs phrase (* 2 i) (* 2 (+ i 1))))
+          xs (vec xs)
+          n (count xs)
+          chunks
+          (loop [i 0
+                 chunks []]
+            (cond-xlet
+             (<= n i) chunks
+             :let [x (nth xs i)
+                   is-wide (contains? variable-length-prefixes x)
+                   x (if is-wide
+                       (str x (nth xs (inc i)))
+                       x)] 
+             :else (recur (if is-wide
+                            (+ i 2)
+                            (inc i))
+                          (conj chunks x))))]
+      (mapv small-hex->decimal chunks))
+    (catch :default _e
+      [256])))
 ;; (js/console.log (phrase->chunks "01386061"))
+;; (js/console.log (phrase->chunks "01"))
 
 (defn chunks->phrase
   "`chunks` should be a seq of numbers."
