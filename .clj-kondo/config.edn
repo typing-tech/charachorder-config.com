@@ -5,5 +5,7 @@
                                         app.macros]}
            :clojure-lsp/unused-public-var {:exclude #{}}}
  :lint-as {promesa.core/let clojure.core/let}
- :hooks {:analyze-call {app.macros/cond-xlet hooks.cond-xlet/cond-xlet}
+ :hooks {:analyze-call {app.macros/cond-xlet hooks.cond-xlet/cond-xlet
+                        app.macros/binding-block hooks.binding-block/binding-block
+                        app.macros/bb hooks.binding-block/bb}
          :macroexpand {app.macros/args macros/args}}}
